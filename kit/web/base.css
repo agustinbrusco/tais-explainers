@@ -38,7 +38,7 @@ em { font-style: italic; }
 /* ---- Scrollytelling layout: prose steps beside a sticky stage ---- */
 .explainer {
   display: grid;
-  grid-template-columns: minmax(20rem, 34rem) 1fr;
+  grid-template-columns: minmax(20rem, 34rem) minmax(0, 1fr);   /* minmax(0, …): wide stage content can't squeeze the prose */
   gap: 0 3.5rem;
   max-width: 92rem;
   margin: 0 auto;
@@ -79,7 +79,9 @@ em { font-style: italic; }
   position: sticky;
   top: 0;
   height: 100vh;
+  min-width: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   padding: 2rem 0;
 }
@@ -87,7 +89,7 @@ em { font-style: italic; }
 
 /* the stage as a framed instrument: header (figure number, title, badge), body, footer */
 .panel {
-  position: relative; width: 100%; margin: 0;
+  position: relative; width: 100%; min-width: 0; margin: 0;
   display: flex; flex-direction: column; gap: .7rem;
   padding: 1.1rem 1.3rem 1rem;
   background:

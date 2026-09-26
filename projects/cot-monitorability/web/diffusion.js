@@ -8,8 +8,9 @@
 import * as d3 from "d3";
 
 const C = 4, L = 3, T = 3;          // canvas positions, layers per pass, passes
-const W = 720, H = 520;
-const X = (p) => 250 + p * 105;
+const NARROW = matchMedia("(max-width: 860px)").matches;  // phones: narrower viewBox, readout below
+const W = NARROW ? 470 : 720, H = NARROW ? 570 : 520;
+const X = (p) => (NARROW ? 140 : 250) + p * (NARROW ? 84 : 105);
 const PASS_H = L * 38 + 40;          // one pass: L rows of nodes plus the card row above it
 const Y0 = 470;                      // input cards
 const nodeY = (t, r) => Y0 - 44 - (t * PASS_H) - r * 38;       // t = 0..T-1
@@ -119,14 +120,18 @@ export function drawDiffusion(svg, { mode, K, font, quick }) {
       .style("font", `600 15px ${font.mono}`).text(n.id.startsWith("in") ? "?" : last ? "out" : "…");
   }
   // captions
-  root.append("text").attr("x", X(C - 1) + 70).attr("y", Y0 + 5).attr("fill", K.muted).style("font", `500 15px ${font.mono}`).text("random start");
-  root.append("text").attr("x", X(C - 1) + 70).attr("y", cardY(T - 1) + 5).attr("fill", K.muted).style("font", `500 15px ${font.mono}`).text("final text");
+  if (!NARROW) {
+    root.append("text").attr("x", X(C - 1) + 70).attr("y", Y0 + 5).attr("fill", K.muted).style("font", `500 15px ${font.mono}`).text("random start");
+    root.append("text").attr("x", X(C - 1) + 70).attr("y", cardY(T - 1) + 5).attr("fill", K.muted).style("font", `500 15px ${font.mono}`).text("final text");
+  }
 
   // readout
-  const ro = svg.append("g").attr("transform", "translate(24,40)");
+  const ro = svg.append("g").attr("transform", NARROW ? "translate(24,512)" : "translate(24,40)");
   ro.append("text").attr("fill", K.muted).style("font", `500 13px ${font.mono}`).attr("letter-spacing", "0.12em").text("LONGEST DARK PATH");
-  const big = ro.append("text").attr("y", 44).attr("fill", K.residual).style("font", `600 40px ${font.mono}`).text(mode === "hold" ? "?" : 0);
-  ro.append("text").attr("y", 68).attr("fill", K.muted).style("font", `500 14px ${font.mono}`).text("hidden states");
+  // phones: one line (label, number, unit); desktop: stacked in the top-left corner
+  const big = ro.append("text").attr("x", NARROW ? 190 : 0).attr("y", NARROW ? 14 : 44).attr("fill", K.residual)
+    .style("font", `600 ${NARROW ? 34 : 40}px ${font.mono}`).text(mode === "hold" ? "?" : 0);
+  ro.append("text").attr("x", NARROW ? 240 : 0).attr("y", NARROW ? 8 : 68).attr("fill", K.muted).style("font", `500 14px ${font.mono}`).text("hidden states");
 
   if (mode === "hold") return Promise.resolve();
   // the path: glow trail and numbered nodes, in order

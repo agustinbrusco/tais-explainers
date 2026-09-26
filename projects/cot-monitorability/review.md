@@ -69,3 +69,30 @@ narrow viewBox on phones; `shoot.mjs --frames` + `contact_sheet.py` image mode f
 | L11 | Stale `step-04-mobile.png`. | Fixed: all shots regenerated. |
 
 Also fixed while testing: clicking a control inside a step re-triggered the step (double render, restarting animations): `kit/web/steps.js` now ignores clicks on controls. Still open: #8 (mobile nav pill over prose), #15 (hook inside Coconut thought cards).
+
+## 2026-09-26: iteration 3 (full piece + visual overhaul) — `rigor-reviewer` + `learner-sim`, and fixes (3b)
+
+**Rigor-reviewer** (32 findings, no blockers; charts within tolerance; diffusion DAG honest). Fixed:
+- #1 Baker's point misquoted ("hacks needed no reasoning") → their actual point: the hacks only got through because the monitor never saw the actions.
+- #2, #9 our synthesis in the paper's voice ("what's left is what the task forces"; "unfaithfulness lives in…") → marked "Our reading" / "They argue … in our terms"; Emmons title → "…when the hint is easy".
+- #3 "At first it helped" → "throughout training".
+- #4, #5 Baker chart: "genuine fix" → "passes, no test edits"; two baseline points re-read (.05, .18); y-axis labelled.
+- #6, #7 Kuhn: the harder-task gap is smaller (latent ≈0.15, plain ≈0.3 in one variant); "an edit like the full-bandwidth one".
+- #8 "without ever mentioning" → "often without"; the chart-location reference fixed.
+- #10 Emmons RL result misread → "wrote the needed values in forms that narrow monitor didn't recognize: forced into the text isn't the same as caught".
+- #11–13 Prologue calibration: subtitle softened; METR's "often-unreliable" analysis agents; candour "at least partly a habit" (they spoofed transcripts but left reasoning alone; METR isn't sure why).
+- #14, #15 "In this drawing" restored; lookup cost stated as a drawing convention with both ratios (Astra 2.0×, next best ≈1.5×).
+- #16 Readers diagram: the second wire is now transcript-based *selection and checks*, "weaker?", not "meaning … cut"; prose aligned.
+- #17–21 Dilgren "up to" + "nearly a majority"; Redwood's J-lens vs SAE claims separated; S = per-position token probabilities (prompt omitted, noted); top-8 vs p>0.03; Engels' own suspicion of non-transparent reasoning added.
+- #22–26 Board: "some cases", CoT-only-monitor developer message, sandbagging made explicit; production-monitor near-zero recall added (worrying) and monitorability recovery at longer CoTs (reassuring); first column "Stated by OpenAI" now includes the Chief Scientist statement; neutral colors for categories.
+- #27–32 Limits cover the later chapters; REINFORCE simplification named; Q1 shortcut hedge; diffusion 48× vs 28.6× explained; ledger rows per board item, July 8 date; credits completed.
+
+**Learner-sim** (the 4-hop section now works; chapter IV "lands best"; board weakest). Fixed:
+- Predicts rebuilt to target misconceptions and not leak: count the dashed wandering route (readout hidden: "?"); "how many written: none/1/2/3" (the 32-dots lure); 4-hop with reason-tagged options incl. "None: four lookups fit in four layers" and dashed empty lookup slots on the figure; Baker "more honest fixes, cheating goes on unseen" (pressure helps at first); diffusion "what decides?" (no contradiction with the next step). Emmons predict kept.
+- Readouts: "8 rows (4 lookups × 2)"; legend shows only what's on screen; Walcott/Holliday labels no longer collide.
+- Define-before-use: probes, NLAs, activation oracles, J-lens (bulleted), self-conditioning, gate, K + Q mod 4, CODI, gold traces, CoT controllability; 28.6× vs 48× and "a third"; J-lens and weakening explained.
+- Board redesigned: short items with worrying / reassuring / unverified markers, full quotes on hover, fits the panel on desktop.
+- Your-turn Q5 spoiler removed from the looped caveat; Check-yourself figure now the standard graph with the zig-zag.
+- Mobile: charts stacked and diffusion in a narrower viewBox (text ≥ ~11px); mobile panel height bounded.
+
+Not done: small-multiples view; interactive toggles on the diffusion and readers figures (the learner-sim wanted to poke them); hero dot numbers are small at hero size (decorative); gold is still used for both "overseer/forced" and "readable S" (defensible: both mean "readable by an overseer").

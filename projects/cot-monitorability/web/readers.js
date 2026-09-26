@@ -9,9 +9,9 @@ const W = 720, H = 470;
 const COLS = 4, ROWS = 3;
 const cx = (c) => 70 + c * 70, cy = (r) => 330 - r * 80, cardY = 400;
 const READERS = [
-  { name: "Probe", y: 60, node: [3, 2], from: "labels from a transcript judge" },
-  { name: "NLA · activation oracle", y: 190, node: [2, 1], from: "trained on text summaries, Q&A" },
-  { name: "J-lens", y: 320, node: [1, 1], from: "meaning = next-token drivers" },
+  { name: "Probe", y: 60, node: [3, 2], from: "picked via a transcript judge" },
+  { name: "NLA · activation oracle", y: 190, node: [2, 1], from: "outputs checked vs transcript" },
+  { name: "J-lens", y: 320, node: [1, 1], from: "reads what's about to be said" },
 ];
 
 export function drawReaders(svg, { latent, K, font, quick }) {
@@ -57,12 +57,12 @@ export function drawReaders(svg, { latent, K, font, quick }) {
     box.append("text").attr("x", 14).attr("y", 50).attr("fill", K.residual).style("font", `500 14px ${font.mono}`).text("reads: activations ✓");
     const m = box.append("text").attr("x", 14).attr("y", 72).style("font", `500 14px ${font.mono}`).attr("fill", K.muted).text(rd.from);
     if (latent) {
-      m.transition(t).attr("opacity", 0.45);
-      box.append("text").attr("x", w - 14).attr("y", 30).attr("text-anchor", "end").attr("fill", K.overseer)
-        .style("font", `600 30px ${font.display}`).text("?").attr("opacity", 0).transition(t).attr("opacity", 1);
+      m.transition(t).attr("opacity", 0.5);
+      box.append("text").attr("x", w - 14).attr("y", 26).attr("text-anchor", "end").attr("fill", K.overseer)
+        .style("font", `500 14px ${font.mono}`).text("weaker?").attr("opacity", 0).transition(t).attr("opacity", 1);
     }
   }
   g.append("text").attr("x", 400).attr("y", 448).attr("fill", K.muted).style("font", `500 14px ${font.mono}`)
-    .text(latent ? "signal: still there · meaning, checks: cut" : "pale wire: where meaning and checks come from");
+    .text(latent ? "activations: still there · checks: weaker?" : "pale wire: checks that lean on the transcript");
   return new Promise((r) => setTimeout(r, quick ? 0 : 850));
 }

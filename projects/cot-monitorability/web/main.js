@@ -312,10 +312,13 @@ function renderDag(i, s, { instant = false } = {}) {
   // readouts: the dark path is a property of the architecture (it ticks up with the pulse only on the steps
   // that introduce it); "forced into text" fills in as the pulse reaches each card
   readNeed.text(s.k ? s.k * task.rows : "—");
+  d3.select("#ro-need .unit").text(s.task === "hops" ? `rows (${s.k} lookups × 2)` : "in a row");
+  if (story && s.darkHidden) story.ticks = false;   // predict step: don't show the answer in the readout
   d3.select("#ro-need").classed("idle", !s.k);
   d3.select("#ro-dark").classed("idle", !story && !s.hold);
   readDark.interrupt();
-  if (s.hold) { readDark.text(dark.length); lastDark = dark.length; }
+  if (s.darkHidden) { readDark.text("?"); lastDark = null; }
+  else if (s.hold) { readDark.text(dark.length); lastDark = dark.length; }
   else if (!story) { readDark.text("?"); lastDark = null; }
   else if (story.ticks) { readDark.text(quick ? dark.length : 0); lastDark = dark.length; }
   else {
@@ -327,6 +330,10 @@ function renderDag(i, s, { instant = false } = {}) {
   chainStrip.html(!s.k ? "" : (s.task === "hops" ? stripHops : stripArith)(s.k, chain, quick && !s.hold, s.hold));
 
   const done = playStory(story, g, s, task, { delay: quick ? 0 : relayout ? 800 : 300, quick, my: ++token });
+  // legend: only what this step actually draws
+  const shown = { tok: true, h: true, forced: !!story?.writes?.length, carry: !!story?.items?.some((it) => it.count === null),
+                  lat: s.arch === "coconut", dark: !!story };
+  d3.selectAll(".legend [data-key]").style("display", function () { return shown[this.dataset.key] ? null : "none"; });
   if (s.hold) readForced.html(`<span class="muted">predict first</span>`);
   syncControls(s, i);
   return Promise.all([t.end().catch(() => {}), done]);
@@ -414,11 +421,33 @@ const DWELL = { card: 460, answer: 520, thought: 260 }; // ms spent passing thro
 function playStory(story, g, s, task, { delay, quick, my }) {
   svg.selectAll("g.story").interrupt().transition().duration(quick ? 0 : 200).attr("opacity", 0).remove();
   pupil.interrupt().attr("cx", 0);
-  if (!story) { readForced.html(`<span class="muted">no task yet</span>`); return Promise.resolve(); }
-
   const layer = (parent) => parent.append("g").attr("class", "story");
   const trail = layer(gTrail), route = layer(gRoute), over = layer(gOver), pulseG = layer(gPulse);
   const rr = Math.min(13, rowGap(g.R) / 2.6);
+  if (s.ghostZig) {  // a route that wanders sideways, drawn but not counted: the predict asks how long it is
+    const ids = d3.range(L).map((r) => `h${r + 1}_${r}`);
+    trail.append("path").attr("d", d3.line()(ids.map((id) => { const p = pos(g.byId.get(id), g.R); return [p.x, p.y]; })))
+      .attr("fill", "none").attr("stroke", K.residual).attr("stroke-width", 3).attr("stroke-dasharray", "7 6").attr("opacity", 0.9);
+    ids.forEach((id) => { const p = pos(g.byId.get(id), g.R);
+      route.append("circle").attr("cx", p.x).attr("cy", p.y).attr("r", rr).attr("fill", K.bg).attr("stroke", K.residual).attr("stroke-width", 2.5); });
+    const e = pos(g.byId.get(ids.at(-1)), g.R);
+    over.append("text").attr("x", e.x + rr + 8).attr("y", e.y + 7).attr("fill", K.residual)
+      .style("font", `italic 500 22px ${css("font-display")}`).text("length?");
+  }
+  if (s.emptyCapsules) {  // two lookups fit in one trip: show their slots before asking
+    const x = colX(0);
+    [[0, 1], [2, 3]].forEach(([r0, r1]) => {
+      const yTop = rowY(r1, g.R), yLow = rowY(r0, g.R);
+      trail.append("rect").attr("x", x - rr - 6).attr("width", 2 * rr + 12).attr("y", yTop - rr - 6).attr("height", yLow - yTop + 2 * rr + 12)
+        .attr("rx", rr + 6).attr("fill", "none").attr("stroke", K.residual).attr("stroke-width", 1.5).attr("stroke-dasharray", "5 4");
+      const tag = over.append("g").attr("transform", `translate(${x},${(yTop + yLow) / 2})`);
+      const txt = tag.append("text").attr("text-anchor", "middle").attr("dy", "0.34em").attr("fill", K.muted)
+        .style("font", `italic 500 18px ${css("font-display")}`).text("lookup");
+      const bb = txt.node().getBBox();
+      tag.insert("rect", "text").attr("x", bb.x - 5).attr("y", bb.y - 1).attr("width", bb.width + 10).attr("height", bb.height + 2).attr("rx", 5).attr("fill", K.bg);
+    });
+  }
+  if (!story) { readForced.html(`<span class="muted">no task yet</span>`); return Promise.resolve(); }
   const at = (ms, fn) => (quick ? fn() : d3.timeout(() => my === token && fn(), ms));
   const seen = [];
   let longest = 0;  // the dark-path readout ticks up to the longest route shown so far, never back down
@@ -472,7 +501,7 @@ function playStory(story, g, s, task, { delay, quick, my }) {
       // what this hop found, written in the gap between its two rows (blue italic: it exists only in the dark)
       const tag = over.append("g").attr("transform", `translate(${x},${(y + yLow) / 2})`);
       const txt = tag.append("text").attr("text-anchor", "middle").attr("dy", "0.34em").attr("fill", K.residual)
-        .style("font", `italic 500 ${NARROW ? 21 : 21}px ${css("font-display")}`).text(it.label);
+        .style("font", `italic 500 ${NARROW ? 19 : 18}px ${css("font-display")}`).text(it.label);
       const bb = txt.node().getBBox();
       tag.insert("rect", "text").attr("x", bb.x - 5).attr("y", bb.y - 1).attr("width", bb.width + 10).attr("height", bb.height + 2)
         .attr("rx", 5).attr("fill", K.bg).attr("stroke", K.residual).attr("stroke-width", 1).attr("stroke-opacity", 0.5);
@@ -565,11 +594,11 @@ const ARCH_NAME = { standard: "Standard", looped: "Looped", coconut: "Coconut", 
 const freeTitle = (s) => `${ARCH_NAME[s.arch]}${s.arch === "looped" ? ` ×${s.loops}` : ""} · ${s.task === "hops" ? "4-hop question" : `${s.k}-step chain`}`;
 const STEPS = [
   { title: "An unrolled transformer", arch: "standard", k: 0, path: false, profile: false },
-  { title: "Counting a dark path", arch: "standard", k: 0, profile: false, showAttn: true },   // predict: can a zig-zag beat 4?
+  { title: "Counting a dark path", arch: "standard", k: 0, profile: false, showAttn: true, darkHidden: true, ghostZig: true }, // predict
   { title: "Sideways doesn't help", arch: "standard", k: 0, zigzag: true },                  // every hop climbs a layer
   { title: "A 10-step chain", arch: "standard", k: 10, hold: true },                         // predict
   { title: "Forced into text", arch: "standard", k: 10 },                                    // two are forced
-  { title: "A 4-hop question", arch: "standard", k: 4, task: "hops", hold: true },           // predict
+  { title: "A 4-hop question", arch: "standard", k: 4, task: "hops", hold: true, emptyCapsules: true }, // predict
   { title: "Whatever lands at the top", arch: "standard", k: 4, task: "hops" },              // only 23
   { title: "Looped ×2", arch: "looped", loops: 2, k: 10 },
   { title: "Coconut: two continuous thoughts", arch: "coconut", k: 10 },
@@ -589,7 +618,7 @@ const STEPS = [
   { title: "Readers of hidden states", scene: "readers", latent: false },
   { title: "When the text goes away", scene: "readers", latent: true },
   { title: "The evidence board: GPT-6 Astra", scene: "board", badge: "sources" },
-  { title: "Check yourself", arch: "fullbw", k: 10 },
+  { title: "Check yourself", arch: "standard", k: 0, zigzag: true },
   { title: "What this doesn't show", arch: "standard", k: 10 },
 ];
 // the prologue (step 0) is the hook; it comes before everything else

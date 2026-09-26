@@ -4,13 +4,15 @@
 
 import * as d3 from "d3";
 
-const W = 720, H = 460;
+// Phones get panels stacked in a narrower viewBox, so chart text stays readable.
+const NARROW = matchMedia("(max-width: 860px)").matches;
+const W = NARROW ? 440 : 720, H = 460;
 
 // Baker et al. 2025, Fig. 4: fraction of samples over training (epochs 0–1), read off at every 0.1.
 const X10 = d3.range(11).map((i) => i / 10);
 export const BAKER = [
   { title: "Reward: pass the tests", genuine: [.61, .63, .66, .66, .62, .52, .49, .45, .37, .36, .23],
-    caught: [0, 0, .01, .08, .22, .35, .42, .50, .60, .59, .75], hidden: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+    caught: [0, 0, .01, .05, .18, .35, .42, .50, .60, .59, .75], hidden: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
   { title: "… and don't trigger the monitor", genuine: [.61, .72, .74, .74, .70, .64, .58, .51, .50, .44, .43],
     caught: [0, 0, .01, .02, .03, .02, .02, .01, .01, .01, .01], hidden: [0, 0, 0, .01, .04, .13, .24, .36, .38, .44, .49] },
 ];
@@ -31,10 +33,11 @@ export const EMMONS = [
 ];
 
 export function drawChart(svg, name, { pre, K, font, quick }) {
-  svg.attr("viewBox", `0 0 ${W} ${H}`);
+  svg.attr("viewBox", `0 0 ${W} ${NARROW && name !== "kuhn" ? 620 : H}`);
   svg.selectAll("*").interrupt().remove();
   const t = d3.transition().duration(quick ? 0 : 900).ease(d3.easeCubicOut);
   ({ baker, kuhn, emmons, incident })[name](svg, { pre, K, font, t });
+  return new Promise((resolve) => setTimeout(resolve, quick ? 0 : 2000));   // longest reveal is 2 × 900 ms
 }
 
 const label = (g, x, y, text, K, font, opts = {}) => g.append("text").attr("x", x).attr("y", y).text(text)
@@ -53,14 +56,16 @@ function axes(g, x, y, K, font, { xTicks, yTicks, yFmt = (v) => v, xFmt = (v) =>
 }
 
 function baker(svg, { pre, K, font, t }) {
-  const pw = 300, gap = 44, top = 64, bottom = 380;
   BAKER.forEach((p, i) => {
-    const x0 = 70 + i * (pw + gap);
+    const pw = NARROW ? 330 : 300;
+    const x0 = NARROW ? 80 : 70 + i * (pw + 44);
+    const top = NARROW ? 50 + i * 290 : 64, bottom = NARROW ? top + 190 : 380;
     const g = svg.append("g");
     const x = d3.scaleLinear([0, 1], [x0, x0 + pw]), y = d3.scaleLinear([0, 1], [bottom, top]);
     label(g, x0, top - 30, p.title, K, font, { fill: K.text, size: 19, family: font.display, weight: 500 });
     axes(g, x, y, K, font, { xTicks: [0, .5, 1], yTicks: [0, .25, .5, .75, 1], yFmt: (v) => (i ? "" : `${v * 100}%`),
       xLabel: "training →" });
+    if (i === 0) label(g, x0 - 44, bottom + 46, "share of samples", K, font, { size: 14 });
     if (pre && i === 1) {  // the answer, hidden until the reveal step
       g.append("rect").attr("x", x0).attr("y", top).attr("width", pw).attr("height", bottom - top).attr("rx", 8)
         .attr("fill", "rgba(245,192,74,.05)").attr("stroke", K.overseer).attr("stroke-dasharray", "5 5");
@@ -87,7 +92,7 @@ function baker(svg, { pre, K, font, t }) {
     // end-of-training labels
     const end = { genuine: p.genuine[10], caught: p.caught[10], hidden: p.hidden[10] };
     let acc = 0;
-    for (const [key, text, fill] of [["genuine", "genuine fix", K.token], ["caught", "cheats, caught", K.danger], ["hidden", "cheats, unseen", K.danger]]) {
+    for (const [key, text, fill] of [["genuine", "passes, no test edits", K.token], ["caught", "cheats, caught", K.danger], ["hidden", "cheats, unseen", K.danger]]) {
       const v = end[key];
       if (v > 0.06) label(g, x(1) - 6, y(acc + v / 2) + 6, `${text} ${Math.round(v * 100)}%`, K, font,
         { anchor: "end", size: 15, fill: key === "genuine" ? K.bg : "#FFE3E3", weight: 600 })
@@ -95,11 +100,11 @@ function baker(svg, { pre, K, font, t }) {
       acc += v;
     }
   });
-  label(svg, 70, 440, "Re-plotted from Baker et al. (2025), Fig. 4; values read off the figure by eye.", K, font, { size: 14, fill: K.faint });
+  label(svg, NARROW ? 20 : 70, NARROW ? 610 : 440, NARROW ? "Re-plotted from Baker et al. (2025), Fig. 4 (approx.)" : "Re-plotted from Baker et al. (2025), Fig. 4; values read off the figure by eye.", K, font, { size: 14, fill: K.faint });
 }
 
 function kuhn(svg, { pre, K, font, t }) {
-  const x = d3.scaleLinear([0, 100], [90, 680]), y = d3.scaleLinear([0, 1], [370, 60]);
+  const x = d3.scaleLinear([0, 100], [90, NARROW ? 420 : 680]), y = d3.scaleLinear([0, 1], [370, 60]);
   const g = svg.append("g");
   axes(g, x, y, K, font, { xTicks: [0, 20, 40, 60, 80, 100], yTicks: [0, .25, .5, .75, 1], yFmt: (v) => v.toFixed(2),
     xLabel: "RL steps against the monitor →", yLabel: "monitorability" });
@@ -114,14 +119,15 @@ function kuhn(svg, { pre, K, font, t }) {
     label(g, x(64), key === "plain" ? y(0.86) : y(0.13), name, K, font, { anchor: "middle", size: 17, fill: color, weight: 600 });
   }
   if (pre) label(g, x(60), y(0.25), "with a latent channel: ?", K, font, { anchor: "middle", size: 20, fill: K.residual, weight: 600 });
-  label(g, 90, 440, "Re-plotted from Kuhn, evhu & Westover (2026). 0 = chance, 1 = always identified.", K, font, { size: 14, fill: K.faint });
+  label(g, NARROW ? 20 : 90, 440, NARROW ? "Re-plotted from Kuhn et al. (2026). 0 = chance." : "Re-plotted from Kuhn, evhu & Westover (2026). 0 = chance, 1 = always identified.", K, font, { size: 14, fill: K.faint });
 }
 
 function emmons(svg, { pre, K, font, t }) {
-  const pw = 290, gap = 60, top = 64, bottom = 350;
-  const y = d3.scaleLinear([0, 34], [bottom, top]);
   EMMONS.forEach((p, i) => {
-    const x0 = 80 + i * (pw + gap);
+    const pw = NARROW ? 330 : 290;
+    const x0 = NARROW ? 80 : 80 + i * (pw + 60);
+    const top = NARROW ? 50 + i * 250 : 64, bottom = NARROW ? top + 170 : 350;
+    const y = d3.scaleLinear([0, 34], [bottom, top]);
     const g = svg.append("g");
     label(g, x0, top - 30, p.title, K, font, { fill: K.text, size: 19, family: font.display, weight: 500 });
     const x = d3.scaleBand(["none", "simple", "complex"], [x0, x0 + pw]).padding(0.28);
@@ -145,12 +151,12 @@ function emmons(svg, { pre, K, font, t }) {
     }
   });
   // legend
-  const lg = svg.append("g").attr("transform", "translate(80,412)");
+  const lg = svg.append("g").attr("transform", NARROW ? "translate(20,560)" : "translate(80,412)");
   [[K.danger, "picks the hinted answer, never mentions the hint"], [K.token, "picks it and mentions the hint"]].forEach(([c, text], j) => {
     lg.append("rect").attr("x", 0).attr("y", j * 20 - 11).attr("width", 16).attr("height", 12).attr("rx", 2).attr("fill", c);
     label(lg, 24, j * 20, text, K, font, { size: 14 });
   });
-  label(svg, 80, 456, "Re-plotted from Emmons et al. (2025), Fig. 3. Dashed: rate with no hint.", K, font, { size: 13, fill: K.faint });
+  label(svg, NARROW ? 20 : 80, NARROW ? 612 : 456, "Re-plotted from Emmons et al. (2025), Fig. 3. Dashed: no hint.", K, font, { size: 13, fill: K.faint });
 }
 
 // METR (2026), investigation of the Hugging Face incident: counts from the report.
@@ -170,8 +176,8 @@ function incident(svg, { K, font, t }) {
   label(g, x0, gy + 24, "70,000+ messages and files between them", K, font, { size: 15 });
 
   // what the investigators read
-  const sx = 470, sy = 96;
-  label(g, sx, 40, "What investigators read", K, font, { size: 16, fill: K.text });
+  const sx = NARROW ? 34 : 470, sy = NARROW ? 470 : 96;
+  label(g, sx, NARROW ? sy - 22 : 40, "What investigators read", K, font, { size: 16, fill: K.text });
   for (let j = 7; j >= 0; j--) {
     g.append("rect").attr("x", sx + j * 9).attr("y", sy + j * 9).attr("width", 150).attr("height", 108).attr("rx", 8)
       .attr("fill", K.token).attr("stroke", K.bg).attr("stroke-width", 1.5).attr("filter", "url(#paper)");
@@ -180,8 +186,11 @@ function incident(svg, { K, font, t }) {
   [22, 40, 58, 76].forEach((y, j) => top.append("rect").attr("x", 14).attr("y", y).attr("width", j === 3 ? 70 : 118).attr("height", 7).attr("rx", 3).attr("fill", K.muted).attr("opacity", 0.55));
   g.append("rect").attr("x", sx - 6).attr("y", sy - 6).attr("width", 162 + 63).attr("height", 120 + 63).attr("rx", 12)
     .attr("fill", "none").attr("stroke", K.overseer).attr("stroke-width", 2.5).attr("stroke-dasharray", "6 5");
-  label(g, sx, sy + 212, "≈1,300 transcripts, all with raw", K, font, { size: 15 });
-  label(g, sx, sy + 234, "chains of thought, plus the board", K, font, { size: 15 });
-  label(g, sx, sy + 262, "read mostly by LLM analysis agents", K, font, { size: 14, fill: K.overseer });
-  label(g, 34, 452, "Counts from METR's investigation (Greenblatt, Cotra & Wijk, 2026).", K, font, { size: 13, fill: K.faint });
+  const lx = NARROW ? sx + 250 : sx, ly = NARROW ? sy + 20 : sy + 212;
+  label(g, lx, ly, "≈1,300 transcripts,", K, font, { size: 15 });
+  label(g, lx, ly + 22, "all with raw chains", K, font, { size: 15 });
+  label(g, lx, ly + 44, "of thought", K, font, { size: 15 });
+  label(g, lx, ly + 72, "read mostly by", K, font, { size: 14, fill: K.overseer });
+  label(g, lx, ly + 92, "LLM analysis agents", K, font, { size: 14, fill: K.overseer });
+  label(g, 34, NARROW ? 612 : 452, NARROW ? "Counts from METR (2026)." : "Counts from METR's investigation (Greenblatt, Cotra & Wijk, 2026).", K, font, { size: 13, fill: K.faint });
 }
