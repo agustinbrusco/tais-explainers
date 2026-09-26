@@ -16,27 +16,31 @@ Predictions are split into a *predict* step (task posed, route held, guess butto
 leaks the answer.
 Status: ✅ in the prototype · 🔲 planned
 
-| # | step (on screen) | visual state | what should click | claims |
+| # | step (on screen) | scene | what should click | claims |
 |---|---|---|---|---|
-| 0 | 🔲 Hook: the Hugging Face incident | incident card: ~1,200 agents, a message board, raw CoTs | reading CoT is *the* tool that works today | C-HF-1..3 |
-| 1 | ✅ A language model, unrolled | standard DAG; readout "?" | positions × layers; tokens treated as the only readable nodes; the monitor reads that row | C-DAG-1/2 |
-| 2 | ✅ The longest dark path (predict) | column route counted 1–4 | a dark path is counted in hidden states; predict: can a zig-zag beat 4? | C-OSD-1 |
-| 3 | ✅ Sideways doesn't help (reveal) | zig-zag route also tops out at 4; **depth profile** appears (4s everywhere) | every attention hop climbs a layer; OSD named; formal version counts operations, log cost dropped | C-OSD-1/2, C-PROF-1 |
-| 4 | ✅ A problem that doesn't fit (predict) | task posed (strip, "needs 10"), route held; guess buttons | commit to a guess | C-CONV-1, C-SHORT-1, C-NANDA-1 |
-| 5 | ✅ Forced into text (reveal) | pulse climbs; 39, 64 forced; count restarts; answer plain | **necessity**; the rule in the drawing's terms; through the text ≠ readable | C-NEC-1, C-KOR-1, C-RULE-1, C-VIS-1 |
-| 6 | ✅ Facts hit the same wall (predict) | 4-hop question posed, 2 rows per hop | facts fare ~2× worse; guess which answer surfaces | C-HOP-1/2, C-CONV-2 |
-| 7 | ✅ A bare "23" (reveal) | capsules; only 23 forced | necessity guarantees a minimum, not a legible one; measured on different datasets; Biran's partial second pass | C-HOP-4..6, C-XU-2, C-BIRAN-1/2, C-FILL-1 |
-| 8 | ✅ Looped | R = 8, pass bands; only 64 forced; profile 8s | depth becomes a dial; Astra's evidence; variants and filler | C-LOOP-1..3, C-ASTRA-ARCH, C-HOP-5, C-FILL-1 |
-| 9 | ✅ Coconut | thought cards; count runs 1–10; profile shows capacity 12 | continuous thoughts bypass the text bottleneck | C-COCO-1..3 |
-| 10 | ✅ Full bandwidth | dark links on every column; profile 4→32 | the discarded state kept → dark path grows with every token | C-FBW-0..3 |
-| 11 | ✅ Your turn | controls live; 5 questions with answers (one transfer) | operate the rule; filler adds width, not depth | C-FILL-1 |
-| 12 | 🔲 Two ways to earn the reward | same graph; the reward term "monitor didn't flag" | obfuscation under pressure; necessity survives it, propensity doesn't | C-BAKER-1..2, C-TOY-1 |
-| 12b | 🔲 *(aside)* the policy-gradient version | a small equation panel, collapsible | the math behind "the cheaper route wins" | C-RL-1 |
-| 13 | 🔲 Faithfulness ≠ monitorability | two panels: rationalization vs computation CoT | "unfaithful" doesn't mean "unmonitorable" | C-EMM-1 |
-| 14 | 🔲 Diffusion | canvas × denoising-steps DAG; opaque vs bottlenecked self-conditioning | 28.6× → 1.1× | C-DIFF-1..2 |
-| 15 | 🔲 What latent reasoning does to interpretability | readers with label-source wires that go dark | labels and verification are what we lose | C-INTERP-1..7 |
-| 16 | 🔲 Evidence board: Astra | confirmed / reported / rumored / bounded | calibration in both directions | C-ASTRA-* |
-| 17 | 🔲 Check yourself | five questions (see README) | transfer | n/a |
+| P1 | ✅ A swarm, read through its thoughts | waffle: 1,200 agents, 700 red; transcript stack (real counts) | CoT reading is the tool that worked on a real incident, and it rested on propensity | C-HF-1..5 |
+| I.2 | ✅ A language model, unrolled | DAG | positions × layers; tokens treated as readable | C-DAG-1/2 |
+| I.3 | ✅ The longest dark path (predict) | DAG, column counted, diagonals highlighted | counting a dark path; can a wander beat 4? | C-OSD-1 |
+| I.4 | ✅ Sideways doesn't help | zig-zag also tops out at 4; depth profile | every hop climbs a layer; OSD named | C-OSD-2, C-PROF-1 |
+| II.5 | ✅ A problem that doesn't fit (predict) | task posed, route held | "32 dots is plenty?" (width vs depth) | C-CONV-1, C-SHORT-1, C-NANDA-1 |
+| II.6 | ✅ Forced into text | pulse, forced 39 & 64 | necessity; the rule; through text ≠ readable | C-NEC-1, C-KOR-1, C-RULE-1 |
+| II.7 | ✅ Facts hit the same wall (predict) | hop ladder in prose; 2 rows per lookup | which answer surfaces? (salience misconception) | C-HOP-1/2, C-CONV-2 |
+| II.8 | ✅ Whatever lands at the top | capsules labelled with each lookup's result; 23 forced | what surfaces is whatever lands at the top | C-HOP-4..6, C-XU-2, C-BIRAN-1/2 |
+| III.9–11 | ✅ Looped / Coconut / Full bandwidth | DAG edits | depth becomes a dial; thoughts; the discarded state kept | C-LOOP-*, C-COCO-*, C-FBW-* |
+| III.12 | ✅ Your turn | controls + 5 questions w/ answers | operate the rule; filler = width | C-FILL-1 |
+| IV.13 | ✅ Train against the monitor (predict) | Baker chart, pressure panel hidden | "penalize bad thoughts" misconception | C-BAKER-1..3 |
+| IV.14 | ✅ Two ways to earn the reward | Baker chart, both panels; RL-math aside | obfuscated reward hacking; propensity erodes | C-BAKER-4..7, C-RL-1/2 |
+| IV.15 | ✅ Pressure finds the dark path | Kuhn chart | a latent channel empties the CoT; the plain model can only thin it | C-TOY-1..6 |
+| IV.16 | ✅ When the hint needs math (predict) | Emmons chart, complex bars hidden | "unfaithful ⇒ unmonitorable" misconception | C-EMM-1 |
+| IV.17 | ✅ Unfaithful, but only when it's easy | Emmons chart | rationalization vs computation | C-EMM-2..4 |
+| V.18 | ✅ One canvas, many passes (predict) | diffusion DAG, S wires, no path | do the cards cut the path? | C-DIFF-1 |
+| V.19 | ✅ A wire around the cards | S opaque: path 9 | diffusion = the FBW edit if S is opaque; 28.6× | C-DIFF-2, C-DIFF-5 |
+| V.20 | ✅ Label the wire readable | S readable: path 3 | the ratio flips on one labelling decision; 1.1× | C-DIFF-3/4 |
+| VI.21 | ✅ Readers of hidden states | readers with two wires | where interp tools get meaning from | C-INTERP-1..3 |
+| VI.22 | ✅ When the text goes away | text wire cut | activations persist; labels and checks are lost | C-INTERP-4..7 |
+| VI.23 | ✅ The evidence board | HTML board, 4 categories | calibrate in both directions | C-ASTRA-* |
+| VI.24 | ✅ Check yourself | FBW DAG | transfer | C-CY-* |
+| VI.25 | ✅ What this doesn't show | standard DAG | limits | C-LIM |
 
 ## Visual grammar (keep consistent)
 - Hidden state = `residual` blue dot. Readable token = `token` paper card. Monitor = `overseer` gold eye plus gold outlines on

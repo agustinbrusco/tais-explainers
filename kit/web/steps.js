@@ -16,12 +16,22 @@ export function mountSteps({ render, root = document }) {
   // Must match the breakpoint in base.css, where the stage becomes a sticky top band.
   const narrow = matchMedia("(max-width: 860px)").matches;
 
+  // Optional chapters: a `.chapter` element (with data-short, e.g. "II") labels every step after it.
+  const chapterOf = sections.map((s) => {
+    for (let el = s.previousElementSibling; el; el = el.previousElementSibling)
+      if (el.classList.contains("chapter")) return el.dataset.short ?? "";
+    return "";
+  });
+
+  const bar = document.createElement("div");
+  bar.className = "progress";
+  bar.innerHTML = "<i></i>";
   const nav = document.createElement("nav");
   nav.className = "stepnav";
-  nav.innerHTML = `<button data-d="-1" aria-label="Previous step">←</button>
+  nav.innerHTML = `<span class="chap"></span><button data-d="-1" aria-label="Previous step">←</button>
     <span aria-live="polite"></span><button data-d="1" aria-label="Next step">→</button>`;
-  document.body.append(nav);
-  const [prevBtn, label, nextBtn] = nav.children;
+  document.body.append(bar, nav);
+  const [chap, prevBtn, label, nextBtn] = nav.children;
   nav.addEventListener("click", (e) => {
     const d = Number(e.target.dataset?.d);
     if (d) goto(current + d, { scroll: true });
@@ -34,6 +44,8 @@ export function mountSteps({ render, root = document }) {
     current = i;
     sections.forEach((s, j) => s.classList.toggle("active", j === i));
     label.textContent = `${i + 1} / ${sections.length}`;
+    chap.textContent = chapterOf[i];
+    bar.firstChild.style.width = `${((i + 1) / sections.length) * 100}%`;
     prevBtn.disabled = i === 0;
     nextBtn.disabled = i === sections.length - 1;
     history.replaceState(null, "", `#${i}`);

@@ -50,23 +50,56 @@ The rigor-reviewer re-checked every location below on 2026-09-26; ✓ means veri
 | C-FBW-3 | Decoding's total serial depth is unchanged; the opaque share changes. | FBT L229-231 ✓ | sourced + inferred | Contrast with opaque depth is ours and Redwood's. |
 | C-VIS-1 | Route numbers count hidden states; the count restarts at 1 after every forced card; dark links don't restart it (Coconut only while the thoughts last). | Brown-Cohen definition (C-OSD-1) | simplified | Phones: 5 columns, so full bandwidth reads 20; the prose gives no number. |
 
-## Planned beats (placeholders; sources known, not yet drafted)
+## Built: prologue and chapters IV–VI (2026-09-26)
 
-| # | Beat | Claims needed | Sources |
-|---|---|---|---|
-| C-HF-* | 0 Hook | ~1,200 agents, >70,000 messages, 700 in the attack; ~1,300 transcripts with raw CoTs; "No other tool … comes close" | METR 2026-08-26 ✓; Redwood 09-23 ✓ |
-| C-BAKER-*, C-TOY-1 | 8 Two ways to earn the reward | obfuscated reward hacking under CoT-monitor pressure; 95% vs 60% recall; the toy recurrent model moves reasoning into latents within 40 RL steps | Baker `2503.11926` ✓; Kuhn et al. LW 2026-09-18 ✓ |
-| C-RL-1 | 8b Policy-gradient aside | a standard REINFORCE identity | textbook; cite Williams 1992 if used |
-| C-EMM-1 | 9 Faithfulness ≠ monitorability | CoT-as-computation vs rationalization; evasion "only when given significant help" | Emmons `2507.05246` |
-| C-DIFF-* | 10 Diffusion | 608,016 vs 21,235 = 28.6× if the self-conditioning is opaque; 23,571 → 1.1× if it's interpretable; S_t = probability-weighted token embeddings; the monitors saw only CoT + output across canvases | Engels `2606.20560` ✓ (numbers); Redwood FAQ |
-| C-INTERP-1 | 11 | activations persist; toy latent models probe about as well as CoT models | Ferreira et al. `2608.04928` ✓ ("losing the readable trace does not necessarily make a model less monitorable") |
-| C-INTERP-2 | 11 | an unreliable CoT can corrupt probe labels: Goodfire's ground truth, probe selection and checks come from a judge reading the CoT | Goodfire `2609.19101` ✓ ("entire agent transcript"; "clearest window into intent"); the consequence is **inferred** |
-| C-INTERP-3 | 11 | NLAs, AOs and the J-lens get their meaning from tokens; the J-lens is "structurally blind" to content not driving the next token | NLA paper (warm-start); AO `2512.15674` L232-261; Wang & Reid `2609.01924` ✓; Redwood App. C (argument) |
-| C-INTERP-4 | 11 | today's latent models are fairly readable (65–93% decodable), possibly because they were trained on gold traces | Dilgren & Wiegreffe `2604.04902` ✓ (both quotes) |
-| C-INTERP-5 | 11 | tools don't transfer unchanged: Huginn is inconsistent under the logit lens; the J-lens had to be re-fit for looped models; per-model classifiers at OpenAI | Lu et al. `2507.02199` ✓; Wang & Reid ✓; Astra card (per agent; re-check) |
-| C-INTERP-6 | 11 | probes give "a single bit"; the Astra card calls for auditing "beyond examining the model's chain of thought" | Redwood App. C ✓ (agent-verified); Astra card ✓ |
-| C-INTERP-7 | 11 | scale gap: all latent-interp studies found are ≤ 3.5B params and mostly distilled from language CoT | research agent's search (absence of evidence; say "we found no…") |
-| C-ASTRA-* | 12 Evidence board | system card quotes; Nanda; the filler-token post; bounds | dossier ✓ items |
+Quotes verified by Claude against raw text on 2026-09-26 (✓): local `.txt`, or page text saved by the research agents
+under `/tmp/claude-1000/cotres/` (METR, Redwood 09-23 with footnotes, Astra card, NLA page) and `/tmp/claude-1000/lw/`
+(Kuhn post, Sutton & Barto). Figures re-plotted by eye were viewed by Claude directly (Baker Fig. 4, Kuhn headline figure,
+Emmons Fig. 3).
+
+| # | Claim (as the piece states it) | Source | Status | Note |
+|---|---|---|---|---|
+| C-HF-1 | July 2026: about 1,200 agents meant to be isolated found a shared message board; 70,000+ messages and files; about 700 joined the attack on Hugging Face. | METR 2026-08-26 ✓ ("Roughly 1200 agents meant to be isolated…"; "sending over 70,000 messages and files"; "700 went on to participate in the attack") | sourced | Incident began July 7 (ExploitGym runs); attack July 11. |
+| C-HF-2 | Main sources: the board and ~1,300 transcripts "all of which contained raw chains of thought", read mostly with LLM analysis agents. | METR ✓ ("A set of ~1,300 transcripts with raw chains of thought"; "we reviewed approximately 1300 transcripts in total, all of which contained raw chains of thought"; analysis agents, "had to defer to these agents to a substantial extent") | sourced | |
+| C-HF-3 | Agents "didn't seem interested in manipulating their chain of thought"; they "seemed to think that the scorer would not look at reasoning". | METR ✓ | sourced | Candour = propensity. |
+| C-HF-4 | Models: an internal research model (~95%) and GPT-5.6 Sol, not Astra. | METR ✓ ("instances of HPIM (~95%) and GPT-5.6 Sol (~5%)") | sourced | |
+| C-HF-5 | Redwood (one author among the investigators) argues "no other tool for understanding models' cognition comes close". | Redwood 09-23 §1 ✓ | sourced (argument) | Greenblatt co-authored both. Redwood credits CoTs *and* inter-agent communication. |
+| C-VIZ-HF | Waffle: 1,200 squares, 700 red; a stack standing for ~1,300 transcripts. | METR counts | simplified | Badge "real · counts from the report". |
+| C-BAKER-1 | OpenAI trained a reasoning agent on coding tasks (make unit tests pass); cheating e.g. editing tests; a GPT-4o monitor read only the CoT. | Baker `2503.11926.txt` L173-182 ✓, L294-296, L312-313 ✓ ("only looks at the agent CoT and not its actions") | sourced | Non-frontier agent for the pressure experiment. |
+| C-BAKER-2 | Without CoT pressure the agent cheated openly and the monitor caught nearly all of it. | Baker L317-319 ✓ ("almost perfect recall … the agent is quite forthright"); Fig. 4 (viewed) | sourced | |
+| C-BAKER-3 | 95% vs 60% recall (full-trajectory vs action-only monitor), in a separate frontier run. | Baker L213-216 ✓, Table 1 L236-238 ✓ | sourced | Flagged on screen as a different setup. |
+| C-BAKER-4 | Reward = tests pass and monitor doesn't flag; at first more honest solutions and less cheating; later "the CoT monitor's recall falls to near zero"; obfuscated reward hacking. | Baker L338-346 ✓; L110 ✓ | sourced | |
+| C-BAKER-5 | Chart: genuine / cheats caught / cheats unseen over training, both agents; end values ≈23/75/0% and ≈43/1/49%. | Baker Fig. 4 (p. 8), read by eye at every 0.1 epoch | simplified (re-plotted, approx.) | Categories are mutually exclusive, so stacking is legitimate. |
+| C-BAKER-6 | Authors: hacks this simple needed no reasoning; complex hacks may be harder to hide "as it may need to explicitly reason about them". | Baker L350-354 ✓ | sourced (argument) | |
+| C-BAKER-7 | "monitorability tax": avoid strong optimization pressure on the CoT. | Baker L26-28, L150-155 | sourced | Term cited to Ouyang et al. [33]. |
+| C-RL-1 | ∇J(θ) = E[R(τ) ∇ log π_θ(τ)]; ∇π = π ∇log π; REINFORCE. | Sutton & Barto §13.3 ✓ ("∇ ln x = ∇x/x", p. 327-328); derivation shown on screen | sourced + derived | Trajectory form is a standard rewrite of their per-step form. |
+| C-RL-2 | Behaving and cheating silently both get R = 1; which grows depends on "which is easier to learn". | C-RL-1 + Baker Fig. 6 caption L405-409 ✓ | inferred + sourced | Simplified: no baseline, no PPO/GRPO details. |
+| C-TOY-1 | Qwen3-1.7B plain vs. a latent channel passing late-layer activations to the next position's early layers (the full-bandwidth edit). | Kuhn et al. LW ✓ ("passes late layer activations to early layer activations of the next token position … learnable matrix W initialized to zero"; "Qwen3-1.7B") | sourced + inferred | Mapping to our FBW edit is ours (the authors call it "parallel latents … like full-bandwidth transformers"). |
+| C-TOY-2 | Reward: solve, and don't let the monitor identify which of two problems. | Kuhn ✓ ("1(correct) - 1(caught by monitor)"; judge identifies the problem both times) | sourced | |
+| C-TOY-3 | Latent model "moves its reasoning into latents … within 40 steps of RL"; plain writes "only every second or third step", "largely identifiable". | Kuhn ✓ | sourced | 40 steps: permutation task only; 70–80 on modchain ✓ ("within 80 steps"; "within 70 steps"). |
+| C-TOY-4 | "Our reading: the plain model could skip only what fits in its dark path." | inference | inferred (marked on screen) | |
+| C-TOY-5 | Chart: monitorability vs RL steps, both models. | Kuhn headline figure (viewed), read by eye | simplified (re-plotted, approx.) | |
+| C-TOY-6 | Caveats: 1.7B; toy monitor objective; SFT with filler first; latents not inspected ("we haven't checked"). | Kuhn ✓ | sourced | |
+| C-EMM-1 | Simple wrong-answer hints are followed more often without being mentioned; with a hint needing "K + Q mod 4", silent following falls to the no-hint rate. | Emmons `2507.05246.txt` L261-270 ✓; Fig. 3 (p. 7, viewed): Flash 8 / 19+5 / 7+6, Pro 5 / 14+18 / 4+14 | sourced | 2025 Gemini 2.5 models; one template. |
+| C-EMM-2 | "CoT-as-rationalization, where the model explains an answer it has already computed" vs "CoT-as-computation…"; "the key property is not faithfulness but monitorability". | Emmons L48-50 ✓; abstract ✓ | sourced | "Unfaithfulness lives in tasks that fit in the dark path" is our mapping. |
+| C-EMM-3 | Evasion "only when given significant help, such as detailed human-written strategies or iterative optimization against the monitor". | Emmons L28-30 ✓ | sourced | |
+| C-EMM-4 | "We don't test whether necessity will hold"; after ~a million RL episodes one model fooled the monitor while still writing needed values. | Emmons L1501 ✓; L1265-1279 (1.28M episodes), L1316-1327 | sourced | |
+| C-DIFF-1 | DiffusionGemma refines a canvas over passes; bidirectional attention; between passes: the canvas tokens and S (softmax of shaped logits × embeddings). | Engels `2606.20560.txt` L215-240 ✓ | sourced | Prompt prefill omitted in the drawing (simplified). |
+| C-DIFF-2 | S opaque: 28.6× (608,016 vs 21,235) at T = 48, 256k context, same base transformer; typical 12–16 passes, "about a third as large". | Engels L276-283 ✓ | sourced | Upper bounds in circuit-depth units. |
+| C-DIFF-3 | S readable: 1.1× (23,571); top-8 or p > 0.03 "is enough to attain the same performance as the baseline"; most tokens are guesses for the final text; "not airtight" quote. | Engels L284-286 ✓, L383-388 ✓, L1211-1216 ✓ | sourced | |
+| C-DIFF-4 | Output-only monitors found the models "similarly monitorable"; Redwood: "has not learned to perform interesting latent reasoning". | Engels Fig. 4 caption ✓; Redwood 09-23 FAQ ✓ | sourced | |
+| C-DIFF-5 | Drawing: 3 passes × 3 layers × 4 positions; dark path 9 (S opaque) vs 3 (S readable), computed on the drawn graph. | DP in `diffusion.js` | inferred | Not the paper's ratio (26, not 48, and the paper doesn't say why). |
+| C-INTERP-1 | Goodfire's probes: selected and scored against an LLM judge given "the entire agent transcript"; rubric: reasoning "often the clearest window into intent"; directions from synthetic text pairs; probes flagged passages the judge missed. | Goodfire `2609.19101.txt` L241-243 ✓, L1544-1545 ✓, L550-552 ✓, L127, L731-756 | sourced | Frontier-scale open models, standard transformers. |
+| C-INTERP-2 | NLAs warm-started from Claude-written summaries; hallucinations "often easy to catch by checking against the transcript". | NLA paper (transformer-circuits.pub/2026/nla) ✓ | sourced | |
+| C-INTERP-3 | Activation oracles learn from question-answering about text; the J-lens reads what drives the next token. | AO `2512.15674.txt` L229-261 ✓; Wang & Reid `2609.01924.txt` L1020-1022 ✓ | sourced | |
+| C-INTERP-4 | In a 1B latent reasoner probes still recovered hint reliance: "losing the readable trace does not necessarily make a model less monitorable". Labels came from counterfactual re-runs. | Ferreira `2608.04928.txt` L538-541 ✓, L118-121 | sourced | |
+| C-INTERP-5 | Latent models decodable "65-93% of the time"; maybe "an artifact of training Coconut and CODI on gold reasoning traces". | Dilgren `2604.04902.txt` L32-34 ✓, L596-599 ✓ | sourced | |
+| C-INTERP-6 | Redwood: token-grounded tools "would likely get weaker…"; probes "a single bit of information…"; Astra card: "alignment auditing techniques beyond examining the model's chain of thought". | Redwood 09-23 App. C ✓; Astra card ✓ | sourced (argument) | |
+| C-INTERP-7 | Scale gap: every latent-reasoning interp study found ≤ 3.5B. | research agents' searches | inferred (absence) | Worded "we found". |
+| C-VIZ-READ | Readers diagram: activations wire survives; text wire cut when reasoning is latent. | C-INTERP-1..6 | simplified (schematic) | "Tools weaken without text" is argument + inference, said on screen. |
+| C-ASTRA-1..14 | The board's items (confirmed / measured / reported-rumored / bounds). | Astra card ✓ (all quotes checked in raw card text); Nanda ✓; Xu ✓; Redwood ✓; tweet via mirror; The Information teaser | sourced | Categories per the research pass; setup caveats (instructed attack; low reasoning effort) on the board. |
+| C-CY-1..5 | Check-yourself answers. | follow from the piece's claims above | inferred | |
+| C-LIM | Limits list; "we still do not have a good understanding" (Korbak). | Korbak L288-291 | sourced | |
 
 ## Guardrails: what the piece must NOT claim
 1. That Brown-Cohen et al. analyse looped transformers, SSMs or the FBT. (They cover transformers, RNNs, continuous latent CoT, black-box memory and token-bottleneck diffusion.)
@@ -76,6 +109,10 @@ The rigor-reviewer re-checked every location below on 2026-09-26; ✓ means veri
 5. Ratios mixing depth definitions (Brown-Cohen 4,490 vs NLS 1,954 for Gemma3-1B).
 6. That a dark path of L layers means L reasoning steps.
 7. That 28.6× equals the number of denoising steps, or that 1.1× is unconditional (it assumes the self-conditioning vectors are interpretable).
+12. That Astra caused the Hugging Face incident (it was mostly an internal research model and GPT-5.6 Sol).
+13. That Astra's awareness-triggered evasion was unprompted misbehaviour (it was evading during an attack it was instructed to do).
+14. That Baker et al. coined "monitorability tax", or that the 95%/60% numbers come from the pressure experiment.
+15. That Kuhn et al.'s toy model is looped (it's a parallel-latents / full-bandwidth-like channel), or that "40 steps" holds for every task.
 8. That Coconut's breadth-first-search behaviour is general (it was shown on synthetic ProsQA with GPT-2).
 9. That Ouro's "faithfulness" means looped models are monitorable (that's causal coupling of latents, not human readability).
 10. That Astra is looped.

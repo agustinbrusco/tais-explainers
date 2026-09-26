@@ -17,7 +17,8 @@
   --attention: #3FBFA0;  /* Attention heads and patterns (component-level). */
   --mlp: #E8835A;  /* MLP layers (component-level). */
   --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "DejaVu Sans Mono", ui-monospace, monospace;
+  --font-mono: "JetBrains Mono", "DejaVu Sans Mono", ui-monospace, monospace;
+  --font-display: "Newsreader", Georgia, serif;
   --fs-caption: 1.250rem;
   --fs-body: 1.750rem;
   --fs-label: 2.000rem;

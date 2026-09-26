@@ -674,8 +674,9 @@
 - id: lw:diffusiongemma-latent-reasoning
   title: Does DiffusionGemma do latent reasoning?
   authors:
-  - unknown
-  date: '2026'
+  - Jan Bauer
+  - Neel Nanda
+  date: '2026-08-16'
   url: https://www.lesswrong.com/posts/QBuJ3suRZxrrxSTtv/does-diffusiongemma-do-latent-reasoning
   accessed: '2026-09-25'
   read: false
@@ -1035,3 +1036,37 @@
   accessed: '2026-09-26'
   read: partial
   notes: 'Fact check for the 4-hop example. Infobox: "birth_date = {{Birth date |1921|6|21}}".'
+- id: book:sutton-barto-2018
+  title: 'Reinforcement Learning: An Introduction (2nd ed.)'
+  authors:
+  - Richard S. Sutton
+  - Andrew G. Barto
+  date: '2018'
+  url: http://incompleteideas.net/book/RLbook2020.pdf
+  accessed: '2026-09-26'
+  read: partial
+  notes: '§13.3 "REINFORCE: Monte Carlo Policy Gradient", pp. 326-328, eqs. (13.6)-(13.8); the identity "∇ ln x = ∇x/x"
+    (p. 327-328). Used for the policy-gradient aside. REINFORCE attributed to Williams (1987, 1992).'
+- id: tweet:merettm-2026-09-02
+  title: Tweet on the computation-graph depth of OpenAI frontier models including Astra
+  authors:
+  - '@merettm (Jakub Pachocki)'
+  date: '2026-09-02'
+  url: https://x.com/merettm
+  accessed: '2026-09-26'
+  read: true
+  notes: 'Read via the api.fxtwitter.com mirror by a research agent (2026-09-26). "The depth of the computation graph for
+    our present frontier models, including Astra, is within a factor of two of GPT-4." Redwood 09-23 calls the author
+    OpenAI''s Chief Scientist and links the tweet. Exact status URL in the agent notes; not re-fetched from x.com.'
+- id: press:the-information-astra-2026-09-02
+  title: OpenAI Technique in 'Astra' Model Sparks Security Concerns
+  authors:
+  - Amir Efrati
+  - Stephanie Palazzolo
+  - Rocket Drew
+  date: '2026-09-02'
+  url: https://www.theinformation.com/
+  accessed: '2026-09-26'
+  read: false
+  notes: 'Paywalled. Only page metadata and the public teaser were read: "an innovative technique that improved the model''s
+    performance also means that the model, and others like it, will reveal less of their ''thinking''". Does not say looped.'

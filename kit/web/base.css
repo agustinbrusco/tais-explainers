@@ -1,41 +1,79 @@
-/* Shared layout + components for web explainers. Requires tokens.css first. */
+/* Shared layout + components for web explainers. Requires tokens.css first.
+   Fonts: pages load Inter, Newsreader (display) and JetBrains Mono from Google Fonts (see kit/starters/web). */
 
 *, *::before, *::after { box-sizing: border-box; }
-html { color-scheme: dark; }
+html { color-scheme: dark; scroll-behavior: smooth; }
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(1200px 700px at 78% -10%, rgba(91, 156, 245, .07), transparent 60%),
+    radial-gradient(900px 600px at -10% 30%, rgba(245, 192, 74, .035), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--text);
-  font: 400 1.0625rem/1.6 var(--font-sans);
+  font: 400 1.0625rem/1.65 var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01";
 }
+::selection { background: rgba(91, 156, 245, .35); }
+a { color: var(--residual); text-underline-offset: .2em; }
+em { font-style: italic; }
+
+/* ---- Hero ---- */
+.hero { grid-column: 1 / -1; padding: 5.5rem 0 3rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3rem; align-items: center; }
+.hero .eyebrow { font: 500 .78rem/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--overseer); margin: 0 0 1.4rem; }
+.hero h1 { font: 500 clamp(2.6rem, 5.2vw, 4.4rem)/1.02 var(--font-display); letter-spacing: -0.02em; margin: 0 0 1.2rem; }
+.hero h1 em { color: var(--residual); font-style: italic; }
+.hero .lede { font-size: 1.22rem; line-height: 1.55; color: #C9CED6; margin: 0 0 1.6rem; max-width: 36rem; }
+.hero .byline { font: 400 .82rem/1.5 var(--font-mono); color: var(--muted); display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; }
+.hero .byline b { color: var(--text); font-weight: 500; }
+.hero-figure { width: 100%; aspect-ratio: 16 / 10; }
+.hero-figure svg { width: 100%; height: 100%; overflow: visible; }
+
+/* legacy simple header (starters) */
+.explainer > header:not(.hero) { grid-column: 1 / -1; padding: 4rem 0 2rem; max-width: 46rem; }
+.explainer > header:not(.hero) h1 { font: 500 var(--fs-title)/1.08 var(--font-display); margin: 0 0 .75rem; letter-spacing: -0.02em; }
+.explainer > header:not(.hero) .lede { color: var(--muted); font-size: 1.2rem; margin: 0; }
 
 /* ---- Scrollytelling layout: prose steps beside a sticky stage ---- */
 .explainer {
   display: grid;
   grid-template-columns: minmax(20rem, 34rem) 1fr;
-  gap: 0 3rem;
-  max-width: 90rem;
+  gap: 0 3.5rem;
+  max-width: 92rem;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 2.5rem;
 }
-.explainer > header { grid-column: 1 / -1; padding: 4rem 0 2rem; max-width: 46rem; }
-.explainer > header h1 { font-size: var(--fs-title); line-height: 1.1; margin: 0 0 .75rem; letter-spacing: -0.02em; }
-.explainer > header .lede { color: var(--muted); font-size: 1.2rem; margin: 0; }
+.prose { padding-bottom: 45vh; counter-reset: step; }
 
-.prose { padding-bottom: 40vh; }
+/* chapter dividers live in the prose column between steps (they are not steps) */
+.chapter { margin: 5rem 0 2.5rem; padding-top: 1.4rem; border-top: 1px solid var(--grid); }
+.chapter:first-child { margin-top: 0; }
+.chapter .num { font: 500 .78rem/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--overseer); }
+.chapter h2 { font: 500 2.2rem/1.1 var(--font-display); letter-spacing: -0.015em; margin: .6rem 0 .6rem; }
+.chapter p { color: var(--muted); margin: 0; max-width: 34rem; font-size: 1.02rem; }
+
 .step {
-  min-height: 70vh;
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 2rem;
+  counter-increment: step;
+  min-height: 72vh;
+  padding: 1.3rem 1.6rem 1.2rem;
+  margin-bottom: 2.2rem;
   border-left: 2px solid var(--grid);
-  opacity: .38;
-  transition: opacity var(--t-normal), border-color var(--t-normal);
+  opacity: .42;
+  transition: opacity var(--t-normal), border-color var(--t-normal), background-color var(--t-normal);
   cursor: pointer;
+  border-radius: 0 10px 10px 0;
 }
-.step.active { opacity: 1; border-color: var(--overseer); cursor: default; }
-.step h2 { font-size: 1.35rem; margin: 0 0 .5rem; letter-spacing: -0.01em; }
-.step p { margin: 0 0 .9rem; max-width: 62ch; }
+.step.active { opacity: 1; border-color: var(--overseer); cursor: default; background: linear-gradient(90deg, rgba(245, 192, 74, .045), transparent 70%); }
+.step h2 { font: 500 1.62rem/1.2 var(--font-display); margin: 0 0 .7rem; letter-spacing: -0.01em; }
+.step h2::before {
+  content: counter(step, decimal-leading-zero);
+  display: block; margin-bottom: .45rem;
+  font: 500 .72rem/1 var(--font-mono); letter-spacing: .12em; color: var(--faint);
+}
+.step.active h2::before { color: var(--overseer); }
+.step p, .step ul, .step ol { margin: 0 0 1rem; max-width: 62ch; }
+.step li { margin-bottom: .35rem; }
 
 .stage {
   position: sticky;
@@ -47,16 +85,22 @@ body {
 }
 .stage svg { width: 100%; height: 100%; max-height: 82vh; overflow: visible; }
 
-@media (max-width: 860px) {
-  .explainer { grid-template-columns: 1fr; padding: 0 1rem; }
-  .explainer > header { padding: 2rem 0 1rem; }
-  .explainer > header h1 { font-size: 2.1rem; }
-  .explainer > header .lede { font-size: 1.05rem; }
-  .stage { grid-row: 2; height: 46vh; top: 0; z-index: 1; background: var(--bg); padding: .5rem 0; }
-  .stage svg { max-height: 44vh; }
-  /* the sticky stage covers the top 46vh; land steps just below it */
-  .step { min-height: 55vh; padding: 1rem; scroll-margin-top: calc(46vh + 1rem); }
+/* the stage as a framed instrument: header (figure number, title, badge), body, footer */
+.panel {
+  position: relative; width: 100%; margin: 0;
+  display: flex; flex-direction: column; gap: .7rem;
+  padding: 1.1rem 1.3rem 1rem;
+  background:
+    radial-gradient(circle, rgba(232, 234, 237, .045) 1px, transparent 1.2px) 0 0 / 22px 22px,
+    linear-gradient(180deg, rgba(23, 27, 34, .92), rgba(14, 17, 22, .92));
+  border: 1px solid var(--grid);
+  border-radius: 14px;
+  box-shadow: 0 30px 80px -40px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .03);
 }
+.panel-head { display: flex; align-items: baseline; gap: .8rem; min-height: 1.4rem; }
+.panel-head .fig { font: 500 .72rem/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.panel-head .title { font: 500 1.05rem/1.2 var(--font-display); color: var(--text); flex: 1; min-width: 0; }
+.panel-head .badge { position: static; }
 
 /* ---- Semantic text highlights: <span class="c-residual">residual stream</span> ---- */
 .c-token { color: var(--token); } .c-residual { color: var(--residual); }
@@ -67,58 +111,86 @@ body {
 /* ---- Epistemic badges: every figure says whether it shows real data ---- */
 .badge {
   display: inline-block;
-  font: 500 .72rem/1 var(--font-mono);
-  letter-spacing: .04em;
+  font: 500 .68rem/1 var(--font-mono);
+  letter-spacing: .08em;
   text-transform: uppercase;
-  padding: .35em .6em;
+  padding: .38em .65em;
   border-radius: 999px;
   border: 1px solid currentColor;
 }
 .badge.schematic { color: var(--muted); }
 .badge.real { color: var(--safe); }
 .badge.speculative { color: var(--training); }
-.stage .badge { position: absolute; top: 1.25rem; right: 0; }
+.stage > .badge { position: absolute; top: 1.25rem; right: 0; }
 
-/* ---- Callouts ---- */
-.caveat {
-  border-left: 3px solid var(--muted);
-  background: var(--surface);
-  padding: .75rem 1rem;
-  border-radius: 0 6px 6px 0;
-  font-size: .95rem;
-  color: var(--muted);
+/* ---- Callouts: a small-caps label line, then the text ----
+   Write the label as the first <strong> (caveat) or let ::before supply it (predict, inside). */
+.caveat, .inside, .predict { position: relative; padding: .85rem 1.05rem .9rem; border-radius: 0 8px 8px 0; font-size: .95rem; line-height: 1.6; }
+.caveat { border-left: 2px solid var(--faint); background: rgba(23, 27, 34, .8); color: #A7AFBC; }
+.caveat > strong:first-child, .inside::before, .predict::before {
+  display: block; margin-bottom: .3rem;
+  font: 600 .68rem/1.2 var(--font-mono); letter-spacing: .12em; text-transform: uppercase;
 }
-.caveat strong { color: var(--text); }
-.predict {
-  border: 1px dashed var(--overseer);
-  padding: .75rem 1rem;
-  border-radius: 6px;
-}
-.predict::before { content: "Predict first: "; color: var(--overseer); font-weight: 600; }
+.caveat > strong:first-child { color: var(--text); }
+.caveat strong { color: var(--text); font-weight: 600; }
+.predict { border: 1px dashed rgba(245, 192, 74, .7); border-radius: 8px; background: rgba(245, 192, 74, .04); }
+.predict::before { content: "Predict first"; color: var(--overseer); }
 /* mechanistic evidence from inside a real model, next to a schematic claim */
-.inside {
-  border-left: 3px solid var(--residual);
-  background: var(--surface);
-  padding: .75rem 1rem;
-  border-radius: 0 6px 6px 0;
-  font-size: .95rem;
-}
-.inside::before { content: "Inside a real model: "; color: var(--residual); font-weight: 600; }
+.inside { border-left: 2px solid var(--residual); background: rgba(91, 156, 245, .06); }
+.inside::before { content: "Inside a real model"; color: var(--residual); }
 
-/* ---- Step nav ---- */
-.stepnav {
-  position: fixed; bottom: 1rem; right: 1.25rem;
-  display: flex; gap: .5rem; align-items: center;
-  background: var(--raised); border: 1px solid var(--grid); border-radius: 999px;
-  padding: .35rem .5rem; z-index: 10; font: 500 .85rem var(--font-mono); color: var(--muted);
+/* guess buttons inside a .predict: commit, then the next step reveals */
+.guess { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .75rem; }
+.guess button {
+  font: 500 .9rem var(--font-sans); color: var(--text); background: rgba(23, 27, 34, .9);
+  border: 1px solid rgba(245, 192, 74, .55); border-radius: 999px; padding: .42rem .9rem; cursor: pointer;
+  transition: background var(--t-quick), color var(--t-quick), transform var(--t-quick);
 }
+.guess button:hover { background: rgba(245, 192, 74, .14); transform: translateY(-1px); }
+.guess button.on { background: var(--overseer); color: var(--bg); border-color: var(--overseer); }
+.guessed:empty { display: none; }
+.guessed { display: block; margin-bottom: .4rem; font: 500 .8rem/1.4 var(--font-mono); color: var(--muted); }
+.guessed.right { color: var(--safe); }
+
+/* ---- Progress + step nav ---- */
+.progress { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 20; background: transparent; }
+.progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--residual), var(--overseer)); transition: width var(--t-normal); }
+.stepnav {
+  position: fixed; bottom: 1.1rem; right: 1.25rem;
+  display: flex; gap: .35rem; align-items: center;
+  background: rgba(31, 36, 45, .78); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--grid); border-radius: 999px;
+  padding: .3rem .45rem; z-index: 10; font: 500 .78rem var(--font-mono); color: var(--muted);
+}
+.stepnav .chap { color: var(--overseer); letter-spacing: .06em; padding-left: .35rem; }
 .stepnav button {
   background: none; border: 0; color: var(--text); font: inherit; cursor: pointer;
-  padding: .3rem .6rem; border-radius: 999px;
+  padding: .28rem .55rem; border-radius: 999px;
 }
 .stepnav button:hover { background: var(--grid); }
 .stepnav button:disabled { color: var(--faint); cursor: default; background: none; }
-@media (max-width: 860px) { .stepnav { right: 50%; transform: translateX(50%); } }
+
+@media (max-width: 860px) {
+  /* minmax(0, …) so no long word or wide figure can push the page wider than the phone */
+  .explainer { grid-template-columns: minmax(0, 1fr); padding: 0 1rem; }
+  .hero { grid-template-columns: minmax(0, 1fr); padding: 2.4rem 0 1.4rem; gap: 1.6rem; }
+  .hero .eyebrow { letter-spacing: .08em; line-height: 1.5; }
+  .hero h1 { font-size: 2.5rem; }
+  .hero .lede { font-size: 1.08rem; }
+  .explainer > header:not(.hero) { padding: 2rem 0 1rem; }
+  .explainer > header:not(.hero) h1 { font-size: 2.1rem; }
+  .stage { grid-row: 2; height: 46vh; top: 0; z-index: 1; background: var(--bg); padding: .5rem 0; }
+  .stage svg { max-height: 44vh; }
+  .panel { padding: .55rem .6rem .5rem; border-radius: 10px; gap: .35rem; }
+  .panel-head .title { font-size: .95rem; }
+  .chapter { margin: 3rem 0 1.5rem; }
+  .chapter h2 { font-size: 1.75rem; }
+  /* the sticky stage covers the top of the screen; land steps just below it */
+  .step { min-height: 55vh; padding: 1rem; scroll-margin-top: calc(46vh + 1rem); }
+  /* small and out of the way, so it doesn't cover the prose */
+  .stepnav { bottom: .7rem; right: .7rem; padding: .15rem .25rem; opacity: .82; }
+  .stepnav .chap, .stepnav span[aria-live] { display: none; }
+}
 
 /* ---- SVG primitives ----
    Sizes are in viewBox units. A 720-wide viewBox is drawn ~360px wide on a phone, so
@@ -128,5 +200,6 @@ body {
 .axis-label { fill: var(--muted); font: 400 22px var(--font-sans); }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   * { transition-duration: 0s !important; animation-duration: 0s !important; }
 }

@@ -106,7 +106,21 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
   predict/reveal step pairs with guess buttons, a zig-zag route and a per-column **depth profile**, "Task needs" readout,
   unit "hidden states", answer cards no longer gold, filler tokens defined, "through the text ≠ readable" caveat, drawing
   convention vs measurement kept apart, "Your turn" answers + a transfer question. claims.md rewritten and re-verified.
-  - **Awaiting the learner's feedback on iteration 2b.**
+- **Learner feedback on 2b (2026-09-26):** counted route + depth profile work; the 4-hop step needs a better explanation;
+  predict questions must be genuinely didactic (target a misconception, plausible wrong answer, answerable from the screen).
+  Go-ahead to build several new beats autonomously, polish the visual style, and show the first section as it would look
+  finished.
+- **Iteration 3 (2026-09-26): the whole piece is built** (25 steps, prologue + chapters I–VI):
+  - Visual overhaul (kit-level): Newsreader display serif + JetBrains Mono, hero with a live miniature (standard vs full
+    bandwidth), chapter dividers, framed "instrument" stage with per-step figure titles and badges, progress bar,
+    chapter-aware step nav, small-caps callout labels, guess buttons with right/not-quite feedback.
+  - 4-hop step rewritten as a lookup ladder, capsules labelled on the figure; predict questions rewritten to target
+    misconceptions (width vs depth, salience, penalize-bad-thoughts, unfaithful ⇒ unmonitorable, cards cut diffusion?).
+  - New scenes: METR incident waffle (real counts), Baker/Kuhn/Emmons charts re-plotted from the papers' figures,
+    diffusion as a graph edit (DP on the drawn graph), interpretability "readers" with two wires, Astra evidence board.
+  - claims.md covers every new claim; three research passes and their corrections are in the dossier.
+  - **Not yet done for iteration 3:** a `rigor-reviewer` + `learner-sim` pass on the new chapters (next), motion review of
+    the new scenes, and the learner's feedback.
 - Beats for the full piece are in `script.md` (✅ built, 🔲 planned).
 - **Both research passes are integrated** (depth mechanics per architecture; interpretability without a reliable CoT).
   They're in `references/cot-monitorability/README.md` (sections "What latent reasoning does to interpretability tools" and

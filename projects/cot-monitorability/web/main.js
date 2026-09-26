@@ -10,10 +10,14 @@
 
 import * as d3 from "d3";
 import { mountSteps } from "../../../kit/web/steps.js";
+import { mountHero } from "./hero.js";
+import { drawChart } from "./charts.js";
+import { drawDiffusion } from "./diffusion.js";
+import { drawReaders } from "./readers.js";
 
 const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(`--${n}`).trim();
 const K = Object.fromEntries(
-  ["token", "residual", "overseer", "text", "muted", "faint", "grid", "surface", "raised", "bg"].map((n) => [n, css(n)]),
+  ["token", "residual", "overseer", "danger", "text", "muted", "faint", "grid", "surface", "raised", "bg"].map((n) => [n, css(n)]),
 );
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Phones get fewer columns in a narrower viewBox, so the figure's text scales up instead of shrinking to ~7px.
@@ -142,7 +146,8 @@ function chainStory(g, k, arch, task) {
   };
   for (let n = 1; n <= total; n++) {
     // hopEnd: the last row of a multi-row step, where a capsule groups the step's rows
-    items.push({ type: "node", id: `h${col}_${row}`, count: ++count, hopEnd: task.rows > 1 && n % task.rows === 0 ? task.rows : 0 });
+    const hopEnd = task.rows > 1 && n % task.rows === 0 ? task.rows : 0;
+    items.push({ type: "node", id: `h${col}_${row}`, count: ++count, hopEnd, label: hopEnd ? task.value(n / task.rows) : null });
     if (n === total) break;
     if (row < g.R - 1) { items.push({ type: "edge", id: `v${col}_${row}`, kind: "climb" }); row++; continue; }
     cross(n / task.rows); // R is a multiple of task.rows, so a column always ends on a whole step
@@ -218,8 +223,13 @@ function cardPath(col, last) {
 
 // ---------------- rendering ----------------
 const svg = d3.select("#stage").attr("viewBox", `0 0 ${W} ${H}`);
-const defs = svg.append("defs");
+// Shared filters live in their own always-rendered SVG: Chrome drops elements whose filter sits inside a
+// display:none SVG, and #stage is hidden whenever another scene is showing.
+const defs = d3.select("body").append("svg").attr("width", 0).attr("height", 0).attr("aria-hidden", "true")
+  .style("position", "absolute").append("defs");
 // userSpaceOnUse: a perfectly vertical line has a zero-width bounding box, which would collapse the filter region.
+defs.append("filter").attr("id", "paper").attr("x", "-20%").attr("y", "-20%").attr("width", "140%").attr("height", "160%")
+  .html(`<feDropShadow dx="0" dy="2.5" stdDeviation="2.5" flood-color="#000" flood-opacity="0.45"/>`);
 defs.append("filter").attr("id", "glow").attr("filterUnits", "userSpaceOnUse")
   .attr("x", -20).attr("y", -20).attr("width", W + 40).attr("height", H + 40)
   .html(`<feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>`);
@@ -250,8 +260,40 @@ function stateFor(i) {
 
 let prevKey = null, lastDark = null, token = 0;
 
-function render(i, _prev, { instant = false } = {}) {
-  const s = stateFor(i);
+// Scenes other than the DAG draw into #chart (or show #board); the DAG's own readouts, strip and legend hide.
+const FONT = { mono: css("font-mono"), display: css("font-display") };
+const BADGE = { schematic: ["schematic", "schematic"], replot: ["real", "real · re-plotted, approx."],
+                counts: ["real", "real · counts from the report"], sources: ["real", "real · quotes from sources"] };
+function setScene(scene) {
+  const dag = scene === "dag";
+  d3.selectAll("#stage, .readouts, #chain, .legend").style("display", dag ? null : "none");
+  d3.select("#chart").style("display", ["chart", "diffusion", "readers"].includes(scene) ? null : "none");
+  d3.select("#board").style("display", scene === "board" ? null : "none");
+}
+
+function render(i, _prev, opts = {}) {
+  const s0 = stateFor(i);
+  const scene = s0.scene ?? "dag";
+  const [cls, text] = BADGE[s0.badge ?? "schematic"];
+  const [main, ...rest] = text.split(" · ");
+  d3.select("#fig-badge").attr("class", `badge ${cls}`)
+    .html(`${main}${rest.length ? `<span class="b-detail"> · ${rest.join(" · ")}</span>` : ""}`);
+  d3.select("#fig-num").text(`Fig. ${i + 1}`);
+  d3.select("#fig-title").text(s0.title ?? freeTitle(s0));
+  setScene(scene);
+  if (scene === "dag") return renderDag(i, s0, opts);
+  ++token;                                  // cancel any DAG story still animating
+  svg.selectAll("g.story").interrupt().remove();
+  prevKey = null;                           // coming back to the DAG re-lays it out from scratch
+  const quick = opts.instant || REDUCED;
+  const chart = d3.select("#chart");
+  if (scene === "chart") return drawChart(chart, s0.chart, { pre: s0.pre, K, font: FONT, quick });
+  if (scene === "diffusion") return drawDiffusion(chart, { mode: s0.mode, K, font: FONT, quick });
+  if (scene === "readers") return drawReaders(chart, { latent: s0.latent, K, font: FONT, quick });
+  return Promise.resolve();
+}
+
+function renderDag(i, s, { instant = false } = {}) {
   const task = TASKS[s.task];
   const g = buildGraph(s);
   const dark = longestDarkPath(g);
@@ -295,7 +337,7 @@ function drawGraph(g, s, t) {
   const edgeStyle = (e) => {
     if (e.kind === "dark-link") return { stroke: K.residual, w: 2, o: 0.55, dash: "5 4" };
     if (e.kind === "write" || e.kind === "in") return { stroke: K.token, w: 1.5, o: 0.35, dash: null };
-    if (e.kind === "attn") return { stroke: K.faint, w: 1.2, o: 0.5, dash: null };
+    if (e.kind === "attn") return s.showAttn ? { stroke: K.muted, w: 1.8, o: 1, dash: null } : { stroke: K.faint, w: 1.2, o: 0.5, dash: null };
     return { stroke: K.faint, w: 1.6, o: 0.9, dash: null };
   };
   gEdges.selectAll("path").data(g.edges, (e) => e.id).join(
@@ -323,6 +365,7 @@ function drawGraph(g, s, t) {
     c.append("text").attr("text-anchor", "middle").attr("dy", "0.36em");
     return c;
   });
+  cards.select("rect").attr("filter", (n) => (n.kind === "latent" ? null : "url(#paper)"));
   cards.select("rect").transition(t)
     .attr("fill", (n) => (n.kind === "latent" ? "none" : K.token))
     .attr("stroke", (n) => (n.kind === "latent" ? K.residual : "none"))
@@ -426,6 +469,14 @@ function playStory(story, g, s, task, { delay, quick, my }) {
         .attr("height", yLow - y + 2 * rr + 12).attr("rx", rr + 6)
         .attr("fill", "none").attr("stroke", K.residual).attr("stroke-width", 1.5).attr("opacity", 0.8);
       if (!quick) cap.attr("opacity", 0).transition().duration(260).attr("opacity", 0.8);
+      // what this hop found, written in the gap between its two rows (blue italic: it exists only in the dark)
+      const tag = over.append("g").attr("transform", `translate(${x},${(y + yLow) / 2})`);
+      const txt = tag.append("text").attr("text-anchor", "middle").attr("dy", "0.34em").attr("fill", K.residual)
+        .style("font", `italic 500 ${NARROW ? 21 : 21}px ${css("font-display")}`).text(it.label);
+      const bb = txt.node().getBBox();
+      tag.insert("rect", "text").attr("x", bb.x - 5).attr("y", bb.y - 1).attr("width", bb.width + 10).attr("height", bb.height + 2)
+        .attr("rx", 5).attr("fill", K.bg).attr("stroke", K.residual).attr("stroke-width", 1).attr("stroke-opacity", 0.5);
+      if (!quick) tag.attr("opacity", 0).transition().duration(260).attr("opacity", 1);
     }
     n.append("circle").attr("r", rr + 3).attr("fill", K.residual).attr("opacity", 0.35).attr("filter", "url(#glow)");
     n.append("circle").attr("r", rr).attr("fill", K.residual);
@@ -510,25 +561,45 @@ function stripHops(k, story, quick, hold) {
 }
 
 // ---------------- steps and controls ----------------
+const ARCH_NAME = { standard: "Standard", looped: "Looped", coconut: "Coconut", fullbw: "Full bandwidth" };
+const freeTitle = (s) => `${ARCH_NAME[s.arch]}${s.arch === "looped" ? ` ×${s.loops}` : ""} · ${s.task === "hops" ? "4-hop question" : `${s.k}-step chain`}`;
 const STEPS = [
-  { arch: "standard", k: 0, path: false, profile: false },   // unrolled
-  { arch: "standard", k: 0, profile: false },                // the longest dark path (predict: can a zig-zag beat it?)
-  { arch: "standard", k: 0, zigzag: true },                  // … no: every hop climbs a layer; depth profile
-  { arch: "standard", k: 10, hold: true },                   // a problem that doesn't fit (predict)
-  { arch: "standard", k: 10 },                               // … two are forced
-  { arch: "standard", k: 4, task: "hops", hold: true },      // facts hit the same wall (predict)
-  { arch: "standard", k: 4, task: "hops" },                  // … only 23
-  { arch: "looped", loops: 2, k: 10 },
-  { arch: "coconut", k: 10 },
-  { arch: "fullbw", k: 10 },
+  { title: "An unrolled transformer", arch: "standard", k: 0, path: false, profile: false },
+  { title: "Counting a dark path", arch: "standard", k: 0, profile: false, showAttn: true },   // predict: can a zig-zag beat 4?
+  { title: "Sideways doesn't help", arch: "standard", k: 0, zigzag: true },                  // every hop climbs a layer
+  { title: "A 10-step chain", arch: "standard", k: 10, hold: true },                         // predict
+  { title: "Forced into text", arch: "standard", k: 10 },                                    // two are forced
+  { title: "A 4-hop question", arch: "standard", k: 4, task: "hops", hold: true },           // predict
+  { title: "Whatever lands at the top", arch: "standard", k: 4, task: "hops" },              // only 23
+  { title: "Looped ×2", arch: "looped", loops: 2, k: 10 },
+  { title: "Coconut: two continuous thoughts", arch: "coconut", k: 10 },
+  { title: "Full bandwidth", arch: "fullbw", k: 10 },
   null, // free play
+  // Chapter IV: pressure
+  { title: "Train against the monitor", scene: "chart", chart: "baker", pre: true, badge: "replot" },
+  { title: "Two ways to earn the reward", scene: "chart", chart: "baker", badge: "replot" },
+  { title: "Pressure finds the dark path", scene: "chart", chart: "kuhn", badge: "replot" },
+  { title: "When the hint needs math", scene: "chart", chart: "emmons", pre: true, badge: "replot" },
+  { title: "Unfaithful, but only when it's easy", scene: "chart", chart: "emmons", badge: "replot" },
+  // Chapter V: diffusion
+  { title: "One canvas, many passes", scene: "diffusion", mode: "hold" },
+  { title: "A wire around the cards", scene: "diffusion", mode: "opaque" },
+  { title: "Label the wire readable", scene: "diffusion", mode: "readable" },
+  // Chapter VI: what's left
+  { title: "Readers of hidden states", scene: "readers", latent: false },
+  { title: "When the text goes away", scene: "readers", latent: true },
+  { title: "The evidence board: GPT-6 Astra", scene: "board", badge: "sources" },
+  { title: "Check yourself", arch: "fullbw", k: 10 },
+  { title: "What this doesn't show", arch: "standard", k: 10 },
 ];
+// the prologue (step 0) is the hook; it comes before everything else
+STEPS.unshift({ title: "Why reading thoughts matters", scene: "chart", chart: "incident", badge: "counts" });
 
 const ctl = { arch: "standard", loops: 2, task: "arith", k: { arith: 12, hops: 4 } };
 function controlsState() { return { arch: ctl.arch, loops: ctl.loops, task: ctl.task, k: ctl.k[ctl.task], path: true }; }
 const archButtons = d3.selectAll("#controls [data-arch]"), taskButtons = d3.selectAll("#controls [data-task]");
 const loopsInput = d3.select("#loops"), kInput = d3.select("#k");
-const FREE = STEPS.length - 1;
+const FREE = STEPS.indexOf(null);
 const free = () => window.explainer?.current === FREE;
 
 archButtons.on("click", function () { ctl.arch = this.dataset.arch; if (free()) render(FREE); });
@@ -548,6 +619,9 @@ function syncControls(s, i) {
   d3.select("#k-val").text(s.k);
 }
 
+// the prose quotes the size of the drawn graph, which is smaller on phones
+document.querySelectorAll(".n-hidden").forEach((el) => { el.textContent = T * L; });
+mountHero(document.getElementById("hero"), K, { mono: css("font-mono"), display: css("font-display") });
 mountSteps({ render });
 
 // "Predict first" boxes: clicking a guess records it in the next step's answer and moves on to the reveal.
@@ -556,6 +630,8 @@ document.querySelectorAll(".guess").forEach((box) => box.addEventListener("click
   if (!b) return;
   e.stopPropagation();
   box.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
-  document.getElementById(box.dataset.echo).textContent = `You said: ${b.textContent}. `;
+  const right = b.hasAttribute("data-correct"), echo = document.getElementById(box.dataset.echo);
+  echo.textContent = `You said “${b.textContent}”. ${right ? "Right." : "Not quite."}`;
+  echo.classList.toggle("right", right);
   window.explainer.goto(window.explainer.current + 1, { scroll: true });
 }));

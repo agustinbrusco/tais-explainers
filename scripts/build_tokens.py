@@ -13,9 +13,11 @@ tokens = json.loads((ROOT / "kit/tokens.json").read_text())
 lines = ["/* GENERATED from kit/tokens.json by scripts/build_tokens.py. Do not edit. */", ":root {"]
 lines += [f"  --{k}: {v};" for k, v in tokens["color"].items()]
 lines += [f"  --{k}: {v['hex']};  /* {v['means']} */" for k, v in tokens["semantic"].items()]
-lines += [f'  --font-sans: "{tokens["type"]["sans"]}", system-ui, sans-serif;',
-          f'  --font-mono: "{tokens["type"]["mono"]}", ui-monospace, monospace;']
-lines += [f"  --fs-{k}: {v / 16:.3f}rem;" for k, v in tokens["type"]["scale"].items()]
+ty = tokens["type"]
+lines += [f'  --font-sans: "{ty["sans"]}", system-ui, sans-serif;',
+          f'  --font-mono: "{ty.get("mono_web", ty["mono"])}", "{ty["mono"]}", ui-monospace, monospace;',
+          f'  --font-display: "{ty.get("display", ty["sans"])}", Georgia, serif;']
+lines += [f"  --fs-{k}: {v / 16:.3f}rem;" for k, v in ty["scale"].items()]
 lines += [f"  --t-{k.replace('_', '-')}: {v}s;" for k, v in tokens["motion"].items() if not k.startswith("_")]
 lines += ["}", ""]
 
