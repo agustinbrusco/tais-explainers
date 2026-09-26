@@ -36,11 +36,18 @@ piece will need, each tied to a section, figure or page. Anything unsourced is `
 
 ## 3. Script (`script.md`) and narration
 - Arc: question → why the obvious answer fails → the idea → watching it work → where it breaks → check yourself.
-- Beats table: one new idea per beat, and each beat names the claims it relies on.
+- Beats table: one new idea per beat, and each beat names the claims it relies on. Under each animated beat, add a
+  `reads:` line: what the viewer must understand, in order, with times (`kit/PLAYBOOK.md`, "Timing: write the reads").
 - Narration (`narration.yaml`) is written for the ear: short sentences, no parentheses, no symbols, and numbers
   said the way a person says them. Use `say:` when the spoken form should differ from the caption.
 - Render with `uv run scripts/tts.py ... --preview` and **ask the learner to listen** before timing any visuals
   to it (I can't hear it). Put their pronunciation fixes in `kit/lexicon.yaml`.
+
+## 3b. Technical gate, before building
+Dispatch `technical-reviewer` (Fable; pass `model: "fable"` too) in `script` mode on the brief, `claims.md` and `script.md`. It checks that the
+explanation is technically right before any of it becomes code: the mechanism, which simplifications are load-bearing,
+the argument. Fix its blockers first (a wrong framing costs a paragraph now and a rebuild later), and log its findings
+and their resolution in `review.md`.
 
 ## 4. The hardest visual first
 Identify the one visual that carries the insight, the shot that makes it *click*. Prototype it first, review it
@@ -69,8 +76,8 @@ only from `kit.style.S` (semantic) and `C` (neutral), and no raw hex in scenes.
 **3D:** reach for Three.js first. Blender is justified only for a cinematic shot that nothing else can do. Write down why.
 
 ## 6. Review
-Run the `review` skill: visual self-review, then the `rigor-reviewer` and `learner-sim` agents. Fix, and re-review
-what changed. Record findings and their resolution in `review.md`.
+Run the `review` skill: visual self-review, then the `technical-reviewer` and `rigor-reviewer` (Fable) and `learner-sim`
+(Opus) agents. Fix, and re-review what changed. Record findings and their resolution in `review.md`.
 
 ## 7. Deliver
 Show it to the learner with a report they can act on: what changed, what the reviews found and fixed, what was *not*

@@ -15,7 +15,7 @@ kit/                  shared visual language: tokens.json (source of truth), PLA
                       interp.py (real activations), web/ (base.css, steps.js, states.js, glass.js), starters/
 scripts/              reusable tools (below)
 learner/              profile.md, concept-map.md, journal.md: who we're teaching and what has landed
-.claude/              skills (explainer, research, review) and agents (rigor-reviewer, learner-sim)
+.claude/              skills (explainer, research, review) and agents (technical-reviewer, rigor-reviewer, learner-sim)
 ```
 
 ## Rigor is non-negotiable
@@ -78,7 +78,8 @@ Prefer real activations for anything drawn as a hidden state (see `projects/cot-
 | `danger` / `safe` (red / green) | misaligned or hidden-objective behavior / aligned or caught behavior |
 | `attention` / `mlp` (teal / coral) | component-level only |
 
-Motion: one thing moves at a time. Hold after every reveal (`MOTION.hold_after_reveal`). Text on screen should
+Motion: one thing moves at a time. Hold after every reveal (`MOTION.hold_after_reveal`). Time every animated beat by
+its *reads* (`kit/PLAYBOOK.md`, "Timing"). Text on screen should
 still be readable on a phone (SVG labels ≥ 22 units in a 720-wide viewBox).
 Edit `kit/tokens.json`, then `uv run scripts/build_tokens.py`.
 
@@ -97,11 +98,30 @@ Edit `kit/tokens.json`, then `uv run scripts/build_tokens.py`.
 
 ## Workflow
 
-The `explainer` skill holds the full pipeline (brief → research → claims → script → hardest visual first →
-build → review → deliver). `research` builds `references/<topic>/`. `review` is the self-critique pass and
-dispatches the `rigor-reviewer` and `learner-sim` agents. Gate: the learner agrees on the brief before building.
-**`kit/PLAYBOOK.md`** holds what earlier pieces taught (patterns that landed, pitfalls, checklists, tools): read it
-before designing, and add each piece's lessons to it when the piece is done.
+The `explainer` skill holds the full pipeline (brief → research → claims → script → technical gate → hardest visual
+first → build → review → deliver). `research` builds `references/<topic>/`. `review` is the self-critique pass and
+dispatches the three review agents. Two gates come before anything is built: the learner agrees on the brief, and
+`technical-reviewer` passes the script. **`kit/PLAYBOOK.md`** holds what earlier pieces taught (patterns that landed,
+pitfalls, checklists, tools): read it before designing, and add each piece's lessons to it when the piece is done.
+
+## Who does what (models)
+
+Each job goes to the model suited to it, and the technical content is always checked by a model that didn't write it
+(the learner's request, 2026-09-26).
+
+| who | model | job |
+|---|---|---|
+| main session | Opus (now 5.5) | project management; research, claims and script; code, visuals and the whole experience; weighing the reviews |
+| `technical-reviewer` | Fable (now 5.1) | is the explanation technically right? The script before building, then the built piece |
+| `rigor-reviewer` | Fable | every statement against its cited source |
+| `learner-sim` | Opus | the learner's experience: where they'd get lost, the predicts, engagement |
+
+- Each agent's model is in its frontmatter (`model: fable`, `model: opus`), and the aliases follow the newest model of
+  their family. Pass `model` in the Agent call as well: in this setup, new or edited agent files weren't picked up
+  mid-session (2026-09-26), although the docs say they should be. To check which model an agent runs on, ask it to quote
+  the sentence in its system prompt that names its model.
+- Effort isn't pinned, so agents inherit the session's.
+- A reviewer's finding is a claim: verify it against the source or the code, then fix it or record in `review.md` why not.
 
 ## Tools
 
@@ -114,9 +134,9 @@ uv run scripts/tts.py projects/<slug>/narration.yaml --preview
 uv run manim -ql --media_dir projects/<slug>/build/media projects/<slug>/manim/scenes.py <Scene>
 uv run scripts/contact_sheet.py <video.mp4> [-n 12 | -t 1,2.5 | --burst 4.0]
 node scripts/shoot.mjs projects/<slug>/web/index.html [--mobile] [--steps 0,3]
-node scripts/shoot.mjs <page> --steps 2 --frames 16 --every 330 --element .stage   # motion frames; tile them with:
+node scripts/shoot.mjs <page> --clock --steps 2 --frames 24 --element .stage   # every frame of a transition (24 fps); tile:
 uv run scripts/contact_sheet.py build/shots/step-02-f*.png -o motion.png
-node scripts/shoot.mjs <page> --at 1500,6000 --element .hero        # timed shots after load (animations outside steps)
+node scripts/shoot.mjs <page> --clock --at 1500,6000 --element .hero     # timed shots after load (animations outside steps)
 node scripts/study_page.mjs <url> --out <scratchpad>/study           # study a reference page (shots stay in scratch)
 uv run scripts/storyboard.py <youtube-url> --out <scratchpad>/sb --quad   # a video's storyboard stills, to study craft
 node projects/<slug>/tests/functional.mjs                           # the piece's verified invariants
@@ -127,7 +147,7 @@ python3 -m http.server 8000                                 # from the repo root
 ## Self-verification: I can see stills, but I can't watch or listen
 
 - I review video through contact sheets (`contact_sheet.py`, with `--burst` for a transition's motion) and web
-  pieces through `shoot.mjs` (desktop and `--mobile`; it fails on console errors; `--frames` for animations). **Never say a render
+  pieces through `shoot.mjs` (desktop and `--mobile`; it fails on console errors; `--clock --frames` for animations). **Never say a render
   "looks good" without having viewed it in this session.**
 - I can't hear. Ask the learner to listen to `build/audio/preview.wav` before visuals are timed to it, and
   add every mispronunciation they report to `kit/lexicon.yaml`.

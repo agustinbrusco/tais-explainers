@@ -6,11 +6,16 @@
 //   node scripts/shoot.mjs http://localhost:8000/ --out /tmp/shots
 //   node scripts/shoot.mjs <page> --steps 2 --frames 12 --every 350 --element .stage   # motion: frames while it animates
 //   node scripts/shoot.mjs <page> --at 1500,6000,12000 [--element .hero]             # timed shots after load (heroes, intros)
+//   node scripts/shoot.mjs <page> --clock --steps 3 --frames 24 --element .stage       # every frame of a transition, at 24 fps
 //
 // Motion review: --frames N takes N shots every --every ms *without* waiting for the step's animation, and
 // --element crops to one element. Tile them with `uv run scripts/contact_sheet.py <frames...>`.
 // --reduced emulates prefers-reduced-motion (pages should then jump straight to their final state).
 // --at t1,t2,… skips step navigation and takes shots t ms after load: for animations outside the step engine.
+// --clock makes the times exact. The page's clock (Date, performance.now, timers, requestAnimationFrame) then moves only
+// when this tool advances it, so frame j of --frames is exactly j/--fps s (default 24) after the step starts, and --at
+// shots are exactly t ms of animation after load, however slow the machine is. That covers D3 transitions and canvas
+// loops. CSS transitions still run on real time. Idea from ClaudeAnimationBase's renderer (frames as functions of time).
 //
 // Pages opt in by exposing `window.explainer = { steps: number, goto(i, {scroll}): Promise|void }`
 // (see kit/starters/web). Without it, one full-page shot is taken.
@@ -23,7 +28,7 @@ import { readFile, mkdir } from "node:fs/promises";
 import { existsSync, statSync } from "node:fs";
 import path from "node:path";
 
-const VALUE_FLAGS = new Set(["steps", "out", "width", "height", "settle", "frames", "every", "element", "at"]);
+const VALUE_FLAGS = new Set(["steps", "out", "width", "height", "settle", "frames", "every", "element", "at", "fps"]);
 const args = process.argv.slice(2);
 const opts = {};
 const positional = [];
@@ -71,17 +76,24 @@ const page = await browser.newPage({ viewport: { width, height }, deviceScaleFac
 const errors = [];
 page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
 page.on("pageerror", (e) => errors.push(String(e)));
+const clock = Boolean(opts.clock);
+if (clock) { await page.clock.install(); await page.clock.pauseAt(Date.now() + 1000); }
+// advance the page's time by ms: exactly under --clock, in real time otherwise
+const advance = (ms) => (clock ? page.clock.runFor(Math.round(ms)) : page.waitForTimeout(ms));
 await page.goto(url, { waitUntil: "networkidle" });
 await page.evaluate(() => document.fonts?.ready);
+if (clock && !flag("at")) await advance(1000); // let start-up timers and frames run
 
 const nSteps = await page.evaluate(() => window.explainer?.steps ?? 0);
 const tag = mobile ? "mobile" : `${width}`;
 const shots = [];
 const t0load = Date.now();
 if (flag("at")) {
+  let elapsed = 0;
   for (const t of flag("at").split(",").map(Number)) {
+    if (clock) { await advance(t - elapsed); elapsed = t; }
     const wait = t0load + t - Date.now();
-    if (wait > 0) await page.waitForTimeout(wait);
+    if (!clock && wait > 0) await page.waitForTimeout(wait);
     const f = path.join(outDir, `at-${String(t).padStart(5, "0")}ms-${tag}.png`);
     await (flag("element") ? page.locator(flag("element")).first().screenshot({ path: f }) : page.screenshot({ path: f }));
     shots.push(f);
@@ -92,26 +104,34 @@ if (flag("at")) {
   shots.push(f);
 } else {
   const want = flag("steps") ? flag("steps").split(",").map(Number) : [...Array(nSteps).keys()];
-  const frames = Number(flag("frames", 0)), every = Number(flag("every", 300));
+  const frames = Number(flag("frames", 0)), every = Number(flag("every", clock ? 1000 / Number(flag("fps", 24)) : 300));
   const shoot = (f) => (flag("element") ? page.locator(flag("element")).first().screenshot({ path: f }) : page.screenshot({ path: f }));
+  // goto(i) may return a promise that settles when its transitions end: await it on real time, but not under --clock,
+  // where that would wait on a paused clock. `settle` false starts the step without waiting (to film it).
+  const goto = (i, settle = true) => page.evaluate(([i, wait]) => {
+    const p = window.explainer.goto(i, { scroll: "instant" });
+    return wait ? p : undefined;
+  }, [i, settle && !clock]);
   for (const i of want) {
     const stem = path.join(outDir, `step-${String(i).padStart(2, "0")}`);
     if (frames) {
       // settle on the previous step first, so the frames show the transition into step i
-      if (i > 0) { await page.evaluate((i) => window.explainer.goto(i - 1, { scroll: "instant" }), i); await page.waitForTimeout(400); }
-      await page.evaluate((i) => { window.explainer.goto(i, { scroll: "instant" }); }, i);
+      if (i > 0) { await goto(i - 1); await advance(clock ? 2000 : 400); }
+      await goto(i, false);
       const t0 = Date.now();
       for (let j = 0; j < frames; j++) {
+        if (clock && j > 0) await advance(every);
         const wait = t0 + j * every - Date.now();
-        if (wait > 0) await page.waitForTimeout(wait);
-        const f = `${stem}-f${String(j).padStart(2, "0")}-${String(Date.now() - t0).padStart(5, "0")}ms-${tag}.png`;
+        if (!clock && wait > 0) await page.waitForTimeout(wait);
+        const ms = clock ? Math.round(j * every) : Date.now() - t0;
+        const f = `${stem}-f${String(j).padStart(2, "0")}-${String(ms).padStart(5, "0")}ms-${tag}.png`;
         await shoot(f);
         shots.push(f);
       }
       continue;
     }
-    await page.evaluate((i) => window.explainer.goto(i, { scroll: "instant" }), i);
-    await page.waitForTimeout(Number(flag("settle", 900))); // let transitions finish
+    await goto(i);
+    await advance(Number(flag("settle", clock ? 2000 : 900))); // let transitions finish
     const f = `${stem}-${tag}.png`;
     await shoot(f);
     shots.push(f);

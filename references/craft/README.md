@@ -23,6 +23,28 @@ on ResNets and the residual stream is this series' residual-stream prerequisite,
   with highlighted tokens.
 - **Palette:** black, viridis for magnitudes, one warm accent (gold outlines and arrows on operators like "Unembed").
 
+## ClaudeAnimationBase (John Heibel, 2026)
+https://github.com/JohnHeibel/ClaudeAnimationBase (MIT) · read 2026-09-26 at commit 0ac8bf2: the code and the guide, not
+renders. A kit for hand-painted character cartoons in p5.js and p5.brush, made with Claude Opus 5.5 and based on the
+music video "I'm Upping My P(doom)". The learner pointed us to it.
+- **Timing is where generated animation fails.** Rule 4 of its guide, "Timing: model the viewer": list each shot's
+  *reads* (what the viewer must understand, in order, with start and end times); one read at a time; fast actions, slow
+  meanings; lead the eye; let the reads set the length. Its storyboard doubles as a timing sheet. → *Borrowed as*
+  "Timing: write the reads" in `kit/PLAYBOOK.md`, and a `reads:` line for animated beats in `script.md`.
+- **Frames are pure functions of time.** Every shot is `fn(t)`, so its renderer can draw any instant exactly: contact
+  sheets at chosen times, a strip of *every* frame of a moment, full-resolution crops, crops that follow a world point
+  through the camera, and MP4 through ffmpeg. → *Borrowed as* `shoot.mjs --clock`, which gets the same exactness for
+  our D3 transitions and canvas hero by controlling the page's clock (Playwright) instead of rewriting them.
+- **A review budget:** at least one sheet per shot, a strip for every key motion and transition, and a crop for every
+  face that carries the story. "Count the frames each read gets (24 frames = 1 s)."
+- **The classic animation principles, restated for code:** anticipation, slow in and slow out, arcs, overlapping action,
+  and "avoid twinning" (code copies values, so everything moves at once and in sync).
+- **An observation in its README** (theirs, not tested here): the reasoning level tracks how "extravagant" and
+  detail-oriented the scenes get. Its test videos were made with Opus 5.5 at xhigh.
+- **What doesn't transfer:** the "no text" rule (explainers need labels and numbers), boiling hand-painted linework
+  (data figures need precision and honest geometry, and its README says the watercolour fills render in seconds per
+  frame without a GPU), and the mascot.
+
 ## Goodfire, "A Geometric Calculator Inside a Neural Network" (2026-05-14)
 https://www.goodfire.com/research/a-geometric-calculator · examined 2026-09-25 via per-figure screenshots
 - **Real data under idealized geometry.** Actual activation point clouds, projected onto a circle plane and colored by

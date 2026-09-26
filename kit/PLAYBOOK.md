@@ -14,7 +14,7 @@ lessons and without repeating what's already here.
 3. **Big autonomous passes between feedback rounds.** Each pass followed the same order:
    - build;
    - take stills (desktop, phone and reduced motion), motion frames, timed shots, and run the functional tests;
-   - run both review agents in parallel;
+   - run the review agents in parallel;
    - fix;
    - commit;
    - report.
@@ -32,6 +32,10 @@ lessons and without repeating what's already here.
    - What was *not* done.
    - How to open the piece.
    - Two or three specific questions (e.g. "do the real squares help after step 2, or feel decorative?").
+6. **Since 2026-09-26, reviews are split by model** (the learner's request; see "Who does what" in `CLAUDE.md`). Fable
+   checks the technical content, independently of the author: `technical-reviewer` gates the script before building and
+   reviews the built piece, and `rigor-reviewer` audits claims against sources. `learner-sim` stays on Opus. Not yet
+   exercised on a whole piece: record here what the split catches that one model missed.
 
 ## 2. Visual grammar that landed
 
@@ -98,6 +102,24 @@ Use one camera move, motivated by the story: the pull-back from the one real sta
 - The content must already be there when the shot opens. Don't fade it in during the move.
 - Skip the move if its target isn't drawn in that layout (phones draw fewer columns).
 - Reduced-motion screenshots hide camera bugs. Check motion frames.
+
+### Timing: write the reads
+Adapted from the animation guide in ClaudeAnimationBase (see `references/craft/`), which calls timing the rule models get
+wrong most often. We know what happens because we wrote the code. The learner sees it once, at full speed, for the
+first time.
+- **A read** is one thing the viewer has to understand: the route reaches a square, the counter says 2, the badge says
+  "reused". Each needs time for the eye to find it, time to understand it, and a beat to register before the next starts.
+- **Write them down** for every animated step or video beat, in order, with times: a `reads:` line under the beat in
+  `script.md`. If they don't fit, lengthen the beat or cut a read. Don't squeeze them.
+- **One read at a time, and the cause before its effect.** When two things change at once, one of them is missed. A
+  count lands with or just after what it counts. (In "Sideways doesn't help" the counter ticks one to two frames,
+  40–85 ms, before its square lights up: harmless at that size, but it's the direction to watch.)
+- **Fast actions, slow meanings.** A move can be quick if the eye was led to it. What it means gets the hold.
+- **Lead the eye** before an important read (the camera moves, the target lights up first), and give it time to arrive.
+- **Code twins by default:** everything moves at once, on one curve. Ease every move, and stagger related changes in the
+  order that carries meaning (a route lights up in causal order).
+- **Check on exact frames:** `shoot.mjs --clock --frames 24 --element .stage` films a transition at 24 fps, the same
+  frames on every run. Count the frames each read gets.
 
 ### Hero
 The whole argument in one cinematic shot, before any words:
@@ -176,11 +198,17 @@ The whole argument in one cinematic shot, before any words:
 - **TransformerLens 4:** `HookedTransformer` is gone. Use `TransformerBridge.boot_tl_legacy` for legacy repos (gelu-4l)
   and `boot_transformers` for Hugging Face models (`kit/interp.py`).
 - **Editing prose with scripts:** match whitespace-tolerantly. Hand-wrapped HTML rarely matches the exact line breaks.
+- **Filming motion:** frames taken on wall-clock time vary from run to run and skip moments. Use `--clock`, which
+  controls the page's clock (D3 transitions, canvas loops; CSS transitions still run on real time). Under it, never await
+  a promise that settles when a transition ends, because it waits on a paused clock.
+- **Headless WebGL, for a future Three.js piece (untested here):** without a GPU, headless Chrome may give no WebGL
+  context. ClaudeAnimationBase's `render.mjs` passes `--use-angle=swiftshader --enable-unsafe-swiftshader` for software
+  WebGL, and `--use-angle=vulkan` or `gl-egl` on headless NVIDIA machines.
 
 ## 6. Tools (what each is for)
 | tool | use it to |
 |---|---|
-| `scripts/shoot.mjs` | take stills per step (`--mobile`, `--reduced`), motion frames (`--frames --every --element`), and timed shots after load (`--at`, for heroes) |
+| `scripts/shoot.mjs` | take stills per step (`--mobile`, `--reduced`), motion frames (`--frames --element`; with `--clock`, exact frames at `--fps`, default 24), and timed shots after load (`--at`, for heroes) |
 | `scripts/contact_sheet.py <images…>` | tile shots or frames into one image to read at a glance |
 | `scripts/study_page.mjs <url> --out <scratch>` | study a reference page: viewport shots, figure crops, computed typography |
 | `scripts/storyboard.py <video> --out <scratch> --quad` | see a YouTube video's composition through its storyboard stills (Claude can't watch video) |
@@ -195,15 +223,21 @@ Reference-study shots stay in the scratchpad. They are the authors' work. Write 
 
 ## 7. Checklists
 
+**Before building**
+- [ ] The learner agreed on the brief.
+- [ ] `technical-reviewer` passed the script (`script` mode), and its blockers are fixed.
+- [ ] Every animated beat in `script.md` has its reads.
+
 **Before showing the learner**
 - [ ] Stills of every step on desktop and phone (`--reduced`), all opened and read; no console errors.
-- [ ] Motion frames for each animated beat and timed shots of the hero, checked at 900–1920 px and on a phone.
+- [ ] Exact motion frames (`--clock`) for each animated beat, with the frames per read counted, and timed shots of the
+      hero, checked at 900–1920 px and on a phone.
 - [ ] Functional tests pass.
 - [ ] Every number on screen traced to `claims.md`, including numbers computed from our own data.
 - [ ] Badges true, including where data is real vs reused. Simplifications named where they happen.
 - [ ] Every predict: not guessable from the figure or wording, fair for all cases, options balanced.
-- [ ] `rigor-reviewer` and `learner-sim` run with a change list and screenshot paths, and their findings resolved or
-      listed as not done in `review.md`.
+- [ ] `technical-reviewer` and `rigor-reviewer` (Fable) and `learner-sim` (Opus) run with a change list and screenshot
+      paths, and their findings resolved or listed as not done in `review.md`.
 
 **Before committing**
 - [ ] `claims.md`, `script.md` (beats, visual grammar), `review.md` and the README handoff updated.

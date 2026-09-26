@@ -165,7 +165,8 @@ badges, dark-past counts, guess flow, free-play answers)
   it on separate layers above the base graph (`drawGraph`), so the structure never carries task state.
 - `STEPS[i]` gives the state for each step, and the last step reads the controls.
 - An architecture is only a change in `buildGraph`, so new architectures (e.g. diffusion) belong there.
-- Motion review: `node scripts/shoot.mjs projects/cot-monitorability/web/index.html --steps 2 --frames 16 --every 330 --element .stage`.
+- Motion review: `node scripts/shoot.mjs projects/cot-monitorability/web/index.html --clock --steps 2 --frames 24 --element .stage`
+  (every frame of the transition at 24 fps, identical on every run).
 - Iteration 4 modules: `tiles.js` (loads the real states, draws them as 8×8 squares; `stateAt(col, row)` / `poolState`),
   `anatomy.js` (step 2), `hero.js` (canvas scene with a perspective camera; pauses off screen). In `main.js`, `showPast`
   computes a square's dark past; `STEPS` flags: `zoomFrom`, `explainWrite`, `fanFocus`, `autoPast`. Paths that cross the
@@ -202,7 +203,8 @@ badges, dark-past counts, guess flow, free-play answers)
    Original list: 8 (two ways to earn the reward, plus the optional RL-math aside),
    9 (faithfulness ≠ monitorability), 10 (diffusion as a graph edit), 11 (what latent reasoning does to interpretability:
    probes need labels, often from text), 12 (the Astra evidence board), 0 (the Hugging Face hook), 13 (check yourself).
-5. Run the `review` skill: shots, then the `rigor-reviewer` and `learner-sim` agents; log in `review.md`.
+5. Run the `review` skill: shots, then the `technical-reviewer` and `rigor-reviewer` (Fable) and `learner-sim` (Opus)
+   agents; log in `review.md`.
 6. Deliver: the learner uses it, answers the check-yourself questions, and it all gets logged in `learner/journal.md`.
    Then decide on the video.
 
