@@ -433,3 +433,31 @@
   accessed: '2026-09-25'
   read: false
   notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: web:redwood-advice-for-making-robust-to-training
+  title: Advice for making robust-to-training model organisms
+  authors:
+  - Redwood Research
+  date: '2026-05-28'
+  url: https://www.redwoodresearch.org/blog/advice-for-making-robust-to-training
+  accessed: '2026-09-25'
+  read: false
+  notes: Located via the Redwood blog index on 2026-09-25 (title checked against the index); not yet read.
+- id: web:redwood-incriminating-misaligned-ai-models
+  title: Incriminating misaligned AI models via distillation
+  authors:
+  - Redwood Research
+  date: '2026-05-18'
+  url: https://www.redwoodresearch.org/blog/incriminating-misaligned-ai-models
+  accessed: '2026-09-25'
+  read: false
+  notes: Located via the Redwood blog index on 2026-09-25 (title checked against the index); not yet read.
+- id: web:redwood-the-distillation-double-bind-distilling
+  title: 'The distillation double bind: Distilling misaligned models either transfers misalignment or
+    it doesn''t'
+  authors:
+  - Redwood Research
+  date: '2026-06-18'
+  url: https://www.redwoodresearch.org/blog/the-distillation-double-bind-distilling
+  accessed: '2026-09-25'
+  read: false
+  notes: Located via the Redwood blog index on 2026-09-25 (title checked against the index); not yet read.

@@ -21,16 +21,21 @@ that?" without searching again.
 ## Procedure
 1. **Pin down the term.** New or ambiguous terms (e.g. anything coined in 2026) might mean several things. Search
    broadly, list the candidate meanings with evidence, and ask the learner if it's still ambiguous.
-2. **Primary sources first:** the paper or post that introduced the idea, then the strongest follow-ups and
+2. **Check the watch list first.** Go through the "Sources to watch" in `references/README.md` for posts newer than the
+   dossier's `Last reviewed` date. Search engines lag, and in this field the last few weeks often matter most.
+3. **Primary sources first:** the paper or post that introduced the idea, then the strongest follow-ups and
    critiques. Secondary explainers are only for finding the primaries.
-3. **Actually read.** Open the source (the `.txt` for papers). Quote the key claim, with its location. Mark each
+4. **Actually read.** Open the source (the `.txt` for papers). Quote the key claim, with its location. Mark each
    source `read: true` only after reading the relevant sections, not just the abstract.
-4. **Hunt for the caveats**: limitations sections, appendices, the results the authors say are weak, and replications
+5. **Hunt for the caveats**: limitations sections, appendices, the results the authors say are weak, and replications
    and failed replications.
-5. **Date everything.** This field moves quickly, and "as of" matters.
-6. **Update `references/README.md`**, the topic index.
+6. **Date everything.** This field moves quickly, and "as of" matters.
+7. **Update `references/README.md`**, the topic index.
 
 ## Rules
 - Never write a title, author list, date, number or URL from memory. Copy it from the source.
 - If a source can't be accessed, say so in the dossier instead of paraphrasing what it "probably" says.
 - Keep "the paper shows", "the authors argue", and "open question" visibly separate.
+- **Calibrate in both directions.** Don't file a worrying finding under "misconceptions" because an older source was
+  reassuring, and don't inflate a rumor into a fact. Label every claim as confirmed, reported, rumored, or contested, and
+  say who is making it.

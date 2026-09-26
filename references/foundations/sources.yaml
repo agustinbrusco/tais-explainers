@@ -162,3 +162,49 @@
   accessed: '2026-09-25'
   read: false
   notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: arxiv:2605.01148
+  title: 'Arithmetic in the Wild: Llama uses Base-10 Addition to Reason About Cyclic Concepts'
+  authors:
+  - Sheridan Feucht
+  - Tal Haklay
+  - Usha Bhalla
+  - Daniel Wurgaft
+  - Can Rager
+  - Raphaël Sarfati
+  - Jack Merullo
+  - Thomas McGrath
+  - Owen Lewis
+  - Ekdeep Singh Lubana
+  - Thomas Fel
+  - Atticus Geiger
+  date: '2026-05-01'
+  url: https://arxiv.org/abs/2605.01148
+  abstract: Does structure in representations imply structure in computation? We study how Llama-3.1-8B
+    reasons over cyclic concepts (e.g., "what month is six months after August?"). Even though Llama-3.1-8B's
+    representations for these concepts are circularly structured, we find that instead of directly computing
+    modular addition in the period of the cyclic concept (e.g., 12 for months), the model re-uses a generic
+    addition mechanism across tasks that operates independently of concept-specific geometry. First, it
+    computes the sum of its two inputs using base-10 addition (six + August=14). Then, it maps this sum
+    back to cyclic concept space (14->February). We show that Llama-3.1-8B uses task-agnostic Fourier
+    features to compute these sums--in fact, these features have periods that respect standard base-10
+    addition, e.g., 2, 5, and 10, rather than the cyclic concept period (e.g., 12 for months). Furthermore,
+    we identify a sparse set of 28 MLP neurons re-used across all tasks (approximately 0.2% of the MLP
+    at layer 18) that can be partitioned into disjoint clusters, each computing the sum for a Fourier
+    feature with a different period. Our work highlights how an interplay between causal abstraction and
+    feature geometry can deepen our mechanistic understanding of LMs.
+  read: false
+  notes: ''
+- id: web:goodfire-geometric-calculator
+  title: A Geometric Calculator Inside a Neural Network
+  authors:
+  - Sheridan Feucht
+  - Ekdeep Singh Lubana
+  - Tal Haklay
+  - Thomas Fel
+  - et al.
+  date: '2026-05-14'
+  url: https://www.goodfire.com/research/a-geometric-calculator
+  accessed: '2026-09-25'
+  read: partial
+  notes: 'Blog version of arxiv:2605.01148 (''Arithmetic in the Wild''). Llama 3.1 8B addition module
+    in layer 18 over circular (Fourier) number representations. Also a craft exemplar: see references/craft/.'

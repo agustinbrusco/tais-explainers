@@ -20,7 +20,17 @@
       "WebFetch(domain:www.lesswrong.com)",
       "WebFetch(domain:openai.com)",
       "WebFetch(domain:deepmind.google)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.redwoodresearch.org)",
+      "WebFetch(domain:blog.redwoodresearch.org)",
+      "WebFetch(domain:www.goodfire.com)",
+      "WebFetch(domain:metr.org)",
+      "WebFetch(domain:deploymentsafety.openai.com)",
+      "WebFetch(domain:alignment.openai.com)",
+      "WebFetch(domain:institute.deepmind.com)",
+      "WebFetch(domain:www.apolloresearch.ai)",
+      "WebFetch(domain:www.neuronpedia.org)",
+      "WebFetch(domain:huggingface.co)"
     ]
   }
 }

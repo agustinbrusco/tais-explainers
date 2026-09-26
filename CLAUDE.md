@@ -29,7 +29,10 @@ learner/              profile.md, concept-map.md, journal.md: who we're teaching
    `speculative`. Prefer real data when it's feasible on CPU (see `interp` extra).
 5. **Name simplifications where they happen,** with a caveat callout on screen, not in a footnote.
 6. **Every piece ends with its limits:** what it doesn't show, what's contested, what's unknown.
-7. **Honest geometry.** 2D/3D pictures of 4096-d spaces mislead in known ways (near-orthogonality,
+7. **Calibrate in both directions.** Don't soften worrying evidence into a "misconception" (e.g. "no lab deploys
+   latent reasoning" was already outdated when written), and don't upgrade rumors to facts. Label claims as confirmed,
+   reported, rumored, or contested, and check the "Sources to watch" in `references/README.md` for recent work.
+8. **Honest geometry.** 2D/3D pictures of 4096-d spaces mislead in known ways (near-orthogonality,
    superposition, projections that make distinct things look close). Say so when the picture depends on it.
 
 ## Pedagogy
