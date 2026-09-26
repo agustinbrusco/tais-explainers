@@ -57,6 +57,11 @@ learner/              profile.md, concept-map.md, journal.md: who we're teaching
 
 Colors carry meaning. Use the same concept → same color everywhere, and **at most 4 semantic colors per frame**.
 
+Web pieces use two materials: **paper** (the page, prose, readable text, charts of published data) and **glass** (dark windows
+onto a model's interior). Where a figure crosses from one to the other is the readability boundary; draw it on purpose.
+Each semantic color has a glass value (`--residual`) and an on-paper `-ink` value (`--residual-ink`) that keeps contrast.
+Prefer real activations for anything drawn as a hidden state (see `projects/cot-monitorability/data/export_tiles.py`).
+
 | token | means |
 |---|---|
 | `token` (paper) | visible text: prompts, outputs, chain-of-thought |

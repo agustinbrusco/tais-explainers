@@ -96,3 +96,53 @@ Also fixed while testing: clicking a control inside a step re-triggered the step
 - Mobile: charts stacked and diffusion in a narrower viewBox (text ≥ ~11px); mobile panel height bounded.
 
 Not done: small-multiples view; interactive toggles on the diffusion and readers figures (the learner-sim wanted to poke them); hero dot numbers are small at hero size (decorative); gold is still used for both "overseer/forced" and "readable S" (defensible: both mean "readable by an overseer").
+
+## 2026-09-26: iteration 4 (visual redesign, "paper and glass") — `rigor-reviewer` + `learner-sim`, and fixes (4b)
+
+**What changed.** A kit-level art direction (paper page, glass windows onto the model, `-ink` variants of every semantic
+color); every hidden state drawn as a square of real gelu-4l numbers (`data/export_tiles.py`); a new step 2 ("A word and
+512 numbers") and a camera pull-back from that state into the grid; attention from every earlier position; a hover that
+lights up a state's dark past; a perspective hero (canvas); diffusion as glass passes with paper strips between them;
+readers as instruments with two wires; charts restyled on paper. Craft notes from actually looking at Goodfire's
+"Interpreting LM Parameters" (per-figure screenshots) and Welch Labs (YouTube storyboard stills) are in `references/craft/`.
+
+**Rigor-reviewer** (1 blocker, 3 should, 8 nits; every new number verified). Fixed:
+- #1 (blocker) The "real states" framing overreached: the squares are the real states under them only in the standard
+  arithmetic figures. Step 2's caveat now says exactly where they're real and lists every reuse case; badges read "real
+  states: gelu-4l" there and "reused gelu-4l states" elsewhere (4-hop included); the hero carries its own badge line;
+  C-VIZ-TILES rewritten to quote the screen.
+- #2 The J-lens reads what is *driving* the next token, which can include a concept the model never says (Wang & Reid's
+  showcase), not "what is about to become a token". Prose, figure label ("sees what drives the next token") and glyph fixed;
+  the looped-model workspace result added for balance; the dossier's "poised to verbalize" re-attributed to the original
+  J-lens paper.
+- #3 Coconut's depth profile: with global attention 12 holds at every later column ("a few columns" was stale).
+- #4 Phones don't draw the anatomy's column, so the camera move is skipped there.
+- Nits: hero act 2 prints plain "…" cards (no invented narration); "where a monitor can see it" (no readability
+  guarantee); per-layer color scale stated; key ±2.69; badge layer read from the data and kept on phones; "entries in its
+  vocabulary"; hover disabled on the predict step and counts labelled "drawn states"; diffusion attention all-to-all within
+  a pass; phone reader wires rerouted outside the cards.
+
+**Learner-sim** (verdict: "the first version where I get it before reading a word"; the 4-hop gap is closed; the hover is
+"the best moment in Chapter I"). Fixed:
+- The sampled-token edge ("the sampled token becomes the next column's input") is drawn, labelled and in the legend on its
+  first appearance.
+- Predicts: step 4 now asks for the *longest possible* route (not the length of a drawn one); 4-hop options all carry a
+  rationale ("23: a day of the month"); Baker is a 2×2; Emmons asks what happens to *silent* hint-following (fair for both
+  models).
+- One state's attention fan is shown bright in step 4, so every line visibly ends one layer up (curves now leave and arrive
+  vertically).
+- The dark past is shown automatically once the route has played in "Sideways doesn't help" (24 states, route 4) and "Full
+  bandwidth" (31 states, route 32), so the contrast doesn't hide behind a hover.
+- Hero: a visible curved wire behind the glass, upright words on the paper, a monitor's eye, "longest dark path" (one name).
+- Wording: "obfuscation" defined; lookup ratios stated (half, about two-thirds); "hold that thought" on filler tokens;
+  Baker "about half of its samples (49% …, above the 43% …)"; "see the limits in the last Emmons step"; "computed ratio";
+  decoded vs verified (Dilgren) explained; SAE defined; board glossary (steganography, sandbagging, honeypot, time
+  horizon); garden-path sentence rewritten; Astra glossed in the prologue; "shared message board" in the figure;
+  "In the figure" (not "on the right", which is wrong on phones); diffusion "(drawn 3 layers deep and 4 positions wide)".
+- Charts: the thin "cheats, caught 1%" band labelled; the no-hint bar in the Emmons legend. Phones: the 4-hop strip uses
+  short relation names so it fits.
+- Performance: the hero pauses when off screen or in a hidden tab.
+
+Not done: an interactive "build your own route" for the step-4 predict; a stack-height knob for the 4-hop question ("with 6
+layers, which name surfaces?"); badges and glow on the tiny squares of the 8-row looped figure; the evidence board is
+still dense.

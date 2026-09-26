@@ -1,134 +1,321 @@
-// The hero figure: the whole argument in one loop, before any words.
-// Left, a standard transformer: a pulse climbs each column and is forced into a gold card at the top, and its count
-// restarts. Right, full bandwidth: the pulse crosses to the next column through a hidden link and the count keeps growing.
-// The two run one after the other (one thing moves at a time). Under reduced motion both are drawn finished.
+// The hero: the whole argument in one shot, before any words.
+//
+// A wall of hidden states (columns = token positions, rows = layers; each square a real gelu-4l state) seen in
+// perspective, receding into the dark. In front of it, on the floor, the transcript: a strip of paper.
+// Act 1, a standard transformer, runs the 10-step chain: a pulse climbs one column, must leave the glass, lands on the
+// paper (the monitor's highlighter marks the word) and climbs again from there, so the count restarts at every word.
+// Act 2, full bandwidth: a wire carries the top state straight into the next column's first layer; words are still
+// printed, but the pulse never needs them, and the count keeps growing.
+// Canvas 2D with a small perspective camera; each square is drawn with the affine map of its projected corners.
+// Reduced motion: one still frame of act 1 and a caption.
 
-import * as d3 from "d3";
+import { stateAt, rampCSS } from "./tiles.js";
 
-const COLS = 5, ROWS = 4;
-const W = 640, H = 400;
-const G = { colW: 50, rowGap: 50, top: 104, cardH: 30 };
-const PANELS = [{ x0: 38, mode: "standard", label: "standard" }, { x0: 350, mode: "fullbw", label: "full bandwidth" }];
-
-export function mountHero(el, K, font) {
-  const svg = d3.select(el).attr("viewBox", `0 0 ${W} ${H}`);
-  svg.append("defs").append("filter").attr("id", "hero-glow").attr("filterUnits", "userSpaceOnUse")
-    .attr("x", -20).attr("y", -20).attr("width", W + 40).attr("height", H + 40)
-    .html(`<feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>`);
-  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const panels = PANELS.map((p) => drawPanel(svg, p, K, font));
-
-  if (reduced) { panels.forEach((p) => p.finish()); return; }
-  let alive = true;
-  const loop = async () => {
-    while (alive) {
-      panels.forEach((p) => p.reset());
-      await wait(700);
-      for (const p of panels) { await p.play(); await wait(900); }
-      await wait(2200);
-    }
-  };
-  // start once visible; stop when the page is hidden to save battery
-  new IntersectionObserver(([e], io) => { if (e.isIntersecting) { io.disconnect(); loop(); } }).observe(el);
-  document.addEventListener("visibilitychange", () => { if (document.hidden) alive = false; });
-}
-
+const NARROW = () => matchMedia("(max-width: 860px)").matches;
+const LAYERS = 4, DX = 1.0, DY = 0.92, TILE = 0.6, BASE = 0.78;   // world units
+const CARD_Z = -0.72;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-function drawPanel(svg, { x0, mode, label }, K, font) {
-  const g = svg.append("g");
-  const cx = (c) => x0 + G.colW * c + G.colW / 2;
-  const cy = (r) => G.top + (ROWS - 1 - r) * G.rowGap;
-  const cardY = cy(0) + 52;
-  const top = cy(ROWS - 1) - 14;
+export function mountHero(el, { K, font }) {
+  if (!el) return;
+  const canvas = document.createElement("canvas");
+  el.appendChild(canvas);
+  const ctx = canvas.getContext("2d");
+  const caption = el.parentElement.querySelector(".scene-caption");
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // structure
-  for (let c = 0; c < COLS; c++) {
-    g.append("line").attr("x1", cx(c)).attr("x2", cx(c)).attr("y1", cy(0)).attr("y2", cy(ROWS - 1)).attr("stroke", K.faint).attr("stroke-width", 1.4);
-    if (c > 0) for (let r = 0; r < ROWS - 1; r++)
-      g.append("line").attr("x1", cx(c - 1)).attr("y1", cy(r)).attr("x2", cx(c)).attr("y2", cy(r + 1)).attr("stroke", K.faint).attr("stroke-width", 1).attr("opacity", 0.5);
-    if (mode === "fullbw" && c < COLS - 1)
-      g.append("path").attr("d", fbPath(c)).attr("fill", "none").attr("stroke", K.residual).attr("stroke-width", 1.6).attr("stroke-dasharray", "4 4").attr("opacity", 0.5);
-    for (let r = 0; r < ROWS; r++) g.append("circle").attr("cx", cx(c)).attr("cy", cy(r)).attr("r", 6).attr("fill", K.residual).attr("opacity", 0.4);
-    g.append("rect").attr("x", cx(c) - 20).attr("y", cardY - G.cardH / 2).attr("width", 40).attr("height", G.cardH).attr("rx", 6).attr("fill", K.token);
+  // per-square textures (8x8 cells of a real state), drawn once
+  const tex = new Map();
+  const texture = (c, r) => {
+    const k = `${c}_${r}`;
+    if (tex.has(k)) return tex.get(k);
+    const v = stateAt(c, r), cv = document.createElement("canvas");
+    cv.width = cv.height = 64;
+    const g = cv.getContext("2d");
+    g.fillStyle = "#02050b"; g.fillRect(0, 0, 64, 64);
+    v.forEach((x, i) => { g.fillStyle = rampCSS(x / 127); g.fillRect((i % 8) * 8 + 0.6, Math.floor(i / 8) * 8 + 0.6, 6.8, 6.8); });
+    tex.set(k, cv);
+    return cv;
+  };
+
+  let W = 0, H = 0, dpr = 1, cam = null, N = 10, narrow = false;
+  function layout() {
+    const r = el.getBoundingClientRect();
+    dpr = Math.min(2, devicePixelRatio || 1);
+    W = r.width; H = r.height;
+    canvas.width = Math.max(1, Math.round(W * dpr)); canvas.height = Math.max(1, Math.round(H * dpr));
+    narrow = NARROW();
+    N = narrow ? 7 : 10;
+    // the camera stands just before the question, turned right: the transcript runs away from it, deeper into the dark
+    cam = narrow
+      ? { x: -2.2, y: 2.9, z: -4.6, yaw: 0.62, pitch: 0.2, f: H * 0.78, cx: W * 0.36, cy: H * 0.4 }
+      : { x: -1.9, y: 2.75, z: -4.3, yaw: 0.56, pitch: 0.17, f: H * (W < 1100 ? 0.72 : 0.8), cx: W * (W < 1100 ? 0.7 : 0.6), cy: H * 0.45 };
   }
-  g.append("text").attr("x", cx(0) - 18).attr("y", G.top - 44).attr("fill", K.muted).style("font", `500 18px ${font.mono}`)
-    .text(label);
-  const readout = g.append("text").attr("x", cx(0) - 18).attr("y", cardY + 48)
-    .attr("fill", K.residual).style("font", `600 18px ${font.mono}`);
-
-  const story = g.append("g");
-  const pulse = g.append("circle").attr("r", 6.5).attr("fill", K.text).attr("filter", "url(#hero-glow)").attr("opacity", 0);
-
-  function fbPath(c) {  // up from the top node, right, down the gutter, into the next column's first node
-    const gx = cx(c) + G.colW / 2;
-    return `M${cx(c)},${cy(ROWS - 1)} L${cx(c)},${top} L${gx},${top} L${gx},${cy(0)} L${cx(c + 1)},${cy(0)}`;
+  // world -> screen. x runs along the transcript, y up; the wall is the plane z = 0, the camera at negative z
+  function P(x, y, z) {
+    const c = cam, dx = x - c.x, dy = y - c.y, dz = z - c.z;
+    const cy = Math.cos(c.yaw), sy = Math.sin(c.yaw), cp = Math.cos(c.pitch), sp = Math.sin(c.pitch);
+    const X = dx * cy - dz * sy, Zf = dx * sy + dz * cy;
+    const Y = dy * cp + Zf * sp, Z = -dy * sp + Zf * cp;
+    return [c.cx + (c.f * X) / Z, c.cy - (c.f * Y) / Z];
   }
-  function writePath(c) {  // up, right, down the gutter into the next card
-    const gx = cx(c) + G.colW / 2;
-    return `M${cx(c)},${cy(ROWS - 1)} L${cx(c)},${top} L${gx},${top} L${gx},${cardY} L${cx(c + 1) - 20},${cardY}`;
+  const colX = (c) => c * DX;
+  const rowY = (r) => BASE + r * DY;
+
+  // the full-bandwidth wire: a cable that leaves the top of column c, bows behind the wall, and plugs into the first
+  // layer of column c + 1 (drawn as a smooth curve through world space)
+  function wire(c) {
+    const x0 = colX(c), x1 = colX(c + 1), top = rowY(LAYERS - 1), pts = [];
+    for (let i = 0; i <= 24; i++) {
+      const u = i / 24, e = u * u * (3 - 2 * u);
+      pts.push([x0 + (x1 - x0) * e, top + 0.35 * Math.sin(Math.PI * Math.min(1, u * 1.6)) - (top - rowY(0)) * e, 0.55 * Math.sin(Math.PI * u)]);
+    }
+    return pts;
   }
 
-  // the route as a list of legs; each leg ends at a node (count), a card (reset) or nothing
-  function legs() {
-    const out = [];
-    let count = 0;
-    for (let c = 0; c < COLS; c++) {
-      for (let r = 0; r < ROWS; r++) {
-        out.push({ node: [cx(c), cy(r)], count: ++count });
-        if (r < ROWS - 1) out.push({ d: `M${cx(c)},${cy(r)} L${cx(c)},${cy(r + 1)}`, kind: "climb" });
+  // ---------------- the two acts: legs of a route in world space ----------------
+  // leg: { pts, kind: climb|carry|write|read|link, tile?: [c, r], count?, card?: {col, word, forced} }
+  function route(mode) {
+    const legs = [], top = rowY(LAYERS - 1);
+    let count = 1;
+    legs.push({ pts: [[0, 0.02, CARD_Z], [0, 0.05, -0.3], [0, rowY(0), 0]], kind: "read", tile: [0, 0], count });
+    const out = (c, card) => {      // leave the glass: up, forward and down onto the paper at the next position
+      const x0 = colX(c), x1 = colX(c + 1), pts = [];
+      for (let i = 0; i <= 20; i++) {
+        const u = i / 20;
+        pts.push([x0 + (x1 - x0) * u, Math.max(0.02, (top + 0.55 * Math.sin(Math.PI * u)) * (1 - u * u)), CARD_Z * Math.sin((Math.PI / 2) * u)]);
       }
-      if (c === COLS - 1) break;
-      if (mode === "fullbw") out.push({ d: fbPath(c), kind: "link" });
-      else { out.push({ d: writePath(c), kind: "write" }, { card: c + 1 }); count = 0; out.push({ d: `M${cx(c + 1)},${cardY - G.cardH / 2} L${cx(c + 1)},${cy(0)}`, kind: "write" }); }
+      legs.push({ pts, kind: "write", card });
+    };
+    if (mode === "standard") {
+      const segs = [4, 4, 2], words = ["39", "64"];
+      segs.forEach((n, c) => {
+        for (let r = 1; r < LAYERS; r++) {
+          const pts = [[colX(c), rowY(r - 1), 0], [colX(c), rowY(r), 0]];
+          legs.push(r < n ? { pts, kind: "climb", tile: [c, r], count: ++count } : { pts, kind: "carry", tile: [c, r] });
+        }
+        if (c < segs.length - 1) {
+          out(c, { col: c + 1, word: words[c], forced: true });
+          count = 1;
+          legs.push({ pts: [[colX(c + 1), 0.02, CARD_Z], [colX(c + 1), 0.05, -0.3], [colX(c + 1), rowY(0), 0]], kind: "read", tile: [c + 1, 0], count });
+        } else out(c, { col: c + 1, word: "181", forced: false });
+      });
+    } else {
+      const words = Array(9).fill("…");
+      for (let c = 0; c < N - 1; c++) {
+        for (let r = 1; r < LAYERS; r++) legs.push({ pts: [[colX(c), rowY(r - 1), 0], [colX(c), rowY(r), 0]], kind: "climb", tile: [c, r], count: ++count });
+        if (c === N - 2) break;
+        const x0 = colX(c), x1 = colX(c + 1), gx = (x0 + x1) / 2;
+        legs.push({ pts: wire(c), kind: "link", tile: [c + 1, 0], count: ++count, card: { col: c + 1, word: words[c], forced: false, pale: true } });
+      }
+    }
+    for (const l of legs) l.dur = { climb: 380, carry: 260, write: 950, read: 520, link: 760 }[l.kind];
+    return legs;
+  }
+
+  // ---------------- drawing ----------------
+  const ease = (u) => (u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2);
+  const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  function partial(pts, u) {         // a polyline up to fraction u of its length
+    if (u >= 1) return pts;
+    const seg = pts.slice(1).map((p, i) => dist(p, pts[i]));
+    let rem = u * seg.reduce((a, b) => a + b, 0);
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length; i++) {
+      if (rem >= seg[i - 1]) { out.push(pts[i]); rem -= seg[i - 1]; continue; }
+      const f = rem / seg[i - 1];
+      out.push(pts[i - 1].map((v, k) => v + (pts[i][k] - v) * f));
+      break;
     }
     return out;
   }
+  function poly(pts, fill, stroke, lw = 1) {
+    ctx.beginPath();
+    pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+    ctx.closePath();
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+  }
+  function worldLine(pts, color, width, glow = 0) {
+    ctx.beginPath();
+    pts.forEach((w, i) => { const p = P(...w); i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); });
+    ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+  function affine(o, ex, ey, s) {    // map local units (s px per unit) onto the parallelogram at o spanned by ex, ey
+    ctx.setTransform(dpr * (ex[0] - o[0]) * s, dpr * (ex[1] - o[1]) * s, dpr * (ey[0] - o[0]) * s, dpr * (ey[1] - o[1]) * s, dpr * o[0], dpr * o[1]);
+  }
+  const reset = () => ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  let maxCount = 0;
-  function lightNode([x, y], count, quick) {
-    const n = story.append("g").attr("transform", `translate(${x},${y})`);
-    n.append("circle").attr("r", 10).attr("fill", K.residual);
-    n.append("text").attr("text-anchor", "middle").attr("dy", "0.36em").attr("fill", K.bg).style("font", `700 11px ${font.mono}`).text(count);
-    if (!quick) n.attr("opacity", 0).transition().duration(140).attr("opacity", 1);
-    maxCount = Math.max(maxCount, count);
-    readout.text(`dark path ${maxCount}`);
-  }
-  function lightCard(c, quick) {
-    const r = story.append("rect").attr("x", cx(c) - 20).attr("y", cardY - G.cardH / 2).attr("width", 40).attr("height", G.cardH).attr("rx", 6)
-      .attr("fill", K.token).attr("stroke", K.overseer).attr("stroke-width", 3.5);
-    if (quick) return;
-    r.attr("opacity", 0).transition().duration(120).attr("opacity", 1);
-    story.append("rect").attr("x", cx(c) - 20).attr("y", cardY - G.cardH / 2).attr("width", 40).attr("height", G.cardH).attr("rx", 8)
-      .attr("fill", "none").attr("stroke", K.overseer).attr("stroke-width", 2.5)
-      .transition().duration(600).attr("x", cx(c) - 32).attr("y", cardY - G.cardH).attr("width", 64).attr("height", G.cardH * 2).attr("opacity", 0).remove();
-  }
-  function drawLeg(leg, quick) {
-    const p = story.append("path").attr("d", leg.d).attr("fill", "none")
-      .attr("stroke", leg.kind === "write" ? K.overseer : K.residual).attr("stroke-width", leg.kind === "write" ? 2.4 : 3)
-      .attr("filter", leg.kind === "write" ? null : "url(#hero-glow)");
-    const len = p.node().getTotalLength();
-    if (!quick) p.attr("stroke-dasharray", `${len} ${len}`).attr("stroke-dashoffset", len);
-    return { p, len };
-  }
+  function draw({ mode, legs, u }) {
+    reset();
+    ctx.clearRect(0, 0, W, H);
+    const done = Math.floor(u), frac = u - done;
+    const lit = new Map(), printed = new Map();
+    legs.forEach((l, i) => {
+      const f = i < done ? 1 : i === done ? frac : 0;
+      if (l.tile && f >= 0.999) lit.set(`${l.tile[0]}_${l.tile[1]}`, l.count ?? 0);
+      if (l.card && l.kind === "write" && f > 0.9) printed.set(l.card.col, { ...l.card, a: Math.min(1, (f - 0.9) / 0.1) });
+      if (l.card && l.kind === "link" && f > 0.5) printed.set(l.card.col, { ...l.card, a: Math.min(1, (f - 0.5) / 0.3) });
+    });
 
-  return {
-    reset() { story.selectAll("*").interrupt().remove(); pulse.interrupt().attr("opacity", 0); maxCount = 0; readout.text(""); },
-    finish() { for (const l of legs()) { if (l.node) lightNode(l.node, l.count, true); else if (l.card !== undefined) lightCard(l.card, true); else drawLeg(l, true); } },
-    async play() {
-      const list = legs();
-      pulse.attr("transform", `translate(${list[0].node[0]},${list[0].node[1]})`).attr("fill", K.text).transition().duration(150).attr("opacity", 1);
-      for (const l of list) {
-        if (l.node) { lightNode(l.node, l.count); continue; }
-        if (l.card !== undefined) { lightCard(l.card); await wait(380); continue; }
-        const { p, len } = drawLeg(l);
-        const dur = len / (l.kind === "climb" ? 0.22 : 0.55);
-        p.transition().duration(dur).ease(d3.easeLinear).attr("stroke-dashoffset", 0);
-        await pulse.transition().duration(dur).ease(d3.easeLinear).attr("fill", l.kind === "write" ? K.overseer : K.text)
-          .attrTween("transform", () => (u) => { const q = p.node().getPointAtLength(u * len); return `translate(${q.x},${q.y})`; })
-          .end().catch(() => {});
+    // the floor: the transcript, a strip of paper in front of the wall, fading into the dark at the far end
+    const x0 = -0.75, x1 = colX(N - 1) + 1.2, zn = -0.22, zf = -1.22;
+    const strip = [P(x0, 0, zn), P(x1, 0, zn), P(x1, 0, zf), P(x0, 0, zf)];
+    poly(strip, "rgba(238, 232, 219, 0.95)");
+    const fa = P(colX(N - 1) + 1.2, 0, -0.7), fb = P(colX(Math.max(2, N - 5)), 0, -0.7);
+    const grad = ctx.createLinearGradient(fa[0], fa[1], fb[0], fb[1]);
+    grad.addColorStop(0, "rgba(6,8,13,0.97)"); grad.addColorStop(1, "rgba(6,8,13,0)");
+    poly(strip, grad);
+    for (let c = 0; c < N; c++) {
+      const cx = colX(c), hw = 0.38, hz = 0.24;
+      poly([P(cx - hw, 0, CARD_Z + hz), P(cx + hw, 0, CARD_Z + hz), P(cx + hw, 0, CARD_Z - hz), P(cx - hw, 0, CARD_Z - hz)], null, "rgba(130, 112, 86, 0.4)", 0.8);
+      const card = c === 0 ? { word: "Q", a: 1 } : printed.get(c);
+      if (!card) continue;
+      if (card.forced) {  // the monitor's highlighter
+        const w = 1.55 * hw * Math.min(1, card.a * 1.4);
+        poly([P(cx - hw * 0.78, 0, CARD_Z + 0.13), P(cx - hw * 0.78 + w, 0, CARD_Z + 0.13), P(cx - hw * 0.78 + w, 0, CARD_Z - 0.13), P(cx - hw * 0.78, 0, CARD_Z - 0.13)],
+          `rgba(243, 205, 91, ${0.92 * card.a})`);
       }
-      await pulse.transition().duration(250).attr("opacity", 0).end().catch(() => {});
-    },
+      const o = P(cx, 0, CARD_Z), ex = P(cx + 1, 0, CARD_Z);
+      const size = Math.max(9, Math.hypot(ex[0] - o[0], ex[1] - o[1]) * (card.word.length > 3 ? 0.2 : 0.26));
+      ctx.fillStyle = card.pale ? `rgba(70, 62, 50, ${0.6 * card.a})` : `rgba(24, 25, 27, ${card.a})`;
+      ctx.font = `600 ${size}px ${font.mono}`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(card.word, o[0], o[1] + 1);
+    }
+
+    {   // the monitor, reading the paper
+      const e = P(-0.6, 0, CARD_Z), e2 = P(-0.3, 0, CARD_Z), w = Math.hypot(e2[0] - e[0], e2[1] - e[1]) * 0.55;
+      ctx.beginPath(); ctx.moveTo(e[0] - w, e[1]); ctx.quadraticCurveTo(e[0], e[1] - w * 0.75, e[0] + w, e[1]);
+      ctx.quadraticCurveTo(e[0], e[1] + w * 0.75, e[0] - w, e[1]); ctx.closePath();
+      ctx.fillStyle = "rgba(255, 253, 247, 0.95)"; ctx.fill(); ctx.lineWidth = 1.8; ctx.strokeStyle = "#855A00"; ctx.stroke();
+      ctx.beginPath(); ctx.arc(e[0], e[1], w * 0.32, 0, 7); ctx.fillStyle = "#855A00"; ctx.fill();
+    }
+
+    // the wall: residual lines and faint attention strands, then the squares
+    for (let c = 0; c < N; c++) {
+      const a = P(colX(c), rowY(0), 0), b = P(colX(c), rowY(LAYERS - 1), 0);
+      ctx.strokeStyle = "rgba(60, 90, 140, 0.5)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      for (let r = 0; r < LAYERS - 1 && c > 0; r++) for (let q = 0; q < c; q++) {
+        const s0 = P(colX(q), rowY(r), 0), s1 = P(colX(c), rowY(r + 1), 0);
+        ctx.strokeStyle = `rgba(70, 110, 170, ${Math.max(0.035, 0.2 - (c - q) * 0.035)})`;
+        ctx.beginPath(); ctx.moveTo(s0[0], s0[1]); ctx.lineTo(s1[0], s1[1]); ctx.stroke();
+      }
+    }
+    if (mode === "fullbw") for (let c = 0; c < N - 2; c++) worldLine(wire(c), "rgba(91, 156, 245, 0.34)", 1.3);   // faint until used
+    for (let c = 0; c < N; c++) for (let r = 0; r < LAYERS; r++) {
+      const h = TILE / 2, cx = colX(c), cy = rowY(r);
+      const p00 = P(cx - h, cy + h, 0), p10 = P(cx + h, cy + h, 0), p01 = P(cx - h, cy - h, 0), p11 = P(cx + h, cy - h, 0);
+      const key = `${c}_${r}`, on = lit.has(key), n = lit.get(key);
+      const far = Math.min(1, 1.08 - 0.72 * (c / (N - 1)) ** 1.2);
+      ctx.globalAlpha = (on ? 1 : 0.4) * far;
+      if (on && n) { ctx.shadowColor = "rgba(91,156,245,0.95)"; ctx.shadowBlur = 24; poly([p00, p10, p11, p01], "#0a1424"); ctx.shadowBlur = 0; }
+      const s = texture(c, r).width;
+      affine(p00, p10, p01, 1 / s);
+      ctx.drawImage(texture(c, r), 0, 0);
+      reset();
+      poly([p00, p10, p11, p01], null, on && n ? "rgba(190, 216, 255, 0.95)" : on ? "rgba(91,156,245,0.8)" : "rgba(70, 100, 150, 0.5)", on && n ? 1.4 : 0.8);
+      ctx.globalAlpha = 1;
+      if (on && n) {   // the running count, on a badge at the square's corner
+        const rr = Math.max(7.5, Math.hypot(p10[0] - p00[0], p10[1] - p00[1]) * 0.24);
+        ctx.beginPath(); ctx.arc(p10[0], p10[1], rr, 0, 7); ctx.fillStyle = K.residual; ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = "#05080d"; ctx.stroke();
+        ctx.fillStyle = "#05080d"; ctx.font = `700 ${Math.round(rr * (n > 9 ? 0.95 : 1.12))}px ${font.mono}`;
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(n, p10[0], p10[1] + 0.5);
+      }
+    }
+
+    // trails, then the pulse
+    legs.forEach((l, i) => {
+      if (i > done) return;
+      const pts = i < done ? l.pts : partial(l.pts, ease(frac));
+      if (pts.length < 2) return;
+      const color = l.kind === "write" ? "rgba(245, 192, 74, 0.95)" : l.kind === "read" ? "rgba(225, 216, 196, 0.6)" : "rgba(126, 180, 255, 0.92)";
+      worldLine(pts, color, l.kind === "climb" || l.kind === "link" ? 2.4 : 2, l.kind === "read" ? 0 : 12);
+      if (i === done && frac < 1) {
+        const p = P(...pts.at(-1));
+        ctx.beginPath(); ctx.arc(p[0], p[1], 4.6, 0, 7);
+        ctx.fillStyle = l.kind === "write" ? K.overseer : "#ffffff";
+        ctx.shadowColor = l.kind === "write" ? K.overseer : "#9cc8ff"; ctx.shadowBlur = 18; ctx.fill(); ctx.shadowBlur = 0;
+      }
+    });
+
+    // a soft scrim behind the title, so the scene never fights the text
+    if (!narrow) {
+      const sc = ctx.createLinearGradient(0, 0, W * 0.52, 0);
+      sc.addColorStop(0, "rgba(5,7,11,0.8)"); sc.addColorStop(0.7, "rgba(5,7,11,0.3)"); sc.addColorStop(1, "rgba(5,7,11,0)");
+      ctx.fillStyle = sc; ctx.fillRect(0, 0, W * 0.52, H);
+    }
+
+    // readout, top right of the scene
+    const best = Math.max(0, ...[...lit.values()].filter(Boolean));
+    const rx = W - (narrow ? 18 : 34), ry = narrow ? 28 : 44;
+    ctx.textAlign = "right"; ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = "#8A93A3"; ctx.font = `500 ${narrow ? 9.5 : 11}px ${font.mono}`;
+    ctx.fillText(mode === "fullbw" ? "FULL BANDWIDTH" : "STANDARD", rx, ry);
+    ctx.fillText("LONGEST DARK PATH", rx, ry + (narrow ? 13 : 16));
+    ctx.fillStyle = K.residual; ctx.font = `600 ${narrow ? 30 : 42}px ${font.mono}`;
+    ctx.fillText(String(best), rx, ry + (narrow ? 46 : 62));
+  }
+
+  // ---------------- playback ----------------
+  const acts = () => [{ mode: "standard", legs: route("standard") }, { mode: "fullbw", legs: route("fullbw") }];
+  const CAPTION = {
+    standard: "A standard transformer. The work climbs the layers, then has to surface as a word, where a monitor can see it. The count restarts.",
+    fullbw: "Full bandwidth. A hidden wire carries the work on, behind the glass. Tokens are still written, but the count never restarts.",
   };
+  let current = null;
+  const render = () => current && W > 0 && draw(current);
+  layout();
+  new ResizeObserver(() => { layout(); render(); }).observe(el);
+
+  if (reduced) {
+    const a = acts()[0];
+    current = { mode: a.mode, legs: a.legs, u: a.legs.length };
+    if (caption) caption.textContent = CAPTION.standard;
+    render();
+    return;
+  }
+  // Playback runs only while the hero is on screen and the tab is visible; it pauses between legs otherwise.
+  let onScreen = false, running = false;
+  const waiters = [];
+  const playing = () => onScreen && !document.hidden;
+  const whenPlaying = () => (playing() ? Promise.resolve() : new Promise((r) => waiters.push(r)));
+  const update = () => { if (playing()) waiters.splice(0).forEach((r) => r()); if (playing() && !running) loop(); };
+  const pause = async (ms) => { await wait(ms); await whenPlaying(); };
+  async function playAct(a) {
+    if (caption) caption.textContent = CAPTION[a.mode];
+    current = { mode: a.mode, legs: a.legs, u: 0 };
+    render();
+    await pause(800);
+    for (let i = 0; i < a.legs.length; i++) {
+      await whenPlaying();
+      const l = a.legs[i], t0 = performance.now();
+      await new Promise((res) => {
+        const tick = (now) => {
+          const f = Math.min(1, (now - t0) / l.dur);
+          current.u = i + f;
+          render();
+          if (f < 1) requestAnimationFrame(tick); else res();
+        };
+        requestAnimationFrame(tick);
+      });
+      if (l.kind === "write") await pause(380);
+    }
+    current.u = a.legs.length; render();
+    await pause(2800);
+  }
+  async function loop() {
+    running = true;
+    for (;;) for (const a of acts()) await playAct(a);
+  }
+  new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; update(); }).observe(el);
+  document.addEventListener("visibilitychange", update);
+  current = { ...acts()[0], u: 0 };
+  render();
 }

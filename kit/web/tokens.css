@@ -1,5 +1,6 @@
 /* GENERATED from kit/tokens.json by scripts/build_tokens.py. Do not edit. */
 :root {
+  /* glass: dark windows onto a model's interior */
   --bg: #0E1116;
   --surface: #171B22;
   --raised: #1F242D;
@@ -7,15 +8,34 @@
   --text: #E8EAED;
   --muted: #8A93A3;
   --faint: #4A5260;
+  /* paper: the page, and anything readable on it */
+  --page: #F1EDE4;
+  --sheet: #FAF8F2;
+  --card: #FFFDF7;
+  --rule: #DAD2C3;
+  --ink: #1B1C1E;
+  --ink2: #57544E;
+  --ink3: #8F897E;
+  --highlight: #F3CD5B;
+  /* semantic: --name on glass, --name-ink on paper */
   --token: #EDE6D6;  /* Visible text: prompts, outputs, chain-of-thought. Drawn as paper-like cards. */
+  --token-ink: #2A2622;
   --residual: #5B9CF5;  /* Hidden states: residual stream, activations, latent reasoning. */
+  --residual-ink: #2B61C4;
   --feature: #B48CFF;  /* Interpretable directions: features, SAE latents, concept vectors. */
+  --feature-ink: #7A4FD6;
   --overseer: #F5C04A;  /* Anything reading the model from outside: probes, lenses, oracles, monitors, auditors. */
+  --overseer-ink: #855A00;
   --training: #F06BB5;  /* Optimization: gradients, fine-tuning, RL pressure, reward. */
+  --training-ink: #B8367E;
   --danger: #FF5A5A;  /* Misaligned, deceptive, or hidden-objective behavior. */
+  --danger-ink: #C0392B;
   --safe: #6FD08C;  /* Aligned, verified, or caught behavior. */
+  --safe-ink: #277240;
   --attention: #3FBFA0;  /* Attention heads and patterns (component-level). */
+  --attention-ink: #1F8A72;
   --mlp: #E8835A;  /* MLP layers (component-level). */
+  --mlp-ink: #C25B2E;
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "DejaVu Sans Mono", ui-monospace, monospace;
   --font-display: "Newsreader", Georgia, serif;

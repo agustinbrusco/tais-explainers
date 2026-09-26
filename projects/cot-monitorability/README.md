@@ -123,7 +123,22 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
     "should"s fixed (see `review.md`): predicts rebuilt around misconceptions without leaks, define-before-use glosses,
     board redesigned, readers diagram recalibrated, mobile layouts for every scene. Smoke-tested (25 steps, desktop +
     mobile, no console errors; guesses and free play exercised).
-  - **Awaiting the learner's feedback on the full piece.**
+  - (Superseded by iteration 4, below.)
+- **Iteration 4 (2026-09-26): visual redesign**, after the learner asked for "more expressive visuals… full visual
+  designer", inspired by Goodfire and Welch Labs, rigorous and simplified only where it doesn't matter:
+  - "Paper and glass" (kit-level): the page is paper; a model's interior is a dark glass window; the transcript lies on the
+    paper below it; the monitor's reading is a gold highlighter. Tokens: `page`, `ink`, and an `-ink` variant per semantic
+    color (`kit/tokens.json`); `kit/web/base.css` rewritten; Newsreader body text.
+  - Real data: every hidden state is a square of real gelu-4l numbers (`data/export_tiles.py` → `web/data/tiles.json`,
+    with a greedy capability check). Real at the tokens under them in the standard arithmetic figures, reused elsewhere,
+    and the caveat and badges say which.
+  - New step 2, "A word and 512 numbers" (`anatomy.js`), and a camera pull-back from that state into the grid; attention
+    drawn from every earlier position; the sampled-token edge drawn and labelled; one state's attention fan in the
+    step-4 predict; the dark past of any square on hover or tap (automatic in two steps); a perspective hero on canvas
+    (`hero.js`); diffusion as glass passes with the canvas on paper strips; readers as instruments; charts on paper.
+  - Reviewed: `rigor-reviewer` (1 blocker, fixed) and `learner-sim`, both acted on (`review.md`, iteration 4/4b).
+    Smoke-tested: 26 steps, desktop and phone, no console errors; guesses and free play exercised.
+  - **Awaiting the learner's feedback on iteration 4.**
 - Beats for the full piece are in `script.md` (✅ built, 🔲 planned).
 - **Both research passes are integrated** (depth mechanics per architecture; interpretability without a reliable CoT).
   They're in `references/cot-monitorability/README.md` (sections "What latent reasoning does to interpretability tools" and
@@ -133,6 +148,8 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 
 **Run it:** `python3 -m http.server 8000` from the repo root, then open http://localhost:8000/projects/cot-monitorability/web/
 · screenshots: `node scripts/shoot.mjs projects/cot-monitorability/web/index.html [--mobile]`
+· real states: `uv run --group interp python projects/cot-monitorability/data/export_tiles.py` (needs `./scripts/setup.sh --interp`;
+TransformerLens 4 loads gelu-4l with `TransformerBridge.boot_tl_legacy`)
 
 **How the prototype works:**
 - `buildGraph(state)` builds the DAG: nodes `x{t}` are tokens (or latent thoughts), `h{t}_{r}` are hidden states.
@@ -144,6 +161,10 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 - `STEPS[i]` gives the state for each step, and the last step reads the controls.
 - An architecture is only a change in `buildGraph`, so new architectures (e.g. diffusion) belong there.
 - Motion review: `node scripts/shoot.mjs projects/cot-monitorability/web/index.html --steps 2 --frames 16 --every 330 --element .stage`.
+- Iteration 4 modules: `tiles.js` (loads the real states, draws them as 8×8 squares; `stateAt(col, row)` / `poolState`),
+  `anatomy.js` (step 2), `hero.js` (canvas scene with a perspective camera; pauses off screen). In `main.js`, `showPast`
+  computes a square's dark past; `STEPS` flags: `zoomFrom`, `explainWrite`, `fanFocus`, `autoPast`. Paths that cross the
+  window's edge are drawn twice with `clip-win` / `clip-out`, so they're glass-colored inside and ink-colored on paper.
 
 **Learner feedback on the prototype (2026-09-25):**
 - The arithmetic chain works as the running example.
@@ -184,7 +205,7 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 - [x] Brief drafted
 - [x] Brief agreed with learner (2026-09-25; additions: Coconut, effects on interp tools, RL math optional)
 - [ ] Sources read, `claims.md` drafted (Brown-Cohen §3–4; Redwood 09-10 and 09-23 incl. appendices; Nanda; Baker; Emmons; Engels)
-- [x] `script.md` beats written (25 steps)
+- [x] `script.md` beats written (26 steps since iteration 4)
 - [x] Money shot prototyped (web) and self-reviewed. Learner feedback received 2026-09-25 (see above).
 - [x] Iteration 2 (N-hop example, counted route with pulse) built and self-reviewed 2026-09-26.
 - [ ] Narration rendered and listened to
@@ -192,4 +213,5 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 - [x] Visual self-review (shots desktop + mobile, motion frames)
 - [x] Rigor review (`rigor-reviewer` agent): full piece 2026-09-26, findings resolved (`review.md`)
 - [x] Learner-sim pass (`learner-sim` agent): full piece 2026-09-26, findings resolved or listed as not done
+- [x] Iteration 4 (visual redesign, real states) built, self-reviewed, rigor- and learner-sim-reviewed (2026-09-26)
 - [ ] Learner watched it, and feedback went into `learner/journal.md`

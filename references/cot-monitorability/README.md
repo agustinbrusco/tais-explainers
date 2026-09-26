@@ -147,9 +147,10 @@ comes from) and *verification* (checking what a readout means). Both lean on tex
 3. **Several readers get their meaning from tokens.**
    - NLAs warm-start on Claude-written summaries of "the text up to that token", and runs without the warm-start degenerated.
    - AOs train on text-derived QA (`references/activation-oracles`, AO paper L229-261 ✓). Note: Redwood App. C names the
-     J-lens, SAEs and NLA initialisations, *not* AOs; the AO point is ours.
-   - The J-lens reads only single-token concepts "poised to verbalize". Wang & Reid (`2609.01924`) ✓: "The lens is
-     structurally blind" to content not driving the next token.
+     J-lens, SAEs and NLA initialisations, *not* AOs; the AO point is ours.   - The J-lens surfaces single-token concepts a model is "poised to verbalize" (the original J-lens paper,
+     `references/j-lens/papers/2607.15495.txt` L24, L61 ✓). That is not "what it is about to say": Wang & Reid (`2609.01924`)
+     ✓: the lens is "structurally blind to content that is not driving the current next token" (L1022), and their showcase is
+     the J-lens reading a sport the model is deliberately not naming ("a boot connecting with a sphere", L1499-1502).
    - Redwood App. C argues all three weaken if fewer thoughts become tokens.
 4. **Today's latent models are fairly readable, probably for a reason that won't last.**
    - Dilgren & Wiegreffe (`2604.04902`, Coconut and CODI) ✓: gold reasoning traces decodable "up to 65-93% of the time".

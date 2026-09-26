@@ -12,6 +12,9 @@ const vectors = tokens.map(() => d3.range(DIM).map(() => rand() * 2 - 1));
 
 const svg = d3.select("#stage");
 const W = 720, H = 420, colW = W / tokens.length;
+// Two materials (kit/web/base.css): the model's interior is a dark glass window; readable tokens lie on the paper below it.
+svg.append("rect").attr("x", 8).attr("y", 14).attr("width", W - 16).attr("height", H - 100).attr("rx", 14)
+  .attr("fill", css("bg")).attr("stroke", css("grid"));
 const x = (i) => colW * i + colW / 2;
 const barY = d3.scaleLinear().domain([-1, 1]).range([34, -34]);
 
