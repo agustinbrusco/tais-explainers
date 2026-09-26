@@ -1,24 +1,54 @@
 # Learner profile
 
-> Filled in with the learner. Every explainer brief reads this, so keep it current.
+> Every explainer brief reads this. **Facts** come from the learner's CVs (2026-09-25), at the level of detail that matters
+> for teaching. **Interests, depth of understanding, and preferences come only from the learner.** Don't infer them.
 
-## Background
-- Education / field:
-- Work:
-- Programming:
-- Math comfort (linear algebra, calculus, probability, optimization):
-- ML / deep learning: (what have you built or trained? which parts of a transformer could you draw from memory?)
-- Interpretability & safety so far: (papers, courses, e.g. ARENA, BlueDot, AGISF)
+## Background (from CV)
+- **Education:** Licenciatura in Physics, UBA (2020–, expected 2028; roughly a B.S. + M.S.).
+  - Optional courses: statistical methods for experimental physics; complex systems (numerical and analytic methods
+    for PDEs); complex networks with systems-biology applications.
+- **Research:** experimental particle-detector work (Skipper-CCD defect detection, 2023–2025).
+  - First-author paper: "Charge Trap Analysis in a SENSEI Skipper-CCD: Understanding Low-Energy Backgrounds in Rare-Event
+    Searches", *Phys. Rev. Applied* (2026), arXiv:2510.23336.
+- **Industry:**
+  - Senior data scientist: A/B-test design, attribution, mathematical modelling, an ML fraud-prevention model. Python,
+    BigQuery, AWS.
+  - About 2.5 years before that as an AI scientist: exploring, developing, implementing and evaluating LLM-based systems.
+    Also co-built an LLM customer-service chatbot.
+- **Teaching:** TA at UBA Physics (Data Laboratory; Introduction to Continuum Modeling; Complex Networks); TA for an
+  intro programming course; volunteer Python workshop.
+- **Courses:**
+  - BlueDot Technical AI Safety, in person, Jul–Aug 2026. Covered alignment and RLHF, mech interp, evals and
+    red-teaming, control and scalable oversight.
+  - Two 2024 short courses: "LLMs: Zero to (almost) Hero!" and a course on modelling cortical circuits with ML.
+- **Other:** first place in a 22-team data competition (2025). Spanish native, English C1.
 
-## Goals
-- Why TAIS, and why now:
-- What "understanding it" should let you do: (read the papers? critique them? do research? explain it to others?)
+## Depth of understanding (from the learner, 2026-09-25)
+- **Transformer internals:** not sure they could write attention and the residual stream from memory. These are exactly
+  the intuitions they want to build. **No hands-on interp yet.** They want that soon, and this repo is part of it.
+- **BlueDot mech interp and oversight weeks:** felt very comfortable in both. They have a fairly intuitive grasp of
+  **SAEs**, and want an SAE explainer to *test and solidify* those ideas. So challenge them there, and don't re-teach basics.
+- **Math:**
+  - **Very comfortable:** linear algebra, SVD, high-dimensional geometry, unsupervised methods (UMAP etc.), complex
+    networks and graphs, and ML/DNN basics (standard architectures).
+  - **RL:** solid *conceptually* (optimization-pressure effects, RLHF, RLVR). The *math* (policy gradients etc.) is less
+    sharp. Explainers can mention or cover the math briefly, but shouldn't re-explain the concepts.
+  - **Wants a mini-refresher before KL divergence.**
+- **Papers on these topics already read:** not stated.
+
+## Goals and audience
+- **Primarily for themselves.** They may also share good pieces with local AI safety groups and
+  fellowship cohorts, crediting Claude. So pieces should stand on their own: no references to this profile or to private context inside a piece.
+- **Where to start:** Claude's call, **without duplicating great existing content**. For example, the residual stream is
+  covered by Welch Labs' "The most cited paper of the century is a brilliant hack" (2026-08-31). Link content like that
+  as a prerequisite and build only what's missing.
 
 ## Preferences
-- Language for explainers: (English / Spanish / mixed)
-- Pace and density: (a 3Blue1Brown-style slow build vs. dense Distill-style)
-- Rigor vs. intuition dial:
-- Formats you love / hate:
+- **Explainers in English.** (Conversation with Claude is in Spanish.)
+- **Physics analogies in moderation**, from their actual strengths: complex systems, continuum modelling, data science,
+  and statistical mechanics or quantum more than other physics. **Avoid classical-mechanics analogies** (torque etc.):
+  "they might not land".
+- Pace, density, formats: not stated yet. Infer from their feedback on the first piece.
 
 ## Known gaps / things that never clicked
--
+- RL math (concepts are fine). KL divergence (needs a refresher).

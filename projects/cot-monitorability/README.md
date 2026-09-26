@@ -1,7 +1,7 @@
 # How Many Steps Fit in the Dark?
 *Chain-of-thought monitoring, opaque serial depth, and the architectures that could end it*
 
-> **Status:** brief, awaiting learner agreement · started 2026-09-25 · format: both (web explorable first, then a narrated video)
+> **Status:** brief agreed 2026-09-25 (with additions below) · format: **web explorable first**; a video only if it seems worth it afterwards
 
 ## Promise
 After this, you can look at any architecture drawn as a computation graph, find its **longest dark path**, and use that
@@ -14,7 +14,8 @@ place the September 2026 evidence (GPT-6 Astra) on that picture, keeping confirm
 - **Does not assume:**
   - Attention and residual-stream mechanics from memory. Only the "wide in parallel, shallow in serial" shape is needed,
     and it gets drawn here.
-  - RL mechanics. A 90-second primer covers exactly what obfuscation requires.
+  - RL *math*. RL concepts (optimization pressure, RLHF, RLVR) are known, so don't re-teach them. The obfuscation
+    argument uses them directly, and a short optional aside can show the policy-gradient version.
   - Circuit complexity.
 
 ## Prerequisites and prior art
@@ -30,10 +31,13 @@ place the September 2026 evidence (GPT-6 Astra) on that picture, keeping confirm
    ∝ layers × loops; full-bandwidth ∝ layers × positions.
 2. **Necessity vs propensity.** For a task needing *k* dependent steps, predict whether the model *must* surface some of
    it as text. That tells you whether a CoT monitor gets a guarantee or is relying on the model's habits.
-3. **Why "penalize bad thoughts" backfires.** With minimal RL: when the reward includes "the monitor didn't flag it", there
+3. **Why "penalize bad thoughts" backfires.** With RL concepts the learner has (math optional): when the reward includes "the monitor didn't flag it", there
    are two ways to earn it, behaving or not verbalizing, and optimization finds the cheaper one.
 4. **Faithfulness ≠ monitorability.** Explain why "CoT is often unfaithful" doesn't imply "monitoring is useless".
-5. **Sort the Astra evidence** into confirmed / reported / rumored / still-bounded, and name the evidence that would change your mind.
+5. **What latent reasoning does to today's interpretability tools** *(added at the learner's request)*. Why probes,
+   SAEs, NLAs, AOs and the J-lens get harder, or lose their labels or their ground truth, when the CoT is unreliable or
+   absent. For example: can you still train a probe if the CoT no longer tells you what the model was doing?
+6. **Sort the Astra evidence** into confirmed / reported / rumored / still-bounded, and name the evidence that would change your mind.
 
 ## The one running example
 **A chain of dependent arithmetic steps** ("start at 7, triple it, subtract 4, …"): each step needs the previous result,
@@ -49,6 +53,8 @@ understood it largely by reading raw chains of thought.
 The transformer unrolled as a DAG: columns are token positions, rows are layers, and the text bottleneck between columns
 is gold. A glowing counter traces the **longest dark path**. Then each architecture is shown as an **edit to the graph**:
 - **Looped:** the rows repeat, so the dark path grows by the loop count.
+- **Coconut** *(learner asked for it explicitly)*: the last hidden state is fed back as the next input, with no token in
+  between. "Thought" columns lose their gold node, and the dark path chains through them.
 - **Full-bandwidth:** an edge carries hidden state straight from column *t* to column *t+1* and skips the gold node, so the
   dark path suddenly spans the whole context. *(To verify in phase 2: does this reproduce Redwood's "1,000,000×"?)*
 - **Diffusion with opaque self-conditioning vs bottlenecked:** GDM's 28.6× → 1.1×.
@@ -72,10 +78,9 @@ One picture and one number explain the whole argument, and each architecture is 
 - Any claim about Astra's architecture as fact.
 
 ## Format and why
-1. **Web explorable first:** the dark-path graph is a mechanism with knobs (architecture, loops, context length, task
-   depth *k*), and it's the money shot.
-2. **Then a ~6–8 min narrated Manim video** of the argument (incident → why CoT works → pressure → architectures → Astra
-   → what's left), reusing the same graph grammar. Good for sharing with study groups.
+**Web explorable** (agreed): the dark-path graph is a mechanism with knobs (architecture, loops, context length, task
+depth *k*), and it's the money shot. A narrated Manim video of the argument, reusing the same graph grammar, is
+**deferred**, and gets decided after the learner has used the explorable.
 
 ## Check yourself
 1. A model solves 3-step chains without CoT but needs CoT for 6-step ones. Which plans is a CoT monitor *guaranteed* a shot

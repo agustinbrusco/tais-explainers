@@ -35,7 +35,8 @@ graph LR
 | attention mechanics | ~ | | (external, TBD) |
 | logit lens → tuned lens | · | residual stream, unembedding | `j-lens` (opening act) |
 | superposition & SAEs | ~ (intuitive, to be tested) | residual stream, sparsity | `saes` |
-| RL basics (policy gradient, outcome vs process reward, KL penalty) | · (weak) | | mini-primer inside `cot-monitorability` |
+| RL concepts (optimization pressure, RLHF, RLVR) | ✓ | | (background) |
+| RL math (policy gradient, KL penalty) | · (weaker) | probability | optional aside in `cot-monitorability` |
 | KL divergence | ~ (needs refresher) | probability | mini-primer before `readers-that-talk` |
 | Jacobians / linearization | ✓ (learner: fine) | multivariable calculus | `j-lens` |
 | J-lens & J-space | · | logit/tuned lens, Jacobians, SAEs | `j-lens` |
