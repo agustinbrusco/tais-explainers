@@ -92,12 +92,47 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 5. *(Transfer)* Agents in a swarm pass compressed embeddings to each other through a shared cache instead of text. Where
    are the new edges, and what happens to the dark path?
 
+## State and next actions (keep this current: it's the handoff after context compaction)
+
+**Where we are (2026-09-25):**
+- The brief is agreed. Web first, and a video only if it proves worth it.
+- **The prototype of the money shot works:** `web/index.html` + `web/main.js`, steps 0–7. It's screenshot-reviewed on
+  desktop and mobile (see `review.md`) and **awaiting the learner's feedback**.
+- Beats for the full piece are in `script.md` (✅ built, 🔲 planned).
+- Two research agents were dispatched: (a) depth mechanics per architecture, (b) interpretability without a reliable CoT.
+  Their findings go into `claims.md` and `references/cot-monitorability/README.md`.
+
+**Run it:** `python3 -m http.server 8000` from the repo root, then open http://localhost:8000/projects/cot-monitorability/web/
+· screenshots: `node scripts/shoot.mjs projects/cot-monitorability/web/index.html [--mobile]`
+
+**How the prototype works:**
+- `buildGraph(state)` builds the DAG: nodes `x{t}` are tokens (or latent thoughts), `h{t}_{r}` are hidden states.
+  Edge kinds: `res`, `attn`, `in`, `write`, `dark-link`.
+- `longestDarkPath(g)` is a DP in topological order, where readable tokens reset the count.
+- `layChain(g, k, arch)` routes the k-step chain, one row per step, and records the forced writes.
+- `STEPS[i]` gives the state for each step, and the last step reads the controls.
+- An architecture is only a change in `buildGraph`, so new architectures (e.g. diffusion) belong there.
+
+**Next actions, in order:**
+1. Fold in the learner's feedback on the prototype.
+2. Integrate the research-agent results:
+   - Fix the **full-bandwidth wiring** in `buildGraph` to match `arxiv:2608.08888`, and remove the "To verify" caveat.
+   - Confirm the Coconut depiction.
+   - Record how Redwood gets 10× / 10⁶×.
+3. Draft `claims.md` for every ✅ beat, then for the planned ones. Nothing ships `open`.
+4. Build the 🔲 beats in `script.md`, in order: 8 (two ways to earn the reward, plus the optional RL-math aside),
+   9 (faithfulness ≠ monitorability), 10 (diffusion as a graph edit), 11 (what latent reasoning does to interpretability:
+   probes need labels, often from text), 12 (the Astra evidence board), 0 (the Hugging Face hook), 13 (check yourself).
+5. Run the `review` skill: shots, then the `rigor-reviewer` and `learner-sim` agents; log in `review.md`.
+6. Deliver: the learner uses it, answers the check-yourself questions, and it all gets logged in `learner/journal.md`.
+   Then decide on the video.
+
 ## Pipeline
 - [x] Brief drafted
-- [ ] Brief agreed with learner
+- [x] Brief agreed with learner (2026-09-25; additions: Coconut, effects on interp tools, RL math optional)
 - [ ] Sources read, `claims.md` drafted (Brown-Cohen §3–4; Redwood 09-10 and 09-23 incl. appendices; Nanda; Baker; Emmons; Engels)
 - [ ] `script.md` beats written
-- [ ] Money shot prototyped (web) and reviewed
+- [x] Money shot prototyped (web) and self-reviewed. Awaiting learner feedback.
 - [ ] Narration rendered and listened to
 - [ ] Visuals built
 - [ ] Visual self-review (contact sheets / shots)
