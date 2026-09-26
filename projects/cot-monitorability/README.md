@@ -102,7 +102,11 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
   - the dark path is now *felt*: a pulse climbs the route and numbers each hidden state; crossing a card lights it gold, the
     monitor's eye reacts, and the count restarts at 1; dark links never restart it;
   - phones get a 5-column, narrower viewBox. Reviewed on desktop, mobile and motion frames (`review.md`, iteration 2).
-  - **Awaiting the learner's feedback on iteration 2.**
+- **Iteration 2b (same day):** `rigor-reviewer` + `learner-sim` run, and all blockers and "should"s fixed (`review.md`):
+  predict/reveal step pairs with guess buttons, a zig-zag route and a per-column **depth profile**, "Task needs" readout,
+  unit "hidden states", answer cards no longer gold, filler tokens defined, "through the text ≠ readable" caveat, drawing
+  convention vs measurement kept apart, "Your turn" answers + a transfer question. claims.md rewritten and re-verified.
+  - **Awaiting the learner's feedback on iteration 2b.**
 - Beats for the full piece are in `script.md` (✅ built, 🔲 planned).
 - **Both research passes are integrated** (depth mechanics per architecture; interpretability without a reliable CoT).
   They're in `references/cot-monitorability/README.md` (sections "What latent reasoning does to interpretability tools" and
@@ -147,7 +151,9 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
      - A "real proportions" toggle (e.g. 62 layers vs ~4 steps) that shows why one row ≠ one step.
      - Make the reset at a gold card feel physical, e.g. the path "breaks" into light when it hits text.
 2. ~~Integrate the research results~~ (done 2026-09-25).
-3. Spot-check the agent-sourced line numbers in `claims.md` that lack ✓ before shipping. Nothing ships `open`.
+3. ~~Spot-check the agent-sourced line numbers~~ (done by the rigor-reviewer 2026-09-26; claims.md rewritten).
+   Candidates from the learner-sim not yet done: a toggle for looped "variant" edges (cross-position deep reads), which
+   would make the filler-token transfer question operable; hop entities labelled on the figure.
 4. Build the 🔲 beats in `script.md`, in order: 8 (two ways to earn the reward, plus the optional RL-math aside),
    9 (faithfulness ≠ monitorability), 10 (diffusion as a graph edit), 11 (what latent reasoning does to interpretability:
    probes need labels, often from text), 12 (the Astra evidence board), 0 (the Hugging Face hook), 13 (check yourself).
@@ -165,6 +171,6 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 - [ ] Narration rendered and listened to
 - [ ] Visuals built
 - [ ] Visual self-review (contact sheets / shots)
-- [ ] Rigor review (`rigor-reviewer` agent) and every claim resolved
-- [ ] Learner-sim pass (`learner-sim` agent)
+- [~] Rigor review (`rigor-reviewer` agent): run on the prototype 2026-09-26, all findings resolved; rerun for new beats
+- [~] Learner-sim pass (`learner-sim` agent): run on the prototype 2026-09-26; rerun for new beats
 - [ ] Learner watched it, and feedback went into `learner/journal.md`

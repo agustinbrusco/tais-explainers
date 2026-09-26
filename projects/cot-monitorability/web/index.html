@@ -18,6 +18,17 @@
     .readouts .k { font: 500 .72rem/1 var(--font-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: .3rem; }
     .readouts .big { font: 700 2rem/1 var(--font-mono); color: var(--residual); }
     .readouts .unit { color: var(--muted); font-size: .85rem; margin-left: .35rem; }
+    .readouts .big.need { color: var(--text); }
+    .readouts .idle .unit { visibility: hidden; }
+    .guess { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
+    .guess button { font: 500 .9rem var(--font-sans); color: var(--text); background: var(--surface); border: 1px solid var(--overseer);
+      border-radius: 999px; padding: .35rem .8rem; cursor: pointer; }
+    .guess button.on { background: var(--overseer); color: var(--bg); }
+    .guessed { color: var(--muted); }
+    ol.qa { padding-left: 1.2rem; }
+    ol.qa li { margin-bottom: .7rem; }
+    ol.qa details { margin-top: .3rem; color: var(--muted); font-size: .93rem; }
+    ol.qa summary { cursor: pointer; color: var(--overseer); font-size: .88rem; }
     #chain { font: 500 1rem/1.9 var(--font-mono); color: var(--residual); min-height: 1.9em; }
     #chain .v { color: var(--token); }
     #chain .chip { padding: .1em .45em; border-radius: 5px; font-weight: 700; }
@@ -68,8 +79,8 @@
   <main class="explainer">
     <header>
       <h1>How Many Steps Fit in the Dark?</h1>
-      <p class="lede">Chain-of-thought monitoring works because, for hard enough problems, models <em>have</em> to think out loud.
-        Here is a way to see exactly when they don't have to, and why some new architectures would change the answer.</p>
+      <p class="lede">Chain-of-thought monitoring works partly because, for hard enough problems, models <em>have</em> to think out
+        loud. Here is a way to see when they don't have to, and why some new architectures would change the answer.</p>
       <p class="proto"><strong>Prototype:</strong> the core figure only, for feedback. The rest of the piece is sketched at the end.</p>
     </header>
 
@@ -79,35 +90,68 @@
         <p>Each column is one token position; each <span class="c-residual">dot</span> is the hidden state at one layer.
           Information flows <em>up</em> through the layers and <em>rightward</em> through attention. At the top of each column
           the model samples a token, which becomes the next column's input.</p>
-        <p>The only things we can read are the <span class="c-token">tokens</span>: the cards along the bottom.
-          That row is the transcript, and it's what a <span class="c-overseer">CoT monitor</span> reads.</p>
-        <p class="caveat"><strong>Simplified:</strong> real models have tens to over a hundred layers, and every position attends
-          to <em>all</em> earlier ones. We draw 4 layers and only nearest-neighbour attention.</p>
+        <p>We treat the <span class="c-token">tokens</span> as the only readable nodes: the cards along the bottom, starting with
+          the question, Q. That row is the transcript, and it's what a <span class="c-overseer">CoT monitor</span> reads.
+          (Hidden states can be partly read too, with probes and lenses; that comes later.)</p>
+        <p class="caveat"><strong>Simplified:</strong> real models have dozens of layers (around a hundred at most in open models),
+          and positions attend to many earlier ones (all of them, in global-attention layers). We draw 4 layers and only
+          nearest-neighbour attention.</p>
       </section>
 
       <section class="step" data-step>
         <h2>The longest dark path</h2>
         <p>Look for routes through the graph that never touch a card. The longest one is the most <em>serial</em> computation the
-          model can do without writing anything down. Count the hidden states along it: that count is its length.</p>
-        <p>In a standard transformer that's one trip up the stack, however many layers it has. Attention moves information
-          sideways, but every hop also climbs a layer, so the path is still one trip up. Attention only adds a small cost,
-          logarithmic in the context length.</p>
+          model can do without writing anything down. Count the hidden states along it: that count is its length. Climbing
+          straight up one column gives 4.</p>
+        <div class="predict">Attention lets a route step sideways into the next column. Can a route that zig-zags through
+          attention touch <em>more</em> than 4 hidden states without touching a card?
+          <div class="guess" data-echo="g-zig"><button>Yes, sideways adds length</button><button>No, 4 is the most</button></div>
+        </div>
+      </section>
+
+      <section class="step" data-step>
+        <h2>Sideways doesn't help</h2>
+        <p><span class="guessed" id="g-zig"></span><strong>No.</strong> Every attention hop also climbs a layer, so a zig-zag runs
+          out of layers exactly when the straight climb does: it tops out at 4 too. The numbers above the graph give the longest
+          dark path that can reach the top of each column. In a standard transformer it's the same everywhere: one trip up the
+          stack, however many layers it has.</p>
         <p>If you think in graphs: it's the longest path in a DAG where readable nodes reset the counter. The formal version is
           called <strong>opaque serial depth</strong>.</p>
+        <p class="caveat"><strong>Counted differently:</strong> the formal definition counts elementary operations (about 170–190
+          per layer in Gemma 3) and is an upper bound on what the architecture allows; we count hidden states. And sideways
+          steps aren't quite free: they add a small cost that grows with the logarithm of the context length (Brown-Cohen,
+          Lindner &amp; Shah, 2026). We leave that out of the drawing.</p>
       </section>
 
       <section class="step" data-step>
         <h2>A problem that doesn't fit</h2>
-        <p class="predict">Each layer here does one step of the chain 7 → ×3 → −4 → ×2 → …, and each step needs the previous
-          result. A 10-step chain, 4 steps per trip up the stack: how many intermediate results must the model write down?</p>
-        <p><strong>Two.</strong> At the top of the stack, the running value has nowhere to go but into a token. The model can't
-          carry 39 into the next trip any other way. So the monitor is <em>guaranteed</em> to see 39 and 64. Watch the count:
-          each time the chain passes through a card, it starts again at 1.</p>
-        <p>This is <strong>necessity</strong>: for tasks deeper than the dark path, thinking out loud isn't a habit the model might
-          drop. It's forced.</p>
-        <p class="caveat"><strong>Drawing convention:</strong> one row = one arithmetic step. Real models need many layers per step:
-          "a 100 layer model clearly can't do 100 steps in a forward pass". Measured directly, today's best models manage about
-          <strong>4</strong> dependent arithmetic steps without CoT, at 50% success (Nanda, 2026; LLM-assisted measurement).</p>
+        <p>Now give the model a task: the chain 7 → ×3 → −4 → ×2 → …, where each step needs the previous result. In this drawing
+          each layer does one step, so one trip up the stack holds 4 of them.</p>
+        <div class="predict">The chain is 10 steps long. How many intermediate results must the model write down?
+          <div class="guess" data-echo="g-chain"><button>0</button><button>1</button><button>2</button><button>3</button></div>
+        </div>
+        <p class="caveat"><strong>Drawing convention:</strong> one row = one arithmetic step. Real models use many layers per step:
+          "a 100 layer model clearly can't do 100 steps in a forward pass". That's measured, not proven: the architecture's bound
+          is in elementary operations (thousands of them), and a task with a shortcut can beat it. Even this chain has one, since
+          its steps compose into a single multiply-and-add. Measured on chains checked for shortcuts, most frontier models manage
+          about <strong>4</strong> dependent arithmetic steps without CoT, at 50% success; one outlier, GPT-6 Astra, manages
+          about 7 (more on it below). The author calls it "heavily LLM-dependent research", with numbers that depend on
+          researcher choices (Nanda, 2026).</p>
+      </section>
+
+      <section class="step" data-step>
+        <h2>Forced into text</h2>
+        <p><span class="guessed" id="g-chain"></span><strong>Two.</strong> At the top of the stack, the running value has nowhere
+          to go but into a token. The model can't carry 39 into the next trip any other way. Watch the count: each time the chain
+          passes through a card, it starts again at 1. (The answer is written too, of course; gold marks only what the task
+          forced out along the way.)</p>
+        <p>This is <strong>necessity</strong>: for tasks deeper than the dark path, putting intermediate results into the text
+          isn't a habit the model might drop. It's forced. In the drawing's terms: a task needing <em>n</em> steps in a row, with a
+          dark path of <em>d</em>, forces at least ⌈<em>n</em>/<em>d</em>⌉ − 1 intermediate results through the text.</p>
+        <p class="caveat"><strong>Through the text is not the same as readable:</strong> necessity guarantees that 39 and 64 pass
+          through the tokens, "This does not guarantee that we can understand that information" (Korbak et al., 2025). That the
+          monitor can read them as 39 and 64 is a second assumption. The same authors argue it holds by default, since models learn
+          a strong "natural language prior" in pretraining; it's the assumption obfuscation attacks.</p>
       </section>
 
       <section class="step" data-step>
@@ -118,58 +162,98 @@
           equals the day-of-month of the birth of the winner of the Nobel Prize in Literature in 1992 born?"</blockquote>
         <p>Each hop needs the previous answer: the 1992 laureate is Derek Walcott, born on the 23rd; the Best Actress at the
           23rd Academy Awards is Judy Holliday, born on the 21st.</p>
-        <p class="predict">A hop costs more depth than an arithmetic step, so here each hop takes two rows. Of the three
-          intermediate answers (Walcott, 23, Holliday), which must be written down?</p>
-        <p><strong>Only 23.</strong> Walcott is found and used inside the first trip up the stack. But 23 arrives at the top, and the
-          next lookup needs it, so it has to surface. Holliday stays in the dark too. Notice what the monitor gets: a bare "23".</p>
-        <p class="caveat"><strong>Measured, not drawn:</strong> without CoT, chained facts are "approx 2x worse than arithmetic steps":
-          about 3.6 facts at 50% success for Astra, 2.8 for Gemini 3.8 Flash (Nanda, 2026). In January 2026 the best model tested
-          answered 60% of 2-hop and 34% of 3-hop questions, and every model was at or near chance on 4 hops (Greenblatt; filler tokens,
-          no CoT). On the benchmark above, Astra rises from about 10–20% to about 50% when given filler tokens (Xu et al., 2026).</p>
+        <p>Chained facts fare worse than arithmetic: without CoT, models manage about half as many ("approx 2x worse", Nanda,
+          2026). So we draw each hop as two rows, a drawing convention like the last one.</p>
+        <div class="predict">Of the three intermediate answers, which must be written down?
+          <div class="guess" data-echo="g-hops"><button>Walcott</button><button>23</button><button>Holliday</button><button>All three</button></div>
+        </div>
+      </section>
+
+      <section class="step" data-step>
+        <h2>A bare "23"</h2>
+        <p><span class="guessed" id="g-hops"></span><strong>In this drawing, only 23.</strong> Walcott is found and used inside the
+          first trip up the stack. But 23 arrives at the top, and the next lookup needs it, so it has to surface. Holliday stays in
+          the dark too.</p>
+        <p>Notice what the monitor gets: a bare "23". Necessity only guarantees a minimum, and here the minimum says little on its
+          own. (A real model may write out much more than the minimum; that's propensity, not necessity. And a real model's limit
+          is a success rate that falls off, not a hard wall.)</p>
+        <p class="caveat"><strong>Measured, on different datasets (so not a trend):</strong> without CoT, Gemini 3 Pro answered 60%
+          of 2-hop and 34% of 3-hop questions, and every model tested was at or near chance on 4 hops (Greenblatt, 2026). The
+          2- and 3-hop figures were with <em>filler tokens</em>: meaningless padding, here "1 2 3 … 300", between the question and
+          the answer. On the benchmark above, every model except Astra gets 10% or less beyond 2 hops (Xu et al., 2026).</p>
         <p class="inside">in two-hop questions, the first hop resolves in early layers and the second only in later ones, so the
-          layers that are left may not hold the knowledge the second hop needs. Patching a later hidden state back into an earlier
-          layer, in effect a hand-made second pass, fixed 32–66% of the failures (Biran et al., 2024; LLaMA 2 and 3, Pythia).</p>
+          layers that are left may not hold the knowledge the second hop needs. For 32–66% of such failures, <em>some</em> choice
+          of a later hidden state patched back into an earlier layer made the answer come out right: in effect, a hand-made,
+          partial second pass (Biran et al., 2024; LLaMA 2 and 3, Pythia; not a practical method, the authors note). The next
+          architecture makes a second pass part of the design.</p>
       </section>
 
       <section class="step" data-step>
         <h2>Looped: the same stack, run twice</h2>
         <p>A <strong>looped</strong> (recurrent-depth) transformer reuses its layers several times per token. Same parameters, but
           the dark path doubles, and the same chain now forces only one written result.</p>
-        <p class="caveat"><strong>Status of the evidence:</strong> OpenAI's GPT-6 Astra is <em>rumored</em>, not confirmed, to be looped.
-          Measured, it manages about <strong>7</strong> dependent steps without CoT vs about 4 for the next best model (Nanda, 2026).
-          OpenAI employees deny an architectural cause.</p>
-        <p class="caveat"><strong>Variants:</strong> some looped designs also let a token read the <em>deepest</em> states of earlier
-          tokens (shared KV caches, warm starts). Those add edges that chain the dark path across positions, not just up one column.</p>
+        <p>Why not just add layers? Because looping turns depth into a dial. A recurrent-depth model can be run for more loops at
+          test time to spend more compute, "unrolling to arbitrary depth" (Geiping et al., 2025). More loops, a longer dark path,
+          no new parameters.</p>
+        <p class="caveat"><strong>Status of the evidence:</strong> OpenAI's GPT-6 Astra, the outlier from before, is
+          <em>rumored</em>, not confirmed, to be looped; according to Redwood, OpenAI employees have denied an architectural cause.
+          Measured, it manages about <strong>7</strong> dependent steps without CoT vs about 4 for the next best models (Nanda,
+          2026). Given filler tokens (up to 4,096 of them), it rises from about 10–20% to about 50% on the 4-hop benchmark above,
+          and other models improve much less (Xu et al., 2026; run at low reasoning effort, with the API reporting zero reasoning
+          tokens).</p>
+        <p class="caveat"><strong>Variants:</strong> some looped designs also let a token read the <em>deepest</em> states of
+          earlier tokens. Those add edges that chain the dark path across positions, not just up one column. That kind of edge is
+          also the only way filler tokens could lengthen the dark path: in the plain graph they add width, not depth, since a route
+          through filler columns still climbs a layer per hop. The authors don't explain Astra's large gain.</p>
       </section>
 
       <section class="step" data-step>
         <h2>Coconut: thinking without tokens</h2>
         <p><strong>Coconut</strong> (Meta, 2024) feeds the last hidden state straight back in as the next input: a
-          <span class="c-residual">continuous thought</span> instead of a word. Those positions have no card to read.</p>
-        <p>The dark path runs right through them, and the whole chain can finish with nothing readable but the answer.</p>
+          <span class="c-residual">continuous thought</span> instead of a word. Those positions have no card to read. The number of
+          thoughts is fixed in training and matched at inference; here there are two.</p>
+        <p>The dark path runs right through them, and the whole chain finishes with nothing readable but the answer. The depth
+          profile shows the capacity: 12 at the last thought (and, through attention, for a few columns after it), of which this
+          chain uses 10.</p>
         <p class="caveat"><strong>Status:</strong> Coconut is a research model, tested on GPT-2 and Llama scale, and it scored
-          <em>below</em> ordinary CoT on GSM8k (34.1% vs 42.9%). It matters as a proof of mechanism, not as a frontier system.</p>
+          <em>below</em> ordinary CoT on GSM8k (34.1% vs 42.9%, GPT-2). It matters as a proof of mechanism, not as a frontier system.</p>
       </section>
 
       <section class="step" data-step>
         <h2>Full bandwidth: text plus a private channel</h2>
-        <p>The <strong>full-bandwidth transformer</strong> (2026) keeps writing tokens, but fuses each sampled token with the previous
-          top-layer hidden state and feeds <em>that</em> back in. The token enters only as a gate on the hidden state, so the model
-          still produces a transcript, yet no card ever cuts the path. The dark path spans the whole context.</p>
+        <p>Ordinary decoding throws information away: "only the sampled token returns to the bottom of the stack, while the
+          top-layer hidden state is discarded." The <strong>full-bandwidth transformer</strong> (2026) keeps it. Each position
+          receives the previous top-layer state, fused with the sampled token, which acts only as a gate on that state.</p>
+        <p>The model still samples a token at every position, so there is still a transcript. But the running value no longer
+          has to pass through it. No card ever cuts the path, and the dark path grows by a full stack with every token.</p>
         <p class="caveat"><strong>Careful with "depth":</strong> the paper notes that decoding's <em>total</em> serial depth is
           unchanged, which is true, since ordinary CoT is also layers × tokens. What changes is how much of it is <em>opaque</em>:
-          from about one stack to about the whole context.</p>
+          from about one stack to about everything generated so far.</p>
       </section>
 
       <section class="step" data-step>
         <h2>Your turn</h2>
-        <p>Try to answer these before touching the controls:</p>
-        <ul>
-          <li>What's the smallest loop count at which a 12-step chain forces <em>nothing</em> into text?</li>
-          <li>Why does the chain length stop mattering under full bandwidth?</li>
-          <li>With Coconut, what happens to a 16-step chain once the thoughts run out?</li>
-          <li>Switch to the 4-hop question. How many loops until nothing but the answer is written?</li>
-        </ul>
+        <p>Answer each one before touching the controls, then check.</p>
+        <ol class="qa">
+          <li>What's the smallest loop count at which a 12-step chain forces <em>nothing</em> into text?
+            <details><summary>Answer</summary>3. Each pass adds 4 to the dark path, and ⌈12/(4 × 3)⌉ − 1 = 0. With 2 loops the dark
+              path is 8, so 64 (after step 8) must be written.</details></li>
+          <li>Why does the chain length stop mattering under full bandwidth?
+            <details><summary>Answer</summary>No card ever resets the count, so the dark path grows by a full stack per token.
+              Any chain that fits in the context fits in the dark. Tokens are still sampled, but they don't have to carry it.</details></li>
+          <li>With Coconut, what happens to a 16-step chain once the thoughts run out?
+            <details><summary>Answer</summary>The dark path reaches 12 at the last thought. The next position is an ordinary token,
+              so the value after step 12 (374) is forced out there; steps 13–16 run in the next column.</details></li>
+          <li>Switch to the 4-hop question. How many loops until nothing but the answer is written?
+            <details><summary>Answer</summary>2. Four hops at two rows each need 8 in a row, and two passes give 8.</details></li>
+          <li><strong>Transfer:</strong> put 20 filler tokens between the question and the answer. Would a standard model now
+            finish the 10-step chain without writing anything? What kind of edge would have to exist for filler to help?
+            <details><summary>Answer</summary>No. Filler tokens are just more columns in the same graph, and a route through
+              them still climbs a layer per hop, so the dark path stays about 4 (plus the small attention cost). They add
+              width: room for parallel work, which is where filler tokens have been shown to help (Pfau et al., 2024). To add
+              <em>depth</em>, some edge must carry a deep state of one position into a shallow layer of a later one, as full
+              bandwidth, Coconut's thoughts, or looped variants that read earlier tokens' deepest states do.</details></li>
+        </ol>
         <div id="controls">
           <div class="seg" role="group" aria-label="Example">
             <button data-task="arith">Arithmetic chain</button>
@@ -203,7 +287,8 @@
     <div class="stage">
       <span class="badge schematic">schematic</span>
       <div class="readouts">
-        <div><span class="k">Longest dark path</span><span class="big" id="read-dark"></span><span class="unit">layers</span></div>
+        <div id="ro-need"><span class="k">Task needs</span><span class="big need" id="read-need"></span><span class="unit">in a row</span></div>
+        <div id="ro-dark"><span class="k">Longest dark path</span><span class="big" id="read-dark"></span><span class="unit">hidden states</span></div>
         <div><span class="k">Forced into text</span><span id="read-forced"></span></div>
       </div>
       <svg id="stage" role="img" aria-label="A transformer drawn as a grid of hidden states over token positions and layers, with the longest path that avoids readable tokens highlighted"></svg>

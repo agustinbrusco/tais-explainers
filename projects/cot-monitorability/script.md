@@ -11,26 +11,32 @@
 8. **Check yourself.**
 
 ## Beats (web explorable; one prose step per beat, and `render(i)` is a pure function of the step)
+
+Predictions are split into a *predict* step (task posed, route held, guess buttons) and a *reveal* step, so the stage never
+leaks the answer.
 Status: ✅ in the prototype · 🔲 planned
 
-| # | step | visual state | what should click | claims |
+| # | step (on screen) | visual state | what should click | claims |
 |---|---|---|---|---|
 | 0 | 🔲 Hook: the Hugging Face incident | incident card: ~1,200 agents, a message board, raw CoTs | reading CoT is *the* tool that works today | C-HF-1..3 |
-| 1 | ✅ A language model, unrolled | standard DAG, no highlight | positions × layers; only tokens are readable; the monitor reads that row | C-DAG-1 |
-| 2 | ✅ The longest dark path | column-0 path glows, counter = 4 | serial depth is bounded by the layer count; attention can't lengthen it | C-OSD-1, C-OSD-2 |
-| 3 | ✅ A problem that doesn't fit | 10-step chain; the pulse climbs, 39 and 64 are forced into cards, the count restarts at 1 after each | **necessity**: long chains are *forced* into text | C-NEC-1, C-NANDA-1, C-VIS-1 |
-| 3b | ✅ Facts hit the same wall | Xu et al.'s 4-hop question, two rows per hop (capsules); only "23" is forced; Walcott and Holliday stay in the dark (blue italic in the strip) | the wall isn't an arithmetic artifact; a hop costs ~2× an arithmetic step; inside real models the second hop can run out of layers | C-HOP-1..6, C-CONV-2, C-BIRAN-1/2 |
-| 4 | ✅ Looped | R = 8, pass bands; only 64 forced | the same weights reused → dark path × loops | C-LOOP-1, C-ASTRA-ARCH, C-NANDA-1 |
-| 5 | ✅ Coconut | thought columns (∿) with no card; nothing forced | continuous thoughts bypass the text bottleneck | C-COCO-1 |
-| 6 | ✅ Full bandwidth | dark links on every column; counter = 32 (20 on phones); the route's count never restarts | a private channel next to the text → dark path spans the context | C-FBW-1, C-FBW-2 |
-| 7 | ✅ Your turn | controls live (example: arithmetic / 4-hop, architecture, loops, chain length) | the learner answers the four questions | n/a |
-| 8 | 🔲 Two ways to earn the reward | same graph; the reward term "monitor didn't flag" → the model can behave *or* stop writing | obfuscation under pressure; necessity survives it, propensity doesn't | C-BAKER-1..2, C-TOY-1 |
-| 8b | 🔲 *(aside)* the policy-gradient version | a small equation panel, collapsible | the math behind "the cheaper route wins" (the learner is solid on RL concepts, less so on the math) | C-RL-1 |
-| 9 | 🔲 Faithfulness ≠ monitorability | two panels: a rationalization CoT vs a computation CoT | "unfaithful" doesn't mean "unmonitorable" | C-EMM-1 |
-| 10 | 🔲 Diffusion | canvas × denoising-steps DAG; toggle opaque vs bottlenecked self-conditioning | 28.6× → 1.1×: what matters is *what passes between steps* | C-DIFF-1..2 |
-| 11 | 🔲 What latent reasoning does to interpretability | the same graph with readers attached to hidden nodes (probe, NLA, J-lens), each with a "label source" wire back to the cards. Toggle Coconut or full bandwidth: the wires to text go dark, and the readers that get their meaning from tokens dim | activations persist; **labels and verification** are what we lose; an unreliable CoT silently corrupts labels; toy latent models are readable only because they were trained on human traces | C-INTERP-1..7 |
-| 12 | 🔲 Evidence board: Astra | a sortable board: confirmed / reported / rumored / bounded | calibration in both directions | C-ASTRA-* |
-| 13 | 🔲 Check yourself | five questions (see README) | transfer | n/a |
+| 1 | ✅ A language model, unrolled | standard DAG; readout "?" | positions × layers; tokens treated as the only readable nodes; the monitor reads that row | C-DAG-1/2 |
+| 2 | ✅ The longest dark path (predict) | column route counted 1–4 | a dark path is counted in hidden states; predict: can a zig-zag beat 4? | C-OSD-1 |
+| 3 | ✅ Sideways doesn't help (reveal) | zig-zag route also tops out at 4; **depth profile** appears (4s everywhere) | every attention hop climbs a layer; OSD named; formal version counts operations, log cost dropped | C-OSD-1/2, C-PROF-1 |
+| 4 | ✅ A problem that doesn't fit (predict) | task posed (strip, "needs 10"), route held; guess buttons | commit to a guess | C-CONV-1, C-SHORT-1, C-NANDA-1 |
+| 5 | ✅ Forced into text (reveal) | pulse climbs; 39, 64 forced; count restarts; answer plain | **necessity**; the rule in the drawing's terms; through the text ≠ readable | C-NEC-1, C-KOR-1, C-RULE-1, C-VIS-1 |
+| 6 | ✅ Facts hit the same wall (predict) | 4-hop question posed, 2 rows per hop | facts fare ~2× worse; guess which answer surfaces | C-HOP-1/2, C-CONV-2 |
+| 7 | ✅ A bare "23" (reveal) | capsules; only 23 forced | necessity guarantees a minimum, not a legible one; measured on different datasets; Biran's partial second pass | C-HOP-4..6, C-XU-2, C-BIRAN-1/2, C-FILL-1 |
+| 8 | ✅ Looped | R = 8, pass bands; only 64 forced; profile 8s | depth becomes a dial; Astra's evidence; variants and filler | C-LOOP-1..3, C-ASTRA-ARCH, C-HOP-5, C-FILL-1 |
+| 9 | ✅ Coconut | thought cards; count runs 1–10; profile shows capacity 12 | continuous thoughts bypass the text bottleneck | C-COCO-1..3 |
+| 10 | ✅ Full bandwidth | dark links on every column; profile 4→32 | the discarded state kept → dark path grows with every token | C-FBW-0..3 |
+| 11 | ✅ Your turn | controls live; 5 questions with answers (one transfer) | operate the rule; filler adds width, not depth | C-FILL-1 |
+| 12 | 🔲 Two ways to earn the reward | same graph; the reward term "monitor didn't flag" | obfuscation under pressure; necessity survives it, propensity doesn't | C-BAKER-1..2, C-TOY-1 |
+| 12b | 🔲 *(aside)* the policy-gradient version | a small equation panel, collapsible | the math behind "the cheaper route wins" | C-RL-1 |
+| 13 | 🔲 Faithfulness ≠ monitorability | two panels: rationalization vs computation CoT | "unfaithful" doesn't mean "unmonitorable" | C-EMM-1 |
+| 14 | 🔲 Diffusion | canvas × denoising-steps DAG; opaque vs bottlenecked self-conditioning | 28.6× → 1.1× | C-DIFF-1..2 |
+| 15 | 🔲 What latent reasoning does to interpretability | readers with label-source wires that go dark | labels and verification are what we lose | C-INTERP-1..7 |
+| 16 | 🔲 Evidence board: Astra | confirmed / reported / rumored / bounded | calibration in both directions | C-ASTRA-* |
+| 17 | 🔲 Check yourself | five questions (see README) | transfer | n/a |
 
 ## Visual grammar (keep consistent)
 - Hidden state = `residual` blue dot. Readable token = `token` paper card. Monitor = `overseer` gold eye plus gold outlines on

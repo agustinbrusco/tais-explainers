@@ -54,7 +54,8 @@ export function mountSteps({ render, root = document }) {
   );
   sections.forEach((s, j) => {
     io.observe(s);
-    s.addEventListener("click", () => goto(j, { scroll: true }));
+    // clicking a section selects it, but not when the click was meant for a control inside it
+    s.addEventListener("click", (e) => { if (!e.target.closest("button, input, select, textarea, a, label, summary, details")) goto(j, { scroll: true }); });
   });
 
   addEventListener("keydown", (e) => {

@@ -473,8 +473,8 @@
   date: '2026-09-10'
   url: https://www.lesswrong.com/posts/x8BvtWxtoajBGHS3g/an-operationalization-of-opaque-serial-depth
   accessed: '2026-09-25'
-  read: false
-  notes: Located by research agent 2026-09-25; not yet read in a project.
+  read: partial
+  notes: 'Quotes checked on the live page by the rigor-reviewer agent on 2026-09-26 (loop depth × loops; recur on opaque state throughout a full context window; linear scaling with tokens for a KV cache shared across depths). No local copy; cite by quote.'
 - id: web:potts-fragile-cot
   title: The fragile foundations of CoT monitoring
   authors:
