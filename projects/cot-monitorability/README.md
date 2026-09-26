@@ -119,8 +119,11 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
   - New scenes: METR incident waffle (real counts), Baker/Kuhn/Emmons charts re-plotted from the papers' figures,
     diffusion as a graph edit (DP on the drawn graph), interpretability "readers" with two wires, Astra evidence board.
   - claims.md covers every new claim; three research passes and their corrections are in the dossier.
-  - **Not yet done for iteration 3:** a `rigor-reviewer` + `learner-sim` pass on the new chapters (next), motion review of
-    the new scenes, and the learner's feedback.
+  - **Iteration 3b (same day):** `rigor-reviewer` (32 findings, no blockers) and `learner-sim` run on the whole piece; all
+    "should"s fixed (see `review.md`): predicts rebuilt around misconceptions without leaks, define-before-use glosses,
+    board redesigned, readers diagram recalibrated, mobile layouts for every scene. Smoke-tested (25 steps, desktop +
+    mobile, no console errors; guesses and free play exercised).
+  - **Awaiting the learner's feedback on the full piece.**
 - Beats for the full piece are in `script.md` (✅ built, 🔲 planned).
 - **Both research passes are integrated** (depth mechanics per architecture; interpretability without a reliable CoT).
   They're in `references/cot-monitorability/README.md` (sections "What latent reasoning does to interpretability tools" and
@@ -168,7 +171,9 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 3. ~~Spot-check the agent-sourced line numbers~~ (done by the rigor-reviewer 2026-09-26; claims.md rewritten).
    Candidates from the learner-sim not yet done: a toggle for looped "variant" edges (cross-position deep reads), which
    would make the filler-token transfer question operable; hop entities labelled on the figure.
-4. Build the 🔲 beats in `script.md`, in order: 8 (two ways to earn the reward, plus the optional RL-math aside),
+4. ~~Build the 🔲 beats~~ (done in iteration 3). Remaining ideas, if the learner wants them: interactive toggles on the
+   diffusion (S opaque/readable) and readers (text on/off) figures; small multiples; a narrated video version.
+   Original list: 8 (two ways to earn the reward, plus the optional RL-math aside),
    9 (faithfulness ≠ monitorability), 10 (diffusion as a graph edit), 11 (what latent reasoning does to interpretability:
    probes need labels, often from text), 12 (the Astra evidence board), 0 (the Hugging Face hook), 13 (check yourself).
 5. Run the `review` skill: shots, then the `rigor-reviewer` and `learner-sim` agents; log in `review.md`.
@@ -179,12 +184,12 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 - [x] Brief drafted
 - [x] Brief agreed with learner (2026-09-25; additions: Coconut, effects on interp tools, RL math optional)
 - [ ] Sources read, `claims.md` drafted (Brown-Cohen §3–4; Redwood 09-10 and 09-23 incl. appendices; Nanda; Baker; Emmons; Engels)
-- [ ] `script.md` beats written
+- [x] `script.md` beats written (25 steps)
 - [x] Money shot prototyped (web) and self-reviewed. Learner feedback received 2026-09-25 (see above).
 - [x] Iteration 2 (N-hop example, counted route with pulse) built and self-reviewed 2026-09-26.
 - [ ] Narration rendered and listened to
-- [ ] Visuals built
-- [ ] Visual self-review (contact sheets / shots)
-- [~] Rigor review (`rigor-reviewer` agent): run on the prototype 2026-09-26, all findings resolved; rerun for new beats
-- [~] Learner-sim pass (`learner-sim` agent): run on the prototype 2026-09-26; rerun for new beats
+- [x] Visuals built (iteration 3)
+- [x] Visual self-review (shots desktop + mobile, motion frames)
+- [x] Rigor review (`rigor-reviewer` agent): full piece 2026-09-26, findings resolved (`review.md`)
+- [x] Learner-sim pass (`learner-sim` agent): full piece 2026-09-26, findings resolved or listed as not done
 - [ ] Learner watched it, and feedback went into `learner/journal.md`

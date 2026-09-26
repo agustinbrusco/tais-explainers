@@ -5,13 +5,15 @@
 
 import * as d3 from "d3";
 
-const W = 720, H = 470;
+// Phones: the model on top, the readers stacked below it, in a narrow viewBox.
+const NARROW = matchMedia("(max-width: 860px)").matches;
+const W = NARROW ? 440 : 720, H = NARROW ? 640 : 470;
 const COLS = 4, ROWS = 3;
-const cx = (c) => 70 + c * 70, cy = (r) => 330 - r * 80, cardY = 400;
+const cx = (c) => (NARROW ? 110 : 70) + c * 70, cy = (r) => (NARROW ? 190 : 330) - r * (NARROW ? 60 : 80), cardY = NARROW ? 250 : 400;
 const READERS = [
-  { name: "Probe", y: 60, node: [3, 2], from: "picked via a transcript judge" },
-  { name: "NLA · activation oracle", y: 190, node: [2, 1], from: "outputs checked vs transcript" },
-  { name: "J-lens", y: 320, node: [1, 1], from: "reads what's about to be said" },
+  { name: "Probe", y: NARROW ? 318 : 60, node: [3, 2], from: "picked via a transcript judge" },
+  { name: "NLA · activation oracle", y: NARROW ? 420 : 190, node: [2, 1], from: "outputs checked vs transcript" },
+  { name: "J-lens", y: NARROW ? 522 : 320, node: [1, 1], from: "reads what's about to be said" },
 ];
 
 export function drawReaders(svg, { latent, K, font, quick }) {
@@ -35,19 +37,24 @@ export function drawReaders(svg, { latent, K, font, quick }) {
     card.append("text").attr("text-anchor", "middle").attr("dy", "0.36em").attr("fill", latent ? K.residual : K.bg)
       .style("font", latent ? `600 22px ${font.display}` : `600 15px ${font.mono}`).text(latent ? "∿" : c === 0 ? "Q" : "…");
   }
-  g.append("text").attr("x", cx(0) - 30).attr("y", cardY + 42).attr("fill", K.muted).style("font", `500 15px ${font.mono}`)
+  g.append("text").attr("x", cx(0) - 30).attr("y", cardY + (NARROW ? 36 : 42)).attr("fill", K.muted).style("font", `500 15px ${font.mono}`)
     .text(latent ? "reasoning stays latent" : "reasoning written as text");
 
   // readers
   for (const rd of READERS) {
-    const x0 = 400, w = 300, h = 92;
+    const x0 = NARROW ? 36 : 400, w = NARROW ? 340 : 300, h = 92;
+    const lane = 392 + READERS.indexOf(rd) * 14;   // phones: each activations wire gets its own lane down the right edge
     const [nc, nr] = rd.node;
     // wire 1: activations -> reader (always there)
-    g.append("path").attr("d", `M${cx(nc)},${cy(nr)} C${cx(nc) + 90},${cy(nr)} ${x0 - 80},${rd.y + 30} ${x0},${rd.y + 30}`)
+    g.append("path").attr("d", NARROW
+        ? `M${cx(nc)},${cy(nr)} L${lane - 8},${cy(nr)} Q${lane},${cy(nr)} ${lane},${cy(nr) + 8} L${lane},${rd.y + 22} Q${lane},${rd.y + 30} ${lane - 8},${rd.y + 30} L${x0 + w},${rd.y + 30}`
+        : `M${cx(nc)},${cy(nr)} C${cx(nc) + 90},${cy(nr)} ${x0 - 80},${rd.y + 30} ${x0},${rd.y + 30}`)
       .attr("fill", "none").attr("stroke", K.residual).attr("stroke-width", 2.2).attr("opacity", 0.85);
     g.append("circle").attr("cx", cx(nc)).attr("cy", cy(nr)).attr("r", 10).attr("fill", "none").attr("stroke", K.overseer).attr("stroke-width", 2);
     // wire 2: text -> reader (meaning, labels, verification)
-    const wire = g.append("path").attr("d", `M${cx(COLS - 1) + 26},${cardY} C${360},${cardY} ${x0 - 60},${rd.y + 66} ${x0},${rd.y + 66}`)
+    const wire = g.append("path").attr("d", NARROW
+        ? `M${cx(0) - 26},${cardY} C${10},${cardY} ${10},${rd.y + 66} ${x0},${rd.y + 66}`
+        : `M${cx(COLS - 1) + 26},${cardY} C${360},${cardY} ${x0 - 60},${rd.y + 66} ${x0},${rd.y + 66}`)
       .attr("fill", "none").attr("stroke", K.token).attr("stroke-width", 2).attr("opacity", 0.8);
     wire.transition(t).attr("stroke", latent ? K.faint : K.token).attr("stroke-dasharray", latent ? "3 7" : null).attr("opacity", latent ? 0.6 : 0.8);
 
@@ -62,7 +69,7 @@ export function drawReaders(svg, { latent, K, font, quick }) {
         .style("font", `500 14px ${font.mono}`).text("weaker?").attr("opacity", 0).transition(t).attr("opacity", 1);
     }
   }
-  g.append("text").attr("x", 400).attr("y", 448).attr("fill", K.muted).style("font", `500 14px ${font.mono}`)
+  g.append("text").attr("x", NARROW ? 40 : 400).attr("y", NARROW ? 636 : 448).attr("fill", K.muted).style("font", `500 14px ${font.mono}`)
     .text(latent ? "activations: still there · checks: weaker?" : "pale wire: checks that lean on the transcript");
   return new Promise((r) => setTimeout(r, quick ? 0 : 850));
 }
