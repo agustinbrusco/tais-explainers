@@ -13,12 +13,14 @@ dependencies = [
     "pyyaml>=6",
 ]
 
-[project.optional-dependencies]
-# Needs system headers: sudo apt install libcairo2-dev libpango1.0-dev pkg-config
+[dependency-groups]
+# Installed by default (see tool.uv.default-groups). Needs system headers:
+#   sudo apt install libcairo2-dev libpango1.0-dev pkg-config
+# Without them: uv sync --no-group manim
 manim = [
     "manim>=0.19",
 ]
-# Real-model activations for "real data" visuals. CPU-only torch (no GPU here).
+# Real-model activations for "real data" visuals. CPU-only torch (no GPU here). uv sync --group interp
 interp = [
     "torch>=2.4",
     "transformer-lens>=2.0",
@@ -26,6 +28,7 @@ interp = [
 
 [tool.uv]
 package = true
+default-groups = ["manim"]
 
 [tool.uv.sources]
 torch = [{ index = "pytorch-cpu" }]

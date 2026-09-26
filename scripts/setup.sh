@@ -7,13 +7,12 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 extras=()
-if pkg-config --exists pangocairo 2>/dev/null; then
-  extras+=(--extra manim)
-else
+if ! pkg-config --exists pangocairo 2>/dev/null; then
+  extras+=(--no-group manim)
   echo "! Cairo/Pango headers missing, so skipping Manim. Install with:"
   echo "    sudo apt install libcairo2-dev libpango1.0-dev pkg-config"
 fi
-[[ "${1:-}" == "--interp" ]] && extras+=(--extra interp)
+[[ "${1:-}" == "--interp" ]] && extras+=(--group interp)
 
 echo "== Python (uv sync ${extras[*]:-})"
 uv sync "${extras[@]}"

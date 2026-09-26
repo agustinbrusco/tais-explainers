@@ -29,13 +29,17 @@ graph LR
 
 | concept | status | needs | covered by |
 |---|---|---|---|
-| residual stream | · | transformer forward pass | `residual-stream-lenses` |
-| logit lens → tuned lens | · | residual stream, unembedding | `residual-stream-lenses` |
-| linear representations, SAEs | · | residual stream | (background) |
-| Jacobians / linearization | · | multivariable calculus | `j-lens` |
+| linear algebra, SVD, high-dim geometry, UMAP-style methods | ★ | | (background) |
+| ML / DNN basics, standard architectures | ✓ | | (background) |
+| residual stream | ~ | transformer forward pass | Welch Labs (external; watch first) |
+| attention mechanics | ~ | | (external, TBD) |
+| logit lens → tuned lens | · | residual stream, unembedding | `j-lens` (opening act) |
+| superposition & SAEs | ~ (intuitive, to be tested) | residual stream, sparsity | `saes` |
+| RL basics (policy gradient, outcome vs process reward, KL penalty) | · (weak) | | mini-primer inside `cot-monitorability` |
+| KL divergence | ~ (needs refresher) | probability | mini-primer before `readers-that-talk` |
+| Jacobians / linearization | ✓ (learner: fine) | multivariable calculus | `j-lens` |
 | J-lens & J-space | · | logit/tuned lens, Jacobians, SAEs | `j-lens` |
 | activation injection → activation oracles | · | patching, probes, SFT | `readers-that-talk` |
 | NLAs | · | AOs, autoencoders/FVE, RL+KL | `readers-that-talk` |
 | model organisms, auditing games | · | SFT/RL/SDF, the readers | `model-organisms` |
-| CoT monitorability | · | reasoning models, RL | `cot-monitorability` |
-| latent architectures, opaque serial depth | · | CoT monitorability | `cot-monitorability` |
+| CoT monitorability, opaque serial depth, latent architectures | · | reasoning models, RL basics | `cot-monitorability` |

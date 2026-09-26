@@ -37,6 +37,11 @@ learner/              profile.md, concept-map.md, journal.md: who we're teaching
 
 ## Pedagogy
 
+- **Don't duplicate great existing work, and build the delta.** Before planning a piece, check what excellent content
+  already covers (the "Sources to watch" and [references/craft/](references/craft/): Welch Labs, Anthropic's interactive
+  papers, Goodfire, Neuronpedia). Link it as a prerequisite and spend our effort on what nobody has shown well yet.
+- **Pieces must stand alone.** The learner may share good ones with study groups, so a piece never refers to the
+  learner profile or private context. Credit line: "Made with Claude".
 - **Question before method.** Open with the problem the technique answers, and why the obvious approach fails.
 - **One running example** carried through the whole piece. Concrete before abstract; a picture before the equation;
   the equation only once the picture has earned it.

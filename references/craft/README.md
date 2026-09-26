@@ -4,6 +4,14 @@ This folder is about how to *show* things. Each entry says what the piece does w
 entries from actually looking at the piece (screenshots stay in the scratchpad and aren't committed; they're the
 authors' work).
 
+## Welch Labs (YouTube)
+https://www.youtube.com/@WelchLabs. Recommended by the learner as top-tier, *especially visually*. Their 2026-08-31 video
+on ResNets and the residual stream is this series' residual-stream prerequisite, so we don't re-make it.
+- *Not yet examined:* Claude can't watch video. To learn from their craft, the learner could share specific timestamps
+  or screenshots to study, which is better than guessing at what makes them good.
+- Its chapters (degradation problem → probing → loss landscapes → shattered gradients → ResNets → residual stream → ViT
+  registers) are a model **arc**: a historical puzzle, then the fix, then how the fix changed our understanding.
+
 ## Goodfire, "A Geometric Calculator Inside a Neural Network" (2026-05-14)
 https://www.goodfire.com/research/a-geometric-calculator · examined 2026-09-25 via per-figure screenshots
 - **Real data under idealized geometry.** Actual activation point clouds, projected onto a circle plane and colored by

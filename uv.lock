@@ -1508,7 +1508,7 @@ dependencies = [
     { name = "soundfile" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 interp = [
     { name = "torch", version = "2.14.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'darwin'" },
     { name = "torch", version = "2.14.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform != 'darwin'" },
@@ -1522,15 +1522,18 @@ manim = [
 requires-dist = [
     { name = "imageio-ffmpeg", specifier = ">=0.5" },
     { name = "kokoro-onnx", specifier = ">=0.4" },
-    { name = "manim", marker = "extra == 'manim'", specifier = ">=0.19" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "pillow", specifier = ">=10" },
     { name = "pyyaml", specifier = ">=6" },
     { name = "soundfile", specifier = ">=0.12" },
-    { name = "torch", marker = "extra == 'interp'", specifier = ">=2.4", index = "https://download.pytorch.org/whl/cpu" },
-    { name = "transformer-lens", marker = "extra == 'interp'", specifier = ">=2.0" },
 ]
-provides-extras = ["manim", "interp"]
+
+[package.metadata.requires-dev]
+interp = [
+    { name = "torch", specifier = ">=2.4", index = "https://download.pytorch.org/whl/cpu" },
+    { name = "transformer-lens", specifier = ">=2.0" },
+]
+manim = [{ name = "manim", specifier = ">=0.19" }]
 
 [[package]]
 name = "tokenizers"

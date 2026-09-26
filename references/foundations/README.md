@@ -5,6 +5,7 @@
 
 | concept | reference | where |
 |---|---|---|
+| **Residual stream (watch first)** | Welch Labs, "The most cited paper of the century is a brilliant hack", 2026-08-31 (35 min: ResNets → residual stream → ViT registers). https://www.youtube.com/watch?v=QgH9sr7G13Q. Recommended by the learner, especially for its visuals. | video |
 | Residual stream, QK/OV circuits, induction heads | Elhage et al., "A Mathematical Framework for Transformer Circuits", Anthropic, 2021. https://transformer-circuits.pub/2021/framework/index.html | web |
 | Logit lens | nostalgebraist, "interpreting GPT: the logit lens", LW, 2020. https://www.lesswrong.com/posts/AcKRB8wDpdaN6v6ru | web |
 | Tuned lens | Belrose et al., 2023-03-14 | `arxiv:2303.08112` |

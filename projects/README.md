@@ -12,10 +12,13 @@ The four requested topics form one argument:
 
 | # | slug | promise | format | status |
 |---|---|---|---|---|
-| 0 | `residual-stream-lenses` | *Pilot.* Watch a prediction form layer by layer with the logit lens and tuned lens, on real GPT-2 activations | web | proposed |
-| 1 | `cot-monitorability` | CoT is our strongest oversight tool (it made the Hugging Face incident legible), and it may be closing: opaque serial depth, looped and full-bandwidth architectures, and GPT-6 Astra, with confirmed and rumored claims kept apart | manim + one interactive | proposed, most urgent |
-| 2 | `j-lens` | See *spider* light up inside a model that never says "spider", and what the J-lens can and can't see | web | proposed |
-| 3 | `readers-that-talk` | Activation oracles vs NLAs: supervised vs unsupervised readers, and why "reconstructs well" ≠ "is true" | web + short video | proposed |
-| 4 | `model-organisms` | The lab bench: build a model with a hidden objective, then play the auditor with the tools from 2–3 | web (game) | proposed |
+| 1 | `cot-monitorability` | **How Many Steps Fit in the Dark?** Find the longest dark path in a computation graph, and use it to predict when reading the CoT can catch a plan. Includes Astra and the Hugging Face incident, with confirmed and rumored claims kept apart. RL mini-primer inside. | web + manim | **brief drafted** |
+| 2 | `saes` | *Test your intuitions.* The learner already has an intuitive grasp of SAEs, so this is predict-then-reveal challenges: toy superposition you train in the browser, then where SAEs fail (splitting, absorption, geometry they miss). | web | proposed |
+| 3 | `j-lens` | Logit lens → tuned lens → J-lens, opening where Welch Labs' residual-stream video leaves off. See *spider* light up inside a model that never says "spider", and what the J-lens can't see. | web | proposed |
+| 4 | `readers-that-talk` | Activation oracles vs NLAs: supervised vs unsupervised readers, and why "reconstructs well" ≠ "is true". Opens with a KL-divergence mini-refresher. | web + short video | proposed |
+| 5 | `model-organisms` | The lab bench: build a model with a hidden objective, then play the auditor with the tools from 2–4. | web (game) | proposed |
+
+**Not re-made (watch these instead):** the residual stream, in Welch Labs' "The most cited paper of the century is a
+brilliant hack" (2026-08-31).
 
 Order and scope are open, pending the learner's profile.

@@ -208,3 +208,15 @@
   read: partial
   notes: 'Blog version of arxiv:2605.01148 (''Arithmetic in the Wild''). Llama 3.1 8B addition module
     in layer 18 over circular (Fourier) number representations. Also a craft exemplar: see references/craft/.'
+- id: yt:welchlabs-resnet
+  title: The most cited paper of the century is a brilliant hack
+  authors:
+  - Welch Labs
+  date: '2026-08-31'
+  url: https://www.youtube.com/watch?v=QgH9sr7G13Q
+  accessed: '2026-09-25'
+  read: false
+  notes: '35-min video: ResNets → degradation problem, loss landscapes, shattered gradients → residual
+    stream → ViT registers. Recommended by the learner as THE residual-stream prerequisite, especially
+    for its visuals. Metadata and chapters from YouTube oEmbed and the description. Claude cannot watch
+    video.'

@@ -770,3 +770,83 @@
   accessed: '2026-09-25'
   read: false
   notes: Located via the Redwood blog index on 2026-09-25 (title checked against the index); not yet read.
+- id: arxiv:2502.17416
+  title: 'Reasoning with Latent Thoughts: On the Power of Looped Transformers'
+  authors:
+  - Nikunj Saunshi
+  - Nishanth Dikkala
+  - Zhiyuan Li
+  - Sanjiv Kumar
+  - Sashank J. Reddi
+  date: '2025-02-24'
+  url: https://arxiv.org/abs/2502.17416
+  abstract: 'Large language models have shown remarkable reasoning abilities and scaling laws suggest
+    that large parameter count, especially along the depth axis, is the primary driver. In this work,
+    we make a stronger claim -- many reasoning problems require a large depth but not necessarily many
+    parameters. This unlocks a novel application of looped models for reasoning. Firstly, we show that
+    for many synthetic reasoning problems like addition, $p$-hop induction, and math problems, a $k$-layer
+    transformer looped $L$ times nearly matches the performance of a $kL$-layer non-looped model, and
+    is significantly better than a $k$-layer model. This is further corroborated by theoretical results
+    showing that many such reasoning problems can be solved via iterative algorithms, and thus, can be
+    solved effectively using looped models with nearly optimal depth. Perhaps surprisingly, these benefits
+    also translate to practical settings of language modeling -- on many downstream reasoning tasks, a
+    language model with $k$-layers looped $L$ times can be competitive to, if not better than, a $kL$-layer
+    language model. In fact, our empirical analysis reveals an intriguing phenomenon: looped and non-looped
+    models exhibit scaling behavior that depends on their effective depth, akin to the inference-time
+    scaling of chain-of-thought (CoT) reasoning. We further elucidate the connection to CoT reasoning
+    by proving that looped models implicitly generate latent thoughts and can simulate $T$ steps of CoT
+    with $T$ loops. Inspired by these findings, we also present an interesting dichotomy between reasoning
+    and memorization, and design a looping-based regularization that is effective on both fronts.'
+  read: false
+  notes: ''
+- id: arxiv:2510.25741
+  title: Scaling Latent Reasoning via Looped Language Models
+  authors:
+  - Rui-Jie Zhu
+  - Zixuan Wang
+  - Kai Hua
+  - Tianyu Zhang
+  - Ziniu Li
+  - Haoran Que
+  - Boyi Wei
+  - Zixin Wen
+  - Fan Yin
+  - He Xing
+  - Lu Li
+  - Jiajun Shi
+  - Kaijing Ma
+  - Shanda Li
+  - Taylor Kergan
+  - Andrew Smith
+  - Xingwei Qu
+  - Mude Hui
+  - Bohong Wu
+  - Qiyang Min
+  - Hongzhi Huang
+  - Xun Zhou
+  - Wei Ye
+  - Jiaheng Liu
+  - Jian Yang
+  - Yunfeng Shi
+  - Chenghua Lin
+  - Enduo Zhao
+  - Tianle Cai
+  - Ge Zhang
+  - Wenhao Huang
+  - Yoshua Bengio
+  - Jason Eshraghian
+  date: '2025-10-29'
+  url: https://arxiv.org/abs/2510.25741
+  abstract: 'Modern LLMs are trained to "think" primarily via explicit text generation, such as chain-of-thought
+    (CoT), which defers reasoning to post-training and under-leverages pre-training data. We present and
+    open-source Ouro, named after the recursive Ouroboros, a family of pre-trained Looped Language Models
+    (LoopLM) that instead build reasoning into the pre-training phase through (i) iterative computation
+    in latent space, (ii) an entropy-regularized objective for learned depth allocation, and (iii) scaling
+    to 7.7T tokens. Ouro 1.4B and 2.6B models enjoy superior performance that match the results of up
+    to 12B SOTA LLMs across a wide range of benchmarks. Through controlled experiments, we show this advantage
+    stems not from increased knowledge capacity, but from superior knowledge manipulation capabilities.
+    We also show that LoopLM yields reasoning traces more aligned with final outputs than explicit CoT.
+    We hope our results show the potential of LoopLM as a novel scaling direction in the reasoning era.
+    Our model is available here: http://ouro-llm.github.io.'
+  read: false
+  notes: ''

@@ -10,6 +10,10 @@
 - Assumes:
 - Does not assume:
 
+## Prerequisites and prior art
+<!-- Existing explainers that already cover parts of this well: link them, and don't re-teach them. What's our delta? -->
+-
+
 ## Learning objectives
 <!-- 3–5, each checkable. "Can predict what X does when Y changes", not "understands X". -->
 1.

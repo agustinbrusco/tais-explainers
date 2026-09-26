@@ -13,6 +13,11 @@ Read `learner/profile.md`, `learner/concept-map.md`, and the last entries of `le
 still empty, interview the learner before planning, keeping it short: background, math comfort, what they've already
 read on the topic, and what "understanding it" would let them do.
 
+## 0.5 Survey what exists
+Before choosing scope, look for excellent existing explainers of this topic (the sources to watch and craft list in
+`references/`, plus a search). Put them in the brief under **Prerequisites and prior art**. The piece covers the *delta*:
+what those don't show, or don't show for this learner.
+
 ## 1. Brief (`README.md`), with a gate
 `./scripts/new_project.sh <slug> --format web|manim|both`, then fill in the brief: the promise, 3–5 *checkable*
 objectives, the one running example, the misconceptions to defuse, what it will NOT show, and the format with a

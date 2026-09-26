@@ -18,8 +18,8 @@ command -v pdftotext >/dev/null && ok pdftotext "poppler" || opt pdftotext "sudo
 echo "renderers:"
 v=$(py "import manim; print(manim.__version__)") && ok manim "v$v" || {
   pkg-config --exists pangocairo 2>/dev/null \
-    && bad manim "uv sync --extra manim" \
-    || bad manim "sudo apt install libcairo2-dev libpango1.0-dev pkg-config && uv sync --extra manim"; }
+    && bad manim "uv sync" \
+    || bad manim "sudo apt install libcairo2-dev libpango1.0-dev pkg-config && uv sync"; }
 [[ -d node_modules/playwright ]] && ls ~/.cache/ms-playwright 2>/dev/null | grep -q chromium \
   && ok playwright "chromium installed" || bad playwright "npm install && npx playwright install chromium"
 command -v blender >/dev/null && ok blender "$(blender --version 2>/dev/null | head -1)" || opt blender "only if a project needs it"

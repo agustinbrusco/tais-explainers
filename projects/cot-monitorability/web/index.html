@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>cot-monitorability</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="../../../kit/web/tokens.css">
+  <link rel="stylesheet" href="../../../kit/web/base.css">
+  <script type="importmap">
+    { "imports": { "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm" } }
+  </script>
+</head>
+<body>
+  <main class="explainer">
+    <header>
+      <h1>Reading the residual stream</h1>
+      <p class="lede">Starter scaffold. Replace this with the explainer's promise: what you'll be able to see after reading it.</p>
+    </header>
+
+    <div class="prose">
+      <section class="step" data-step>
+        <h2>Text goes in as tokens</h2>
+        <p>The model never sees letters. It sees a sequence of <span class="c-token">tokens</span>, each one a card in this row.</p>
+      </section>
+      <section class="step" data-step>
+        <h2>Each position carries a vector</h2>
+        <p>Above every token sits a <span class="c-residual">residual stream</span> vector: thousands of numbers that every layer reads from and writes to.</p>
+        <p class="caveat"><strong>Simplification:</strong> the real vectors have thousands of dimensions. We draw eight bars.</p>
+      </section>
+      <section class="step" data-step>
+        <h2>An overseer reads one position</h2>
+        <p class="predict">The model hasn’t written “Paris” yet. What will the lens decode at the position of “is”?</p>
+        <p>A <span class="c-overseer">lens</span> maps a hidden vector back to something we can read. Here it maps the vector at “is” to a guess at the next token, which reveals what the model is about to say before it says it.</p>
+      </section>
+    </div>
+
+    <div class="stage">
+      <span class="badge schematic">schematic</span>
+      <svg id="stage" viewBox="0 0 720 420" role="img" aria-label="Diagram of tokens and residual stream vectors"></svg>
+    </div>
+  </main>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

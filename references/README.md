@@ -39,6 +39,7 @@ from search results alone missed the most important posts once already (2026-09-
   - OpenAI's Deployment Safety Hub (system cards, https://deploymentsafety.openai.com) and alignment blog (https://alignment.openai.com).
   - GDM (https://deepmind.google, https://institute.deepmind.com).
 - **Evaluators and incident reports**: METR (https://metr.org/blog), Apollo Research (https://www.apolloresearch.ai).
+- **Visual explainers**: Welch Labs (https://www.youtube.com/@WelchLabs), top-tier visuals. Check before re-making a topic.
 - **Interactive tools**: Neuronpedia (https://www.neuronpedia.org) for J-lens and NLA demos.
 
 All dossiers were compiled 2026-09-25. All arXiv metadata was checked against arXiv, and a sample of headline numbers
