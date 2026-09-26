@@ -1,0 +1,18 @@
+# Pronunciation fixes, applied to narration before TTS (captions keep the written form).
+# Whole-word, case-sensitive. Add entries whenever a render mispronounces something.
+# Sections: `all` applies to every language; `en` / `es` only to that language.
+
+all: {}
+
+en:
+  CoT: "C.O.T."
+  CoTs: "C.O.T.s"
+  SAE: "S.A.E."
+  SAEs: "S.A.E.s"
+  LLM: "L.L.M."
+  LLMs: "L.L.M.s"
+  NLA: "N.L.A."
+  NLAs: "N.L.A.s"
+  RLHF: "R.L.H.F."
+
+es: {}

@@ -1,0 +1,30 @@
+/* GENERATED from kit/tokens.json by scripts/build_tokens.py. Do not edit. */
+:root {
+  --bg: #0E1116;
+  --surface: #171B22;
+  --raised: #1F242D;
+  --grid: #2A303B;
+  --text: #E8EAED;
+  --muted: #8A93A3;
+  --faint: #4A5260;
+  --token: #EDE6D6;  /* Visible text: prompts, outputs, chain-of-thought. Drawn as paper-like cards. */
+  --residual: #5B9CF5;  /* Hidden states: residual stream, activations, latent reasoning. */
+  --feature: #B48CFF;  /* Interpretable directions: features, SAE latents, concept vectors. */
+  --overseer: #F5C04A;  /* Anything reading the model from outside: probes, lenses, oracles, monitors, auditors. */
+  --training: #F06BB5;  /* Optimization: gradients, fine-tuning, RL pressure, reward. */
+  --danger: #FF5A5A;  /* Misaligned, deceptive, or hidden-objective behavior. */
+  --safe: #6FD08C;  /* Aligned, verified, or caught behavior. */
+  --attention: #3FBFA0;  /* Attention heads and patterns (component-level). */
+  --mlp: #E8835A;  /* MLP layers (component-level). */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "DejaVu Sans Mono", ui-monospace, monospace;
+  --fs-caption: 1.250rem;
+  --fs-body: 1.750rem;
+  --fs-label: 2.000rem;
+  --fs-title: 3.000rem;
+  --fs-hero: 4.500rem;
+  --t-quick: 0.4s;
+  --t-normal: 0.8s;
+  --t-slow: 1.5s;
+  --t-hold-after-reveal: 0.6s;
+}

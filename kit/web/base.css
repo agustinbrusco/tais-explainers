@@ -1,0 +1,123 @@
+/* Shared layout + components for web explainers. Requires tokens.css first. */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { color-scheme: dark; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 1.0625rem/1.6 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Scrollytelling layout: prose steps beside a sticky stage ---- */
+.explainer {
+  display: grid;
+  grid-template-columns: minmax(20rem, 34rem) 1fr;
+  gap: 0 3rem;
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+.explainer > header { grid-column: 1 / -1; padding: 4rem 0 2rem; max-width: 46rem; }
+.explainer > header h1 { font-size: var(--fs-title); line-height: 1.1; margin: 0 0 .75rem; letter-spacing: -0.02em; }
+.explainer > header .lede { color: var(--muted); font-size: 1.2rem; margin: 0; }
+
+.prose { padding-bottom: 40vh; }
+.step {
+  min-height: 70vh;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+  border-left: 2px solid var(--grid);
+  opacity: .38;
+  transition: opacity var(--t-normal), border-color var(--t-normal);
+  cursor: pointer;
+}
+.step.active { opacity: 1; border-color: var(--overseer); cursor: default; }
+.step h2 { font-size: 1.35rem; margin: 0 0 .5rem; letter-spacing: -0.01em; }
+.step p { margin: 0 0 .9rem; max-width: 62ch; }
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 0;
+}
+.stage svg { width: 100%; height: 100%; max-height: 82vh; overflow: visible; }
+
+@media (max-width: 860px) {
+  .explainer { grid-template-columns: 1fr; padding: 0 1rem; }
+  .explainer > header { padding: 2rem 0 1rem; }
+  .explainer > header h1 { font-size: 2.1rem; }
+  .explainer > header .lede { font-size: 1.05rem; }
+  .stage { grid-row: 2; height: 46vh; top: 0; z-index: 1; background: var(--bg); padding: .5rem 0; }
+  .stage svg { max-height: 44vh; }
+  /* the sticky stage covers the top 46vh; land steps just below it */
+  .step { min-height: 55vh; padding: 1rem; scroll-margin-top: calc(46vh + 1rem); }
+}
+
+/* ---- Semantic text highlights: <span class="c-residual">residual stream</span> ---- */
+.c-token { color: var(--token); } .c-residual { color: var(--residual); }
+.c-feature { color: var(--feature); } .c-overseer { color: var(--overseer); }
+.c-training { color: var(--training); } .c-danger { color: var(--danger); }
+.c-safe { color: var(--safe); } .c-attention { color: var(--attention); } .c-mlp { color: var(--mlp); }
+
+/* ---- Epistemic badges: every figure says whether it shows real data ---- */
+.badge {
+  display: inline-block;
+  font: 500 .72rem/1 var(--font-mono);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .35em .6em;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.badge.schematic { color: var(--muted); }
+.badge.real { color: var(--safe); }
+.badge.speculative { color: var(--training); }
+.stage .badge { position: absolute; top: 1.25rem; right: 0; }
+
+/* ---- Callouts ---- */
+.caveat {
+  border-left: 3px solid var(--muted);
+  background: var(--surface);
+  padding: .75rem 1rem;
+  border-radius: 0 6px 6px 0;
+  font-size: .95rem;
+  color: var(--muted);
+}
+.caveat strong { color: var(--text); }
+.predict {
+  border: 1px dashed var(--overseer);
+  padding: .75rem 1rem;
+  border-radius: 6px;
+}
+.predict::before { content: "Predict first: "; color: var(--overseer); font-weight: 600; }
+
+/* ---- Step nav ---- */
+.stepnav {
+  position: fixed; bottom: 1rem; right: 1.25rem;
+  display: flex; gap: .5rem; align-items: center;
+  background: var(--raised); border: 1px solid var(--grid); border-radius: 999px;
+  padding: .35rem .5rem; z-index: 10; font: 500 .85rem var(--font-mono); color: var(--muted);
+}
+.stepnav button {
+  background: none; border: 0; color: var(--text); font: inherit; cursor: pointer;
+  padding: .3rem .6rem; border-radius: 999px;
+}
+.stepnav button:hover { background: var(--grid); }
+.stepnav button:disabled { color: var(--faint); cursor: default; background: none; }
+@media (max-width: 860px) { .stepnav { right: 50%; transform: translateX(50%); } }
+
+/* ---- SVG primitives ----
+   Sizes are in viewBox units. A 720-wide viewBox is drawn ~360px wide on a phone, so
+   text below ~22 units falls under 11px there. Keep labels >= 22 at viewBox width 720. */
+.tok rect { fill: var(--token); }
+.tok text { fill: var(--bg); font: 500 22px var(--font-mono); }
+.axis-label { fill: var(--muted); font: 400 22px var(--font-sans); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0s !important; animation-duration: 0s !important; }
+}

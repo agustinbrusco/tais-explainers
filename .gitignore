@@ -1,0 +1,21 @@
+# Python / Node
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+
+# Local caches and downloaded models (./scripts/setup.sh restores them)
+.cache/
+
+# Build outputs are reproducible. Publish finished renders via GitHub Releases / Pages.
+build/
+media/
+
+# Reference PDFs + extracted text (uv run scripts/fetch_paper.py --restore)
+references/**/papers/
+
+# Local-only Claude settings
+.claude/settings.local.json
+
+.DS_Store
+*.swp

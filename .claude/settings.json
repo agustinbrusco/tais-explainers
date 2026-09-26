@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run scripts/:*)",
+      "Bash(uv run manim:*)",
+      "Bash(uv sync:*)",
+      "Bash(node scripts/shoot.mjs:*)",
+      "Bash(./scripts/new_project.sh:*)",
+      "Bash(./scripts/doctor.sh)",
+      "Bash(pdftotext:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "WebFetch(domain:arxiv.org)",
+      "WebFetch(domain:export.arxiv.org)",
+      "WebFetch(domain:transformer-circuits.pub)",
+      "WebFetch(domain:alignment.anthropic.com)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:www.alignmentforum.org)",
+      "WebFetch(domain:www.lesswrong.com)",
+      "WebFetch(domain:openai.com)",
+      "WebFetch(domain:deepmind.google)",
+      "WebFetch(domain:github.com)"
+    ]
+  }
+}
