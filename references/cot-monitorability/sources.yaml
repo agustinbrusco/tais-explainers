@@ -737,12 +737,16 @@
 - id: web:redwood-recent-llms-can-do-2-hop-and-3-hop
   title: Recent LLMs can do 2-hop and 3-hop latent (no CoT) reasoning on natural facts
   authors:
-  - Redwood Research
+  - Ryan Greenblatt
   date: '2026-01-01'
   url: https://www.redwoodresearch.org/blog/recent-llms-can-do-2-hop-and-3-hop
-  accessed: '2026-09-25'
-  read: false
-  notes: Located via the Redwood blog index on 2026-09-25 (title checked against the index); not yet read.
+  accessed: '2026-09-26'
+  read: true
+  notes: 'Author and date read from the page byline ("Ryan Greenblatt·January 1, 2026", via Substack). Read in full
+    on 2026-09-26 against the raw page text. Key: "Gemini 3 Pro gets 60% of 2-hop questions right and 34% of 3-hop
+    questions right"; "All models I evaluate have chance or near chance accuracy on 4-hop questions"; those results
+    "use filler tokens counting from 1 to 300". Canonical 2-hop example: "What element has atomic number (the age
+    at which Tesla died)?". Code: github.com/rgreenblatt/multi_hop.'
 - id: web:redwood-measuring-no-cot-math-time-horizon
   title: Measuring no CoT math time horizon (single forward pass)
   authors:
@@ -971,3 +975,63 @@
     for continuous thought models should target the "planning" phase of latent reasoning.'
   read: false
   notes: ''
+- id: arxiv:2406.12775
+  title: 'Hopping Too Late: Exploring the Limitations of Large Language Models on Multi-Hop Queries'
+  authors:
+  - Eden Biran
+  - Daniela Gottesman
+  - Sohee Yang
+  - Mor Geva
+  - Amir Globerson
+  date: '2024-06-18'
+  url: https://arxiv.org/abs/2406.12775
+  abstract: 'Large language models (LLMs) can solve complex multi-step problems, but little is known about
+    how these computations are implemented internally. Motivated by this, we study how LLMs answer multi-hop
+    queries such as "The spouse of the performer of Imagine is". These queries require two information
+    extraction steps: a latent one for resolving the first hop ("the performer of Imagine") into the bridge
+    entity (John Lennon), and another for resolving the second hop ("the spouse of John Lennon") into
+    the target entity (Yoko Ono). Understanding how the latent step is computed internally is key to understanding
+    the overall computation. By carefully analyzing the internal computations of transformer-based LLMs,
+    we discover that the bridge entity is resolved in the early layers of the model. Then, only after
+    this resolution, the two-hop query is solved in the later layers. Because the second hop commences
+    in later layers, there could be cases where these layers no longer encode the necessary knowledge
+    for correctly predicting the answer. Motivated by this, we propose a novel "back-patching" analysis
+    method whereby a hidden representation from a later layer is patched back to an earlier layer. We
+    find that in up to 66% of previously incorrect cases there exists a back-patch that results in the
+    correct generation of the answer, showing that the later layers indeed sometimes lack the needed functionality.
+    Overall, our methods and findings open further opportunities for understanding and improving latent
+    reasoning in transformer-based LLMs.'
+  read: partial
+  notes: 'Abstract, intro, section 6.3 and conclusion read on 2026-09-26. Models: LLaMA 2 7B/13B, LLaMA 3 8B/70B,
+    Pythia 6.9B/12B (txt L202-210). "the bridge entity is resolved in the early layers ... only after this resolution,
+    the two-hop query is solved in the later layers" (L48-53); back-patching "allows the model more layers to finish
+    the computation" (L89-91) and fixes "between 32%-66% of incorrect cases" with the best source/target layers (L617-618).'
+- id: wiki:derek-walcott
+  title: Derek Walcott
+  authors:
+  - Wikipedia contributors
+  date: ''
+  url: https://en.wikipedia.org/wiki/Derek_Walcott
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'Fact check for the 4-hop example. Infobox: "birth_date = {{Birth date|df=y|1930|1|23}}"; awards "Nobel Prize
+    in Literature|1992". Also confirmed in "List of Nobel laureates in Literature" (1992 row: Derek Walcott).'
+- id: wiki:23rd-academy-awards
+  title: 23rd Academy Awards
+  authors:
+  - Wikipedia contributors
+  date: ''
+  url: https://en.wikipedia.org/wiki/23rd_Academy_Awards
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'Fact check for the 4-hop example. Winners table, Best Actress: "Judy Holliday – Born Yesterday"; image caption
+    "Judy Holliday; Best Actress winner". Ceremony held March 29, 1951.'
+- id: wiki:judy-holliday
+  title: Judy Holliday
+  authors:
+  - Wikipedia contributors
+  date: ''
+  url: https://en.wikipedia.org/wiki/Judy_Holliday
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'Fact check for the 4-hop example. Infobox: "birth_date = {{Birth date |1921|6|21}}".'

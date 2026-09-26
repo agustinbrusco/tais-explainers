@@ -18,11 +18,12 @@ Status: ✅ in the prototype · 🔲 planned
 | 0 | 🔲 Hook: the Hugging Face incident | incident card: ~1,200 agents, a message board, raw CoTs | reading CoT is *the* tool that works today | C-HF-1..3 |
 | 1 | ✅ A language model, unrolled | standard DAG, no highlight | positions × layers; only tokens are readable; the monitor reads that row | C-DAG-1 |
 | 2 | ✅ The longest dark path | column-0 path glows, counter = 4 | serial depth is bounded by the layer count; attention can't lengthen it | C-OSD-1, C-OSD-2 |
-| 3 | ✅ A problem that doesn't fit | 10-step chain; 39 and 64 forced into cards | **necessity**: long chains are *forced* into text | C-NEC-1, C-NANDA-1 |
+| 3 | ✅ A problem that doesn't fit | 10-step chain; the pulse climbs, 39 and 64 are forced into cards, the count restarts at 1 after each | **necessity**: long chains are *forced* into text | C-NEC-1, C-NANDA-1, C-VIS-1 |
+| 3b | ✅ Facts hit the same wall | Xu et al.'s 4-hop question, two rows per hop (capsules); only "23" is forced; Walcott and Holliday stay in the dark (blue italic in the strip) | the wall isn't an arithmetic artifact; a hop costs ~2× an arithmetic step; inside real models the second hop can run out of layers | C-HOP-1..6, C-CONV-2, C-BIRAN-1/2 |
 | 4 | ✅ Looped | R = 8, pass bands; only 64 forced | the same weights reused → dark path × loops | C-LOOP-1, C-ASTRA-ARCH, C-NANDA-1 |
 | 5 | ✅ Coconut | thought columns (∿) with no card; nothing forced | continuous thoughts bypass the text bottleneck | C-COCO-1 |
-| 6 | ✅ Full bandwidth | dark links on every column; counter = 32 | a private channel next to the text → dark path spans the context | C-FBW-1 (**open**), C-RW-10x |
-| 7 | ✅ Your turn | controls live (architecture, loops, chain length) | the learner answers the three questions | n/a |
+| 6 | ✅ Full bandwidth | dark links on every column; counter = 32 (20 on phones); the route's count never restarts | a private channel next to the text → dark path spans the context | C-FBW-1, C-FBW-2 |
+| 7 | ✅ Your turn | controls live (example: arithmetic / 4-hop, architecture, loops, chain length) | the learner answers the four questions | n/a |
 | 8 | 🔲 Two ways to earn the reward | same graph; the reward term "monitor didn't flag" → the model can behave *or* stop writing | obfuscation under pressure; necessity survives it, propensity doesn't | C-BAKER-1..2, C-TOY-1 |
 | 8b | 🔲 *(aside)* the policy-gradient version | a small equation panel, collapsible | the math behind "the cheaper route wins" (the learner is solid on RL concepts, less so on the math) | C-RL-1 |
 | 9 | 🔲 Faithfulness ≠ monitorability | two panels: a rationalization CoT vs a computation CoT | "unfaithful" doesn't mean "unmonitorable" | C-EMM-1 |
@@ -35,7 +36,13 @@ Status: ✅ in the prototype · 🔲 planned
 - Hidden state = `residual` blue dot. Readable token = `token` paper card. Monitor = `overseer` gold eye plus gold outlines on
   the cards it's guaranteed to read. Continuous thought = dashed blue card with ∿.
 - Dark route = glowing blue. A forced write = a gold edge into a gold-outlined card.
-- The readouts, "longest dark path" (computed on the drawn graph) and "forced into text", are always visible.
+- **The route is counted:** each hidden state the task uses lights up with its running count (1, 2, 3 …). Crossing a
+  readable card restarts the count at 1; dark links (Coconut, full bandwidth) don't. Multi-row steps (hops) get a capsule.
+- **Motion:** a pulse rides the route; it turns gold on write edges and disappears *into* the card (cards are drawn above
+  it); the card flashes, the monitor's eye reacts, and "forced into text" fills in at that moment. One thing moves at a time.
+  Under `prefers-reduced-motion`, and for slider drags, the final state appears at once.
+- The readouts, "longest dark path" (computed on the drawn graph) and "forced into text", are always visible. The dark-path
+  readout shows "?" until step 2 introduces it, then ticks up with the pulse.
 
 ## Cut list
 - The residual-stream re-explanation: Welch Labs covers it.

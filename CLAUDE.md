@@ -101,13 +101,15 @@ uv run scripts/tts.py projects/<slug>/narration.yaml --preview
 uv run manim -ql --media_dir projects/<slug>/build/media projects/<slug>/manim/scenes.py <Scene>
 uv run scripts/contact_sheet.py <video.mp4> [-n 12 | -t 1,2.5 | --burst 4.0]
 node scripts/shoot.mjs projects/<slug>/web/index.html [--mobile] [--steps 0,3]
+node scripts/shoot.mjs <page> --steps 2 --frames 16 --every 330 --element .stage   # motion frames; tile them with:
+uv run scripts/contact_sheet.py build/shots/step-02-f*.png -o motion.png
 python3 -m http.server 8000                                 # from the repo root, then open /projects/<slug>/web/
 ```
 
 ## Self-verification: I can see stills, but I can't watch or listen
 
 - I review video through contact sheets (`contact_sheet.py`, with `--burst` for a transition's motion) and web
-  pieces through `shoot.mjs` (desktop and `--mobile`; it fails on console errors). **Never say a render
+  pieces through `shoot.mjs` (desktop and `--mobile`; it fails on console errors; `--frames` for animations). **Never say a render
   "looks good" without having viewed it in this session.**
 - I can't hear. Ask the learner to listen to `build/audio/preview.wav` before visuals are timed to it, and
   add every mispronunciation they report to `kit/lexicon.yaml`.

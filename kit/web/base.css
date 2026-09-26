@@ -95,6 +95,15 @@ body {
   border-radius: 6px;
 }
 .predict::before { content: "Predict first: "; color: var(--overseer); font-weight: 600; }
+/* mechanistic evidence from inside a real model, next to a schematic claim */
+.inside {
+  border-left: 3px solid var(--residual);
+  background: var(--surface);
+  padding: .75rem 1rem;
+  border-radius: 0 6px 6px 0;
+  font-size: .95rem;
+}
+.inside::before { content: "Inside a real model: "; color: var(--residual); font-weight: 600; }
 
 /* ---- Step nav ---- */
 .stepnav {

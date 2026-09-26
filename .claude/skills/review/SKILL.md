@@ -12,7 +12,8 @@ produces them.
 - **Video:** `uv run scripts/contact_sheet.py <mp4> -n 16`, then `--burst <t>` for each key transition, to check
   the motion reads as intended.
 - **Web:** `node scripts/shoot.mjs projects/<slug>/web/index.html`, then the same with `--mobile`. A non-zero exit
-  means there were console errors, and those get fixed first.
+  means there were console errors, and those get fixed first. For any animated step, also capture the motion:
+  `--steps <i> --frames 16 --every 330 --element .stage`, then tile the frames with `contact_sheet.py <frames...>`.
 - Open **every** image with Read. Don't sample.
 
 ## 2. Visual checklist (per frame or step)

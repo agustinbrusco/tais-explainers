@@ -5,6 +5,7 @@
     uv run scripts/contact_sheet.py Intro.mp4 -n 20 --cols 5
     uv run scripts/contact_sheet.py Intro.mp4 -t 1.5,3,7.25 --width 960  # exact timestamps (s)
     uv run scripts/contact_sheet.py Intro.mp4 --burst 4.0 --fps 8        # 1s of motion around t=4
+    uv run scripts/contact_sheet.py build/shots/step-02-f*.png -o sheet.png  # tile still images (e.g. shoot.mjs --frames)
 
 Writes <video>.sheet.png next to the video unless -o is given. Uses the ffmpeg bundled with
 imageio-ffmpeg, so no system ffmpeg is needed.
@@ -43,9 +44,26 @@ def label_font(size: int):
     return ImageFont.load_default()
 
 
+IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
+
+
+def tile(frames: list[Image.Image], labels: list[str], cols: int) -> Image.Image:
+    w, h = max(f.width for f in frames), max(f.height for f in frames)
+    pad, bar = 6, 22
+    cols = min(cols, len(frames))
+    rows = -(-len(frames) // cols)
+    sheet = Image.new("RGB", (cols * (w + pad) + pad, rows * (h + bar + pad) + pad), (40, 40, 40))
+    draw, font = ImageDraw.Draw(sheet), label_font(14)
+    for i, (img, label) in enumerate(zip(frames, labels)):
+        x, y = pad + (i % cols) * (w + pad), pad + (i // cols) * (h + bar + pad)
+        sheet.paste(img, (x, y + bar))
+        draw.text((x + 4, y + 3), label, fill=(230, 230, 230), font=font)
+    return sheet
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("video", type=Path)
+    ap.add_argument("inputs", type=Path, nargs="+", help="one video, or several images to tile as they are")
     ap.add_argument("-n", type=int, default=12, help="number of evenly spaced frames")
     ap.add_argument("-t", help="comma-separated timestamps in seconds")
     ap.add_argument("--burst", type=float, help="center time for a short motion burst")
@@ -56,6 +74,14 @@ def main() -> None:
     ap.add_argument("-o", "--out", type=Path)
     a = ap.parse_args()
 
+    if all(p.suffix.lower() in IMAGE_SUFFIXES for p in a.inputs):
+        frames = [Image.open(p).convert("RGB") for p in a.inputs]
+        frames = [f.resize((a.width, round(f.height * a.width / f.width))) for f in frames]
+        out = a.out or a.inputs[0].with_name("frames.sheet.png")
+        tile(frames, [p.stem for p in a.inputs], a.cols).save(out)
+        print(f"{out}  ({len(frames)} images)")
+        return
+    a.video = a.inputs[0]
     dur = duration_of(a.video)
     if a.t:
         times = [float(x) for x in a.t.split(",")]
@@ -70,19 +96,8 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         frames = [grab(a.video, t, a.width, Path(tmp) / f"{i}.png") for i, t in enumerate(times)]
 
-    w, h = frames[0].size
-    pad, bar = 6, 22
-    cols = min(a.cols, len(frames))
-    rows = -(-len(frames) // cols)
-    sheet = Image.new("RGB", (cols * (w + pad) + pad, rows * (h + bar + pad) + pad), (40, 40, 40))
-    draw, font = ImageDraw.Draw(sheet), label_font(14)
-    for i, (img, t) in enumerate(zip(frames, times)):
-        x, y = pad + (i % cols) * (w + pad), pad + (i // cols) * (h + bar + pad)
-        sheet.paste(img, (x, y + bar))
-        draw.text((x + 4, y + 3), f"#{i}  t={t:.2f}s", fill=(230, 230, 230), font=font)
-
     out = a.out or a.video.with_suffix(".sheet.png")
-    sheet.save(out)
+    tile(frames, [f"#{i}  t={t:.2f}s" for i, t in enumerate(times)], a.cols).save(out)
     print(f"{out}  ({len(frames)} frames of {dur:.1f}s video)")
 
 

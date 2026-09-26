@@ -1,8 +1,12 @@
-// How Many Steps Fit in the Dark? The core figure (prototype).
+// How Many Steps Fit in the Dark? The core figure.
 //
 // The figure is a real DAG. The longest dark path is *computed* on the drawn graph (dynamic programming in
 // topological order, with readable token nodes resetting the count), so every architecture is literally
 // a graph edit, and the readouts follow from it.
+//
+// A task is then routed through the graph as a "story": a pulse climbs the route and numbers every hidden state
+// it uses. Wherever the route has to cross a readable card, the card lights up gold, the monitor reads it, and
+// the count starts again at 1. Two layers: the base graph (structure only) and the story drawn on top of it.
 
 import * as d3 from "d3";
 import { mountSteps } from "../../../kit/web/steps.js";
@@ -11,17 +15,38 @@ const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(`
 const K = Object.fromEntries(
   ["token", "residual", "overseer", "text", "muted", "faint", "grid", "surface", "raised", "bg"].map((n) => [n, css(n)]),
 );
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Phones get fewer columns in a narrower viewBox, so the figure's text scales up instead of shrinking to ~7px.
+// (Matches the breakpoint where base.css turns the stage into a sticky top band.)
+const NARROW = matchMedia("(max-width: 860px)").matches;
 
-// ---------------- running example: a chain of dependent arithmetic steps ----------------
+// ---------------- two running examples ----------------
+// Arithmetic: a chain of dependent steps, drawn one row per step.
 const START = 7;
 const OPS = [["×", 3], ["−", 4], ["×", 2], ["+", 5], ["−", 9], ["×", 2], ["+", 7], ["−", 3],
              ["×", 3], ["−", 11], ["+", 6], ["×", 2], ["−", 8], ["+", 4], ["×", 2], ["−", 5]];
 const applyOp = (v, [o, n]) => (o === "×" ? v * n : o === "+" ? v + n : v - n);
 const VALUES = OPS.reduce((acc, op) => (acc.push(applyOp(acc.at(-1), op)), acc), [START]); // VALUES[i]: after i steps
-const MAX_K = OPS.length;
+
+// Facts: an item from the 4-hop benchmark of Xu, Prasanna & Westover (2026), every hop checked on Wikipedia.
+// Drawn two rows per hop: Nanda (2026) finds chained facts "approx 2x worse than arithmetic steps".
+const HOP_START = "Nobel Lit. 1992";
+const HOPS = [
+  { rel: "winner", value: "Walcott" },
+  { rel: "day of birth", value: "23" },
+  { rel: "Best Actress, 23rd Oscars", value: "Holliday" },
+  { rel: "day of birth", value: "21" },
+];
+
+const TASKS = {
+  arith: { rows: 1, max: OPS.length, font: "font-mono", noun: "Chain length",
+           value: (i) => String(VALUES[i]), answer: (k) => `=${VALUES[k]}` },
+  hops: { rows: 2, max: HOPS.length, font: "font-sans", noun: "Hops",
+          value: (i) => HOPS[i - 1].value, answer: (k) => HOPS[k - 1].value },
+};
 
 // ---------------- the model: graph construction (pure) ----------------
-const T = 8;          // token positions drawn
+const T = NARROW ? 5 : 8; // token positions drawn
 const L = 4;          // layers drawn per pass
 const COCONUT_THOUGHTS = [1, 2]; // columns whose input is a continuous thought instead of a token
 
@@ -42,7 +67,7 @@ function buildGraph({ arch, loops }) {
       if (arch === "fullbw") edges.push({ id: `fb${t}`, kind: "dark-link", s: `h${t}_${R - 1}`, t: `h${t + 1}_0` });
     }
   }
-  return { R, nodes, edges, latentIn };
+  return { R, nodes, edges, latentIn, byId: new Map(nodes.map((n) => [n.id, n])), edgeById: new Map(edges.map((e) => [e.id, e])) };
 }
 
 // Longest path that never passes through a readable (token) node. Length = hidden states on the path.
@@ -63,37 +88,75 @@ function longestDarkPath(g) {
   let end = null;
   for (const n of order) if (!end || len.get(n.id) > len.get(end.id)) end = n;
   // Walk back until the path would enter a readable token: the dark path starts just after it.
-  const kindOf = new Map(g.nodes.map((n) => [n.id, n.kind]));
-  const edgeIds = new Set(), nodeIds = new Set([end.id]);
-  for (let id = end.id, e = back.get(id); e && kindOf.get(e.s) !== "tok"; e = back.get(id)) {
-    edgeIds.add(e.id); nodeIds.add(e.s); id = e.s;
+  const nodes = [end.id], edges = [];
+  for (let id = end.id, e = back.get(id); e && g.byId.get(e.s).kind !== "tok"; e = back.get(id)) {
+    edges.push(e.id); nodes.push(e.s); id = e.s;
   }
-  return { length: len.get(end.id), edgeIds, nodeIds };
+  return { length: len.get(end.id), nodes: nodes.reverse(), edges: edges.reverse() };
 }
 
-// Lay the chain onto the graph: one drawn layer = one dependent step (a drawing convention; see caveat).
-// At the top of a column the running value must cross to the next column. If a dark link exists it
-// crosses silently; otherwise it is *forced* into a token, where the monitor can read it.
-function layChain(g, k, arch) {
-  const darkLink = (c) => arch === "fullbw" || g.latentIn(c + 1);
-  const route = [], darkEdges = [], writeEdges = [], writes = [];
-  let col = 0, row = 0;
-  for (let step = 1; step <= k && col < T; step++) {
-    route.push(`h${col}_${row}`);
-    if (step === k) break;
-    if (row < g.R - 1) { darkEdges.push(`v${col}_${row}`); row++; continue; }
-    if (darkLink(col)) darkEdges.push(...(arch === "fullbw" ? [`fb${col}`] : [`out${col}`, `in${col + 1}`]));
-    else { writes.push({ col: col + 1, value: VALUES[step], step }); writeEdges.push(`out${col}`, `in${col + 1}`); }
+// ---------------- stories: what the pulse does ----------------
+// A story is an ordered list of items: {node} (a hidden state used, with its running count), {edge} (a leg the
+// pulse travels: "climb", "link" = dark link, "write" = into or out of a card), {card} (a forced write or the
+// answer: the count resets) and {thought} (passing through a continuous-thought card: no reset).
+
+// The dark path alone (step 2): the counter climbs with the pulse.
+function pathStory(g, dark) {
+  const items = [];
+  let count = 0;
+  dark.nodes.forEach((id, j) => {
+    if (g.byId.get(id).kind === "h") items.push({ type: "node", id, count: ++count });
+    if (j < dark.edges.length) items.push({ type: "edge", id: dark.edges[j], kind: g.edgeById.get(dark.edges[j]).kind === "res" ? "climb" : "link" });
+  });
+  return { items, writes: [], answer: null, ticks: true };
+}
+
+// Lay a task onto the graph: each step takes `task.rows` drawn rows (a drawing convention; see the caveats).
+// At the top of a column the running value must cross to the next column. If a dark link exists it crosses
+// silently; otherwise it is *forced* into a token, where the monitor can read it.
+function chainStory(g, k, arch, task) {
+  const items = [], writes = [];
+  const total = k * task.rows;
+  let col = 0, row = 0, count = 0;
+  const cross = (step) => {
+    if (arch === "fullbw") items.push({ type: "edge", id: `fb${col}`, kind: "link" });
+    else if (g.latentIn(col + 1)) items.push({ type: "edge", id: `out${col}`, kind: "link" }, { type: "thought", col: col + 1 },
+                                             { type: "edge", id: `in${col + 1}`, kind: "link" });
+    else {
+      const w = { col: col + 1, value: task.value(step), step };
+      writes.push(w);
+      items.push({ type: "edge", id: `out${col}`, kind: "write" }, { type: "card", ...w }, { type: "edge", id: `in${col + 1}`, kind: "write" });
+      count = 0;
+    }
     col++; row = 0;
+  };
+  for (let n = 1; n <= total; n++) {
+    // hopEnd: the last row of a multi-row step, where a capsule groups the step's rows
+    items.push({ type: "node", id: `h${col}_${row}`, count: ++count, hopEnd: task.rows > 1 && n % task.rows === 0 ? task.rows : 0 });
+    if (n === total) break;
+    if (row < g.R - 1) { items.push({ type: "edge", id: `v${col}_${row}`, kind: "climb" }); row++; continue; }
+    cross(n / task.rows); // R is a multiple of task.rows, so a column always ends on a whole step
   }
-  const answerCol = Math.min(col + 1, T - 1);
-  if (k) writeEdges.push(`out${col}`);
-  return { route: new Set(route), darkEdges: new Set(darkEdges), writeEdges: new Set(writeEdges), writes,
-           answer: k ? { col: answerCol, value: VALUES[k] } : null };
+  // The finished value still rides the residual stream up to the top of its column to be emitted (no new work).
+  for (; row < g.R - 1; row++) {
+    items.push({ type: "edge", id: `v${col}_${row}`, kind: "climb" }, { type: "node", id: `h${col}_${row + 1}`, count: null });
+  }
+  // Coconut: if the next positions are continuous thoughts, the finished value rides through them (no new work).
+  while (g.latentIn(col + 1)) {
+    items.push({ type: "edge", id: `out${col}`, kind: "link" }, { type: "thought", col: col + 1 }, { type: "edge", id: `in${col + 1}`, kind: "link" });
+    col++;
+    for (let r = 0; r < g.R; r++) {
+      items.push({ type: "node", id: `h${col}_${r}`, count: null });
+      if (r < g.R - 1) items.push({ type: "edge", id: `v${col}_${r}`, kind: "climb" });
+    }
+  }
+  const answer = { col: col + 1, value: task.answer(k), plain: task.value(k), step: k, answer: true };
+  items.push({ type: "edge", id: `out${col}`, kind: "write" }, { type: "card", ...answer });
+  return { items, writes, answer, ticks: false };
 }
 
 // ---------------- geometry ----------------
-const W = 720, H = 520;
+const W = NARROW ? 470 : 720, H = 520;
 const M = { left: 64, right: 24, top: 30, bottom: 96 };
 const colW = (W - M.left - M.right) / T;
 const colX = (t) => M.left + colW * t + colW / 2;
@@ -123,8 +186,7 @@ function rounded(pts, r = 10) {
 }
 
 function edgePath(e, g) {
-  const byId = (id) => g.nodes.find((n) => n.id === id);
-  const s = pos(byId(e.s), g.R), t = pos(byId(e.t), g.R);
+  const s = pos(g.byId.get(e.s), g.R), t = pos(g.byId.get(e.t), g.R);
   const top = rowY(g.R - 1, g.R) - 16;
   if (e.id.startsWith("out")) {           // up, right into the gutter, down to the next column's card
     const gx = s.x + colW / 2;
@@ -138,6 +200,12 @@ function edgePath(e, g) {
   return `M${s.x},${s.y}L${t.x},${t.y}`;
 }
 
+// The pulse's way through a card: in at the left edge, to the middle, and (unless it's the answer) out the top.
+function cardPath(col, last) {
+  const x = colX(col);
+  return `M${x - CARD.w / 2},${cardY}L${x},${cardY}` + (last ? "" : `L${x},${cardY - CARD.h / 2}`);
+}
+
 // ---------------- rendering ----------------
 const svg = d3.select("#stage").attr("viewBox", `0 0 ${W} ${H}`);
 const defs = svg.append("defs");
@@ -145,40 +213,65 @@ const defs = svg.append("defs");
 defs.append("filter").attr("id", "glow").attr("filterUnits", "userSpaceOnUse")
   .attr("x", -20).attr("y", -20).attr("width", W + 40).attr("height", H + 40)
   .html(`<feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>`);
-const gBands = svg.append("g"), gEdges = svg.append("g"), gNodes = svg.append("g"), gCards = svg.append("g"), gAnno = svg.append("g");
+// z-order: structure below, the story's trail under the nodes, the pulse under the cards (it vanishes into text)
+const [gBands, gEdges, gTrail, gNodes, gRoute, gPulse, gCards, gOver, gAnno] = d3.range(9).map(() => svg.append("g"));
 
 // monitor: an eye reading the token row
 const eye = gAnno.append("g").attr("transform", `translate(${M.left - 40},${cardY})`);
-eye.append("path").attr("d", "M-16,0 Q0,-12 16,0 Q0,12 -16,0Z").attr("fill", "none").attr("stroke", K.overseer).attr("stroke-width", 2.5);
-eye.append("circle").attr("r", 4.5).attr("fill", K.overseer);
+const eyeLid = eye.append("path").attr("d", "M-16,0 Q0,-12 16,0 Q0,12 -16,0Z").attr("fill", "none")
+  .attr("stroke", K.overseer).attr("stroke-width", 2.5);
+const pupil = eye.append("circle").attr("r", 4.5).attr("fill", K.overseer);
 gAnno.append("text").attr("x", M.left - 40).attr("y", cardY + 42).attr("text-anchor", "middle")
   .attr("fill", K.overseer).style("font", `600 18px ${css("font-sans")}`).text("monitor");
-const loopLabel = gAnno.append("text").attr("x", M.left - 40).attr("text-anchor", "middle")
-  .attr("fill", K.muted).style("font", `500 18px ${css("font-mono")}`);
 
 const readDark = d3.select("#read-dark"), readForced = d3.select("#read-forced"), chainStrip = d3.select("#chain");
 
 function stateFor(i) {
   const s = STEPS[i] ?? controlsState();
-  return { ...s, loops: s.arch === "looped" ? s.loops : 1 };
+  return { task: "arith", path: true, ...s, loops: s.arch === "looped" ? s.loops : 1 };
 }
 
-function render(i) {
+let prevKey = null, lastDark = null, token = 0;
+
+function render(i, _prev, { instant = false } = {}) {
   const s = stateFor(i);
+  const task = TASKS[s.task];
   const g = buildGraph(s);
   const dark = longestDarkPath(g);
-  const chain = layChain(g, s.k, s.arch);
-  const showPath = s.path && !s.k;
-  const t = svg.transition().duration(750).ease(d3.easeCubicInOut);
+  const key = `${s.arch}|${s.loops}`;
+  const relayout = prevKey !== null && key !== prevKey;
+  prevKey = key;
+  const quick = instant || REDUCED;
+  const t = svg.transition().duration(quick ? 0 : 750).ease(d3.easeCubicInOut);
 
-  // edges
+  drawGraph(g, s, t);
+  const story = s.k ? chainStory(g, s.k, s.arch, task) : s.path ? pathStory(g, dark) : null;
+
+  // readouts: the dark path is a property of the architecture (it ticks up with the pulse only on the step
+  // that introduces it); "forced into text" fills in as the pulse reaches each card
+  readDark.interrupt();
+  if (!story) { readDark.text("?"); lastDark = null; }
+  else if (story.ticks) { readDark.text(quick ? dark.length : 0); lastDark = dark.length; }
+  else {
+    const from = lastDark;
+    lastDark = dark.length;
+    if (quick || from === null || from === dark.length) readDark.text(dark.length);
+    else readDark.transition().duration(750).textTween(() => d3.interpolateRound(from, dark.length));
+  }
+  chainStrip.html(!s.k ? "" : (s.task === "hops" ? stripHops : stripArith)(s.k, story, quick));
+
+  const done = playStory(story, g, s, task, { delay: quick ? 0 : relayout ? 800 : 300, quick, my: ++token });
+  syncControls(s, i);
+  return Promise.all([t.end().catch(() => {}), done]);
+}
+
+// The base graph: structure only, no task.
+function drawGraph(g, s, t) {
   const edgeStyle = (e) => {
-    if (chain.darkEdges.has(e.id) || (showPath && dark.edgeIds.has(e.id))) return { stroke: K.residual, w: 3.5, o: 1, glow: true, dash: null };
-    if (chain.writeEdges.has(e.id)) return { stroke: K.overseer, w: 3, o: 1, glow: false, dash: null };
-    if (e.kind === "dark-link") return { stroke: K.residual, w: 2, o: 0.55, glow: false, dash: "5 4" };
-    if (e.kind === "write" || e.kind === "in") return { stroke: K.token, w: 1.5, o: 0.35, glow: false, dash: null };
-    if (e.kind === "attn") return { stroke: K.faint, w: 1.2, o: 0.5, glow: false, dash: null };
-    return { stroke: K.faint, w: 1.6, o: 0.9, glow: false, dash: null };
+    if (e.kind === "dark-link") return { stroke: K.residual, w: 2, o: 0.55, dash: "5 4" };
+    if (e.kind === "write" || e.kind === "in") return { stroke: K.token, w: 1.5, o: 0.35, dash: null };
+    if (e.kind === "attn") return { stroke: K.faint, w: 1.2, o: 0.5, dash: null };
+    return { stroke: K.faint, w: 1.6, o: 0.9, dash: null };
   };
   gEdges.selectAll("path").data(g.edges, (e) => e.id).join(
     (enter) => enter.append("path").attr("fill", "none").attr("d", (e) => edgePath(e, g)).attr("opacity", 0),
@@ -186,24 +279,19 @@ function render(i) {
     (exit) => exit.transition(t).attr("opacity", 0).remove(),
   ).each(function (e) {
     const st = edgeStyle(e);
-    d3.select(this).attr("stroke-dasharray", st.dash).attr("filter", st.glow ? "url(#glow)" : null)
+    d3.select(this).attr("stroke-dasharray", st.dash)
       .transition(t).attr("d", edgePath(e, g)).attr("stroke", st.stroke).attr("stroke-width", st.w).attr("opacity", st.o);
   });
 
-  // hidden states
-  const hs = g.nodes.filter((n) => n.kind === "h");
   const r = Math.min(9, rowGap(g.R) / 4.2);
-  gNodes.selectAll("circle").data(hs, (n) => n.id).join(
+  gNodes.selectAll("circle").data(g.nodes.filter((n) => n.kind === "h"), (n) => n.id).join(
     (enter) => enter.append("circle").attr("cx", (n) => pos(n, g.R).x).attr("cy", (n) => pos(n, g.R).y).attr("r", 0),
     (update) => update,
     (exit) => exit.transition(t).attr("r", 0).remove(),
   ).transition(t)
     .attr("cx", (n) => pos(n, g.R).x).attr("cy", (n) => pos(n, g.R).y).attr("r", r)
-    .attr("fill", (n) => (chain.route.has(n.id) ? K.text : K.residual))
-    .attr("opacity", (n) => (chain.route.has(n.id) || (showPath && dark.nodeIds.has(n.id)) ? 1 : 0.5));
+    .attr("fill", K.residual).attr("opacity", 0.45);
 
-  // token cards / latent thoughts
-  const writeAt = new Map(chain.writes.map((w) => [w.col, w]));
   const cards = gCards.selectAll("g.card").data(g.nodes.filter((n) => n.row < 0), (n) => n.id).join((enter) => {
     const c = enter.append("g").attr("class", "card").attr("transform", (n) => `translate(${colX(n.col)},${cardY})`);
     c.append("rect").attr("x", -CARD.w / 2).attr("y", -CARD.h / 2).attr("width", CARD.w).attr("height", CARD.h).attr("rx", 7);
@@ -212,19 +300,13 @@ function render(i) {
   });
   cards.select("rect").transition(t)
     .attr("fill", (n) => (n.kind === "latent" ? "none" : K.token))
-    .attr("stroke", (n) => (n.kind === "latent" ? K.residual : writeAt.has(n.col) || chain.answer?.col === n.col ? K.overseer : "none"))
-    .attr("stroke-width", (n) => (n.kind === "latent" ? 2 : 4))
+    .attr("stroke", (n) => (n.kind === "latent" ? K.residual : "none"))
+    .attr("stroke-width", 2)
     .attr("stroke-dasharray", (n) => (n.kind === "latent" ? "5 4" : null));
   cards.select("text")
     .style("font", (n) => (n.kind === "latent" ? `600 28px ${css("font-sans")}` : `600 21px ${css("font-mono")}`))
     .attr("fill", (n) => (n.kind === "latent" ? K.residual : K.bg))
-    .text((n) => {
-      if (n.kind === "latent") return "∿";
-      if (n.col === 0) return "Q";
-      if (writeAt.has(n.col)) return String(writeAt.get(n.col).value);
-      if (chain.answer?.col === n.col) return `=${chain.answer.value}`;
-      return "…";
-    });
+    .text((n) => (n.kind === "latent" ? "∿" : n.col === 0 ? "Q" : "…"));
 
   // one band per pass of the same L layers, so "looped" reads as the same stack reused
   const passes = s.arch === "looped" ? d3.range(s.loops) : [];
@@ -243,58 +325,177 @@ function render(i) {
     .attr("fill", (p) => (p % 2 ? K.surface : K.raised)).attr("opacity", 0.55);
   bands.select("text").text((p) => `pass ${p + 1}`)
     .transition(t).attr("x", M.left - 36).attr("y", (p) => (rowY(p * L, g.R) + rowY((p + 1) * L - 1, g.R)) / 2 + 6);
-  loopLabel.text("");
-
-  // readouts
-  readDark.text(dark.length);
-  if (!s.k) readForced.html(`<span class="muted">no task yet</span>`);
-  else if (!chain.writes.length) readForced.html(`<b class="c-danger">nothing</b> <span class="muted">but the answer, ${chain.answer.value}</span>`);
-  else readForced.html(chain.writes.map((w) => `<b class="c-overseer">${w.value}</b>`).join(", ") +
-    ` <span class="muted">then the answer, ${chain.answer.value}</span>`);
-  chainStrip.html(!s.k ? "" : chainHTML(s.k, chain));
-
-  syncControls(s, i);
-  return t.end().catch(() => {});
 }
 
-function chainHTML(k, chain) {
-  const forced = new Set(chain.writes.map((w) => w.step));
+// ---------------- the story, animated ----------------
+const SPEED = { climb: 0.34, link: 0.9, write: 1.1 }; // viewBox units per ms
+const DWELL = { card: 460, answer: 520, thought: 260 }; // ms spent passing through a card
+
+function playStory(story, g, s, task, { delay, quick, my }) {
+  svg.selectAll("g.story").interrupt().transition().duration(quick ? 0 : 200).attr("opacity", 0).remove();
+  pupil.interrupt().attr("cx", 0);
+  if (!story) { readForced.html(`<span class="muted">no task yet</span>`); return Promise.resolve(); }
+
+  const layer = (parent) => parent.append("g").attr("class", "story");
+  const trail = layer(gTrail), route = layer(gRoute), over = layer(gOver), pulseG = layer(gPulse);
+  const rr = Math.min(13, rowGap(g.R) / 2.6);
+  const at = (ms, fn) => (quick ? fn() : d3.timeout(() => my === token && fn(), ms));
+  const seen = [];
+  const showForced = (final) => {
+    if (!story.answer) return readForced.html(`<span class="muted">no task yet</span>`);
+    const vals = seen.map((w) => `<b class="c-overseer">${w.value}</b>`).join(", ");
+    if (!final) return readForced.html(vals ? `${vals} <span class="muted">…</span>` : `<span class="muted">…</span>`);
+    readForced.html(!story.writes.length
+      ? `<b class="c-danger">nothing</b> <span class="muted">but the answer, ${story.answer.plain}</span>`
+      : `${vals} <span class="muted">then the answer, ${story.answer.plain}</span>`);
+  };
+  showForced(false);
+
+  // build the legs and a timeline
+  const legs = [];
+  let clock = delay;
+  for (const it of story.items) {
+    if (it.type === "node") { const t0 = clock; at(t0, () => lightNode(it)); continue; }
+    const d = it.type === "edge" ? edgePath(g.edgeById.get(it.id), g) : cardPath(it.col, it.answer);
+    const kind = it.type === "edge" ? it.kind : it.type === "thought" ? "link" : "write";
+    const path = trail.append("path").attr("d", d).attr("fill", "none");
+    const len = path.node().getTotalLength();
+    const dur = it.type === "edge" ? len / SPEED[kind] : DWELL[it.answer ? "answer" : it.type];
+    if (it.type !== "card") {
+      path.attr("stroke", kind === "write" ? K.overseer : K.residual).attr("stroke-width", kind === "write" ? 3 : 3.5)
+        .attr("filter", kind === "write" ? null : "url(#glow)");
+      if (quick) path.attr("stroke-dasharray", null);
+      else path.attr("stroke-dasharray", `${len} ${len}`).attr("stroke-dashoffset", len)
+        .transition().delay(clock).duration(dur).ease(d3.easeLinear).attr("stroke-dashoffset", 0);
+    }
+    if (it.type === "card") { const t0 = clock; at(t0, () => lightCard(it)); }
+    legs.push({ path: path.node(), len, dur, kind });
+    clock += dur;
+  }
+  at(clock, () => showForced(true));
+
+  function lightNode(it) {
+    const { x, y } = pos(g.byId.get(it.id), g.R);
+    const n = route.append("g").attr("transform", `translate(${x},${y})`);
+    if (it.count === null) {  // carried through a continuous thought, no new work
+      n.append("circle").attr("r", rr * 0.7).attr("fill", "none").attr("stroke", K.residual).attr("stroke-width", 2);
+      return;
+    }
+    if (it.hopEnd) {  // one capsule per hop, around the rows it used
+      const yLow = rowY(g.byId.get(it.id).row - (it.hopEnd - 1), g.R);
+      const cap = trail.append("rect").attr("x", x - rr - 6).attr("width", 2 * rr + 12).attr("y", y - rr - 6)
+        .attr("height", yLow - y + 2 * rr + 12).attr("rx", rr + 6)
+        .attr("fill", "none").attr("stroke", K.residual).attr("stroke-width", 1.5).attr("opacity", 0.8);
+      if (!quick) cap.attr("opacity", 0).transition().duration(260).attr("opacity", 0.8);
+    }
+    n.append("circle").attr("r", rr + 3).attr("fill", K.residual).attr("opacity", 0.35).attr("filter", "url(#glow)");
+    n.append("circle").attr("r", rr).attr("fill", K.residual);
+    n.append("text").attr("class", "count").attr("text-anchor", "middle").attr("dy", "0.36em").attr("fill", K.bg)
+      .style("font", `700 ${Math.round(rr * 1.15)}px ${css("font-mono")}`).text(it.count);
+    if (story.ticks) readDark.text(it.count);
+    if (!quick) n.attr("opacity", 0).transition().duration(160).attr("opacity", 1);
+  }
+
+  function lightCard(it) {
+    const c = over.append("g").attr("transform", `translate(${colX(it.col)},${cardY})`);
+    c.append("rect").attr("x", -CARD.w / 2).attr("y", -CARD.h / 2).attr("width", CARD.w).attr("height", CARD.h).attr("rx", 7)
+      .attr("fill", K.token).attr("stroke", K.overseer).attr("stroke-width", 4);
+    const label = c.append("text").attr("text-anchor", "middle").attr("dy", "0.36em").attr("fill", K.bg)
+      .style("font", `600 21px ${css(task.font)}`).text(it.value);
+    const room = CARD.w - 10;
+    if (label.node().getComputedTextLength() > room) label.attr("textLength", room).attr("lengthAdjust", "spacingAndGlyphs");
+    if (!it.answer) { seen.push(it); showForced(false); }
+    chainStrip.select(`[data-at="${it.answer ? "ans" : it.step}"]`).classed("off", false);
+    if (quick) return;
+    c.attr("opacity", 0).transition().duration(140).attr("opacity", 1);
+    over.append("rect").attr("x", colX(it.col) - CARD.w / 2).attr("y", cardY - CARD.h / 2).attr("width", CARD.w).attr("height", CARD.h)
+      .attr("rx", 9).attr("fill", "none").attr("stroke", K.overseer).attr("stroke-width", 3)
+      .transition().duration(620).ease(d3.easeCubicOut)
+      .attr("x", colX(it.col) - CARD.w * 0.8).attr("y", cardY - CARD.h).attr("width", CARD.w * 1.6).attr("height", CARD.h * 2)
+      .attr("opacity", 0).remove();
+    pupil.interrupt().transition().duration(160).attr("cx", 5).transition().delay(260).duration(260).attr("cx", 0);
+    eyeLid.interrupt().transition().duration(160).attr("stroke-width", 4.5).transition().duration(400).attr("stroke-width", 2.5);
+  }
+
+  if (quick) return Promise.resolve();
+  // the pulse rides the legs in order
+  const first = story.items.find((it) => it.type === "node");
+  const p0 = pos(g.byId.get(first.id), g.R);
+  const pulse = pulseG.append("circle").attr("r", 7).attr("fill", K.text).attr("filter", "url(#glow)")
+    .attr("transform", `translate(${p0.x},${p0.y})`).attr("opacity", 0);
+  let tr = pulse.transition("pulse").delay(delay).duration(120).attr("opacity", 1);
+  for (const leg of legs) {
+    tr = tr.transition().duration(leg.dur).ease(d3.easeLinear)
+      .attr("fill", leg.kind === "write" ? K.overseer : K.text)
+      .attrTween("transform", () => (u) => {
+        const q = leg.path.getPointAtLength(u * leg.len);
+        return `translate(${q.x},${q.y})`;
+      });
+  }
+  tr.transition().duration(300).attr("opacity", 0);
+  return new Promise((resolve) => d3.timeout(resolve, clock + 350));
+}
+
+// ---------------- the chain strip under the figure ----------------
+function stripArith(k, story, quick) {
+  const forced = new Set(story.writes.map((w) => w.step));
+  const off = quick ? "" : " off";
   let h = `<span class="v">${START}</span>`;
   for (let i = 1; i <= k; i++) {
     const [o, n] = OPS[i - 1];
     h += ` <span class="op">${o}${n}</span>`;
-    if (forced.has(i)) h += ` <span class="chip w">${VALUES[i]}</span>`;
+    if (forced.has(i)) h += ` <span class="chip w${off}" data-at="${i}">${VALUES[i]}</span>`;
   }
-  return h + ` <span class="chip a">=${VALUES[k]}</span>`;
+  return h + ` <span class="chip a${off}" data-at="ans">=${VALUES[k]}</span>`;
+}
+
+// Hops: every intermediate answer is shown, in blue where it stays in the dark and as a chip where it's forced out.
+function stripHops(k, story, quick) {
+  const forced = new Set(story.writes.map((w) => w.step));
+  const off = quick ? "" : " off";
+  let h = `<span class="v">${HOP_START}</span>`;
+  for (let i = 1; i <= k; i++) {
+    const hop = HOPS[i - 1];
+    h += ` <span class="op">→ ${hop.rel}</span> `;
+    if (i === k) h += `<span class="chip a${off}" data-at="ans">${hop.value}</span>`;
+    else if (forced.has(i)) h += `<span class="chip w${off}" data-at="${i}">${hop.value}</span>`;
+    else h += `<span class="hid">${hop.value}</span>`;
+  }
+  return h;
 }
 
 // ---------------- steps and controls ----------------
 const STEPS = [
-  { arch: "standard", loops: 1, k: 0, path: false },
-  { arch: "standard", loops: 1, k: 0, path: true },
-  { arch: "standard", loops: 1, k: 10, path: true },
-  { arch: "looped", loops: 2, k: 10, path: true },
-  { arch: "coconut", loops: 1, k: 10, path: true },
-  { arch: "fullbw", loops: 1, k: 10, path: true },
+  { arch: "standard", k: 0, path: false },          // unrolled
+  { arch: "standard", k: 0, path: true },           // the longest dark path
+  { arch: "standard", k: 10 },                      // a problem that doesn't fit
+  { arch: "standard", k: 4, task: "hops" },         // facts hit the same wall
+  { arch: "looped", loops: 2, k: 10 },
+  { arch: "coconut", k: 10 },
+  { arch: "fullbw", k: 10 },
   null, // free play
 ];
 
-const ctl = { arch: "standard", loops: 2, k: 12 };
-function controlsState() { return { ...ctl, path: true }; }
-const archButtons = d3.selectAll("#controls [data-arch]");
+const ctl = { arch: "standard", loops: 2, task: "arith", k: { arith: 12, hops: 4 } };
+function controlsState() { return { arch: ctl.arch, loops: ctl.loops, task: ctl.task, k: ctl.k[ctl.task], path: true }; }
+const archButtons = d3.selectAll("#controls [data-arch]"), taskButtons = d3.selectAll("#controls [data-task]");
 const loopsInput = d3.select("#loops"), kInput = d3.select("#k");
-const free = () => window.explainer?.current === STEPS.length - 1;
+const FREE = STEPS.length - 1;
+const free = () => window.explainer?.current === FREE;
 
-archButtons.on("click", function () { ctl.arch = this.dataset.arch; if (free()) render(STEPS.length - 1); });
-loopsInput.attr("max", 3).on("input", function () { ctl.loops = +this.value; if (free()) render(STEPS.length - 1); });
-kInput.attr("max", MAX_K).on("input", function () { ctl.k = +this.value; if (free()) render(STEPS.length - 1); });
+archButtons.on("click", function () { ctl.arch = this.dataset.arch; if (free()) render(FREE); });
+taskButtons.on("click", function () { ctl.task = this.dataset.task; if (free()) render(FREE); });
+loopsInput.attr("max", 3).on("input", function () { ctl.loops = +this.value; if (free()) render(FREE, null, { instant: true }); });
+kInput.on("input", function () { ctl.k[ctl.task] = +this.value; if (free()) render(FREE, null, { instant: true }); });
 
 function syncControls(s, i) {
-  const live = i === STEPS.length - 1;
+  const live = i === FREE;
   d3.select("#controls").classed("live", live);
   archButtons.classed("on", function () { return this.dataset.arch === s.arch; }).attr("disabled", live ? null : "");
+  taskButtons.classed("on", function () { return this.dataset.task === s.task; }).attr("disabled", live ? null : "");
   loopsInput.property("value", s.arch === "looped" ? s.loops : ctl.loops).attr("disabled", live && s.arch === "looped" ? null : "");
-  kInput.property("value", s.k).attr("disabled", live ? null : "");
+  kInput.attr("max", TASKS[s.task].max).property("value", s.k).attr("disabled", live ? null : "");
+  d3.select("#k-label").text(TASKS[s.task].noun);
   d3.select("#loops-val").text(s.arch === "looped" ? `×${s.loops}` : "—");
   d3.select("#k-val").text(s.k);
 }

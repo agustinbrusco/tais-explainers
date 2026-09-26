@@ -94,10 +94,15 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 
 ## State and next actions (keep this current: it's the handoff after context compaction)
 
-**Where we are (2026-09-25):**
+**Where we are (2026-09-26):**
 - The brief is agreed. Web first, and a video only if it proves worth it.
-- **The prototype of the money shot works:** `web/index.html` + `web/main.js`, steps 0–7. It's screenshot-reviewed on
-  desktop and mobile (see `review.md`) and **awaiting the learner's feedback**.
+- **Prototype iteration 2 is built** (`web/index.html` + `web/main.js`, 9 steps), acting on the 2026-09-25 feedback:
+  - a second example: Xu et al.'s 4-hop question, in its own step ("Facts hit the same wall", two rows per hop) and as a toggle
+    in "Your turn";
+  - the dark path is now *felt*: a pulse climbs the route and numbers each hidden state; crossing a card lights it gold, the
+    monitor's eye reacts, and the count restarts at 1; dark links never restart it;
+  - phones get a 5-column, narrower viewBox. Reviewed on desktop, mobile and motion frames (`review.md`, iteration 2).
+  - **Awaiting the learner's feedback on iteration 2.**
 - Beats for the full piece are in `script.md` (✅ built, 🔲 planned).
 - **Both research passes are integrated** (depth mechanics per architecture; interpretability without a reliable CoT).
   They're in `references/cot-monitorability/README.md` (sections "What latent reasoning does to interpretability tools" and
@@ -112,9 +117,12 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 - `buildGraph(state)` builds the DAG: nodes `x{t}` are tokens (or latent thoughts), `h{t}_{r}` are hidden states.
   Edge kinds: `res`, `attn`, `in`, `write`, `dark-link`.
 - `longestDarkPath(g)` is a DP in topological order, where readable tokens reset the count.
-- `layChain(g, k, arch)` routes the k-step chain, one row per step, and records the forced writes.
+- A *story* is the ordered route the pulse takes: `pathStory` (the dark path alone) or `chainStory(g, k, arch, task)`,
+  where `TASKS` holds the two examples (`arith`: 1 row per step; `hops`: 2 rows per hop). `playStory` draws and animates
+  it on separate layers above the base graph (`drawGraph`), so the structure never carries task state.
 - `STEPS[i]` gives the state for each step, and the last step reads the controls.
 - An architecture is only a change in `buildGraph`, so new architectures (e.g. diffusion) belong there.
+- Motion review: `node scripts/shoot.mjs projects/cot-monitorability/web/index.html --steps 2 --frames 16 --every 330 --element .stage`.
 
 **Learner feedback on the prototype (2026-09-25):**
 - The arithmetic chain works as the running example.
@@ -123,7 +131,9 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 - **The learner granted creative freedom** to explore the visualization further.
 
 **Next actions, in order:**
-1. Act on the feedback:
+1. ~~Act on the 2026-09-25 feedback~~ (done in iteration 2; still unexplored and worth trying if the learner wants more:
+   small multiples of the four architectures, and a "real proportions" view built on real data, e.g. Biran et al.'s
+   per-layer hop resolution in a 32-layer LLaMA, rather than an invented scale). Original notes:
    - **N-hop example:** an "example" toggle (arithmetic chain | N-hop question). Each hop is one serial step, and a forced
      write is the intermediate entity (e.g. "the director of X" → a name).
      - Pick an example whose facts are **verified** (every fact gets a claims row).
@@ -151,6 +161,7 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 - [ ] Sources read, `claims.md` drafted (Brown-Cohen §3–4; Redwood 09-10 and 09-23 incl. appendices; Nanda; Baker; Emmons; Engels)
 - [ ] `script.md` beats written
 - [x] Money shot prototyped (web) and self-reviewed. Learner feedback received 2026-09-25 (see above).
+- [x] Iteration 2 (N-hop example, counted route with pulse) built and self-reviewed 2026-09-26.
 - [ ] Narration rendered and listened to
 - [ ] Visuals built
 - [ ] Visual self-review (contact sheets / shots)

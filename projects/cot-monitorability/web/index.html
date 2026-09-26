@@ -23,11 +23,18 @@
     #chain .chip { padding: .1em .45em; border-radius: 5px; font-weight: 700; }
     #chain .chip.w { background: var(--token); color: var(--bg); outline: 2px solid var(--overseer); }
     #chain .chip.a { background: var(--token); color: var(--bg); }
+    #chain .chip.off { visibility: hidden; }
+    #chain .op { color: var(--residual); opacity: .8; }
+    #chain .hid { color: var(--residual); font-style: italic; }
+    blockquote.q { margin: 0; padding: .7rem 1rem; border-left: 3px solid var(--token); background: var(--surface);
+      border-radius: 0 6px 6px 0; font-size: .98rem; color: var(--token); }
     .legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: .82rem; color: var(--muted); }
     .legend i { display: inline-block; vertical-align: -2px; margin-right: .4rem; }
     .legend .sw-tok { width: 18px; height: 12px; background: var(--token); border-radius: 3px; }
     .legend .sw-h { width: 11px; height: 11px; background: var(--residual); border-radius: 50%; opacity: .7; }
+    .legend .sw-carry { width: 11px; height: 11px; border: 2px solid var(--residual); border-radius: 50%; }
     .legend .sw-lat { width: 18px; height: 12px; border: 2px dashed var(--residual); border-radius: 3px; }
+    .legend .sw-forced { width: 18px; height: 12px; background: var(--token); border-radius: 3px; outline: 2px solid var(--overseer); }
     .legend .sw-dark { width: 22px; height: 3px; background: var(--residual); box-shadow: 0 0 6px var(--residual); vertical-align: 2px; }
     .muted { color: var(--muted); }
     .proto { border: 1px dashed var(--training); color: var(--training); border-radius: 6px; padding: .5rem .8rem; font-size: .9rem; margin-top: 1rem; }
@@ -81,7 +88,7 @@
       <section class="step" data-step>
         <h2>The longest dark path</h2>
         <p>Look for routes through the graph that never touch a card. The longest one is the most <em>serial</em> computation the
-          model can do without writing anything down.</p>
+          model can do without writing anything down. Count the hidden states along it: that count is its length.</p>
         <p>In a standard transformer that's one trip up the stack, however many layers it has. Attention moves information
           sideways, but every hop also climbs a layer, so the path is still one trip up. Attention only adds a small cost,
           logarithmic in the context length.</p>
@@ -94,12 +101,34 @@
         <p class="predict">Each layer here does one step of the chain 7 → ×3 → −4 → ×2 → …, and each step needs the previous
           result. A 10-step chain, 4 steps per trip up the stack: how many intermediate results must the model write down?</p>
         <p><strong>Two.</strong> At the top of the stack, the running value has nowhere to go but into a token. The model can't
-          carry 39 into the next trip any other way. So the monitor is <em>guaranteed</em> to see 39 and 64.</p>
+          carry 39 into the next trip any other way. So the monitor is <em>guaranteed</em> to see 39 and 64. Watch the count:
+          each time the chain passes through a card, it starts again at 1.</p>
         <p>This is <strong>necessity</strong>: for tasks deeper than the dark path, thinking out loud isn't a habit the model might
           drop. It's forced.</p>
         <p class="caveat"><strong>Drawing convention:</strong> one row = one arithmetic step. Real models need many layers per step:
           "a 100 layer model clearly can't do 100 steps in a forward pass". Measured directly, today's best models manage about
           <strong>4</strong> dependent arithmetic steps without CoT, at 50% success (Nanda, 2026; LLM-assisted measurement).</p>
+      </section>
+
+      <section class="step" data-step>
+        <h2>Facts hit the same wall</h2>
+        <p>Arithmetic is a clean test, but the wall shows up with everyday knowledge too. Here is an item from a 2026 benchmark of
+          <strong>4-hop</strong> questions:</p>
+        <blockquote class="q">"On what day of the month was the Best Actress winner at the Academy Awards ceremony whose number
+          equals the day-of-month of the birth of the winner of the Nobel Prize in Literature in 1992 born?"</blockquote>
+        <p>Each hop needs the previous answer: the 1992 laureate is Derek Walcott, born on the 23rd; the Best Actress at the
+          23rd Academy Awards is Judy Holliday, born on the 21st.</p>
+        <p class="predict">A hop costs more depth than an arithmetic step, so here each hop takes two rows. Of the three
+          intermediate answers (Walcott, 23, Holliday), which must be written down?</p>
+        <p><strong>Only 23.</strong> Walcott is found and used inside the first trip up the stack. But 23 arrives at the top, and the
+          next lookup needs it, so it has to surface. Holliday stays in the dark too. Notice what the monitor gets: a bare "23".</p>
+        <p class="caveat"><strong>Measured, not drawn:</strong> without CoT, chained facts are "approx 2x worse than arithmetic steps":
+          about 3.6 facts at 50% success for Astra, 2.8 for Gemini 3.8 Flash (Nanda, 2026). In January 2026 the best model tested
+          answered 60% of 2-hop and 34% of 3-hop questions, and every model was at or near chance on 4 hops (Greenblatt; filler tokens,
+          no CoT). On the benchmark above, Astra rises from about 10–20% to about 50% when given filler tokens (Xu et al., 2026).</p>
+        <p class="inside">in two-hop questions, the first hop resolves in early layers and the second only in later ones, so the
+          layers that are left may not hold the knowledge the second hop needs. Patching a later hidden state back into an earlier
+          layer, in effect a hand-made second pass, fixed 32–66% of the failures (Biran et al., 2024; LLaMA 2 and 3, Pythia).</p>
       </section>
 
       <section class="step" data-step>
@@ -139,8 +168,13 @@
           <li>What's the smallest loop count at which a 12-step chain forces <em>nothing</em> into text?</li>
           <li>Why does the chain length stop mattering under full bandwidth?</li>
           <li>With Coconut, what happens to a 16-step chain once the thoughts run out?</li>
+          <li>Switch to the 4-hop question. How many loops until nothing but the answer is written?</li>
         </ul>
         <div id="controls">
+          <div class="seg" role="group" aria-label="Example">
+            <button data-task="arith">Arithmetic chain</button>
+            <button data-task="hops">4-hop question</button>
+          </div>
           <div class="seg" role="group" aria-label="Architecture">
             <button data-arch="standard">Standard</button>
             <button data-arch="looped">Looped</button>
@@ -148,7 +182,7 @@
             <button data-arch="fullbw">Full bandwidth</button>
           </div>
           <label>Loops <input id="loops" type="range" min="1" max="3" step="1"><output id="loops-val"></output></label>
-          <label>Chain length <input id="k" type="range" min="1" max="16" step="1"><output id="k-val"></output></label>
+          <label><span id="k-label">Chain length</span> <input id="k" type="range" min="1" max="16" step="1"><output id="k-val"></output></label>
         </div>
       </section>
 
@@ -176,7 +210,9 @@
       <div id="chain" aria-live="polite"></div>
       <div class="legend">
         <span><i class="sw-tok"></i>readable token</span>
+        <span><i class="sw-forced"></i>forced into text</span>
         <span><i class="sw-h"></i>hidden state</span>
+        <span><i class="sw-carry"></i>carried, no new step</span>
         <span><i class="sw-lat"></i>continuous thought</span>
         <span><i class="sw-dark"></i>dark route</span>
       </div>

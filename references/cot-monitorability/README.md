@@ -1,7 +1,7 @@
 # CoT monitorability, and how new architectures threaten it
 
 > **Last reviewed:** 2026-09-25 (revised the same day after the learner pointed to Redwood's 2026-09-23 post, and the Astra
-> material below). ✓ = checked against the source's raw text by Claude, which is stronger than the research agent's
+> material below). 2026-09-26: multi-hop latent reasoning (Greenblatt, Nanda's facts result, Biran et al.) added. ✓ = checked against the source's raw text by Claude, which is stronger than the research agent's
 > tags. Re-read the source before any claim goes into a claims ledger.
 
 ## What it is
@@ -59,6 +59,12 @@ There's also a related threat: growing **no-CoT** (single forward pass) capabili
       ~60-70% to ~90% on old AIME problems".
     - Other models gain little.
     - Caveat: this used `reasoning:low` plus an instruction, not `reasoning:none`, with API-reported reasoning tokens = 0.
+    - Their example 4-hop item ✓: "On what day of the month was the Best Actress winner at the Academy Awards ceremony whose
+      number equals the day-of-month of the birth of the winner of the Nobel Prize in Literature in 1992 born?" (Walcott →
+      23 → Holliday → 21; each hop checked on Wikipedia 2026-09-26.)
+  - Nanda, same post ✓, on multi-hop factual recall: "Every model does worse, approx 2x worse than arithmetic steps, but
+    it's about the same ratio: Astra can do 3.6 facts, Gemini 3.8 Flash at 2.8". Facts "selected for being doable in 1 hop
+    by near-frontier models".
 
 **3. The case against latent reasoning architectures** (Redwood, Finnveden, Pan, Westover, Gupta, Sheffield, Greenblatt,
 "Latent reasoning architectures would undermine CoT, our strongest oversight tool", 2026-09-23).
@@ -209,7 +215,19 @@ comes from) and *verification* (checking what a readout means). Both lean on tex
 ## Hidden computation in ordinary transformers
 - Pfau, Merrill, Bowman, "Let's Think Dot by Dot", `2404.15758`.
 - Greenblatt's series: filler tokens and repeats (2025-12-22), 2- and 3-hop latent reasoning (2026-01-01), no-CoT math time
-  horizon (2025-12-26). Located, not read.
+  horizon (2025-12-26). The multi-hop post is **read** (2026-09-26) ✓:
+  - "Gemini 3 Pro gets 60% of 2-hop questions right and 34% of 3-hop questions right"; "All models I evaluate have chance or
+    near chance accuracy on 4-hop questions"; GPT-4: 9.7% / 3.9%. Those headline numbers "use filler tokens counting from
+    1 to 300" (and 20-shot prompting for Gemini, to stop it reasoning).
+  - Resolves Leo Gao's 2023 Manifold questions on fact composition as yes (e.g. "the atomic number of uranium and the age at
+    which Euler died": 128/128 for Opus 4.5 and Gemini 3 Pro).
+  - Models are "a decent amount better at adding the results of N 1-hop questions than doing N-hop latent reasoning",
+    though the gap was smaller than he expected. So part of the difficulty is seriality, not just recall (our reading).
+- Biran, Gottesman, Yang, Geva, Globerson, "Hopping Too Late", `2406.12775` (2024) ✓: in two-hop queries "the bridge entity is
+  resolved in the early layers of the model. Then, only after this resolution, the two-hop query is solved in the later
+  layers", which may no longer hold the needed knowledge. Back-patching a later hidden state into an earlier layer "allows the
+  model more layers to finish the computation" and fixes 32–66% of failures (best layer pair, an oracle choice). LLaMA 2/3,
+  Pythia. A mechanistic picture of "running out of depth", and in effect a hand-made loop (our gloss).
 - Baherwani et al., `2607.22925`. Frontier models gain up to 13pp from irrelevant filler tokens.
 - Gould et al., "Think Fast", `2606.07157`. The no-CoT 50% time horizon doubles roughly every year.
 
