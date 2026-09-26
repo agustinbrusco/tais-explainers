@@ -85,13 +85,85 @@ There's also a related threat: growing **no-CoT** (single forward pass) capabili
   The CoT-only control is "much worse at learning to confuse the LLM monitor".
 - Caveat: "a toy task … and a toy monitoring objective".
 
-**5. White-box monitors are a complement, not yet a substitute** (Goodfire, Bergen et al., 2026-09-17, `arxiv:2609.19101`) ✓.
-- Difference-of-means activation probes catch "3.1% more hacks in Kimi K3 but 7.9% fewer hacks in GLM 5.2" than CoT
-  monitors, at matched FPR.
-- A probe plus LLM cascade cuts monitoring cost by 90%.
-- "Both techniques surface information that neither reliably does on its own!"
+**5. White-box monitors are a complement, not yet a substitute** (Goodfire, Bergen et al.: blog 2026-09-17; paper
+`arxiv:2609.19101`, v1 2026-09-16) ✓.
+- Difference-of-means activation probes catch "3.1% more hacks in Kimi K3 but 7.9% fewer hacks in GLM 5.2" at matched FPR.
+- **Precision about the baseline:** the blog says "chain-of-thought monitors", but in the paper the baseline is an LLM
+  monitor reading the *whole transcript* (reasoning, messages, tool calls). The paper's body says "3.0 percentage points"
+  where its abstract says 3.1%.
+- "Cuts monitoring cost by 90%" and "Both techniques surface information that neither reliably does on its own!" are
+  **blog** phrasing ✓ (raw blog text). They are not in the paper.
 - *For the series:* this is the bridge to the J-lens, AO and NLA pieces. Those readers are what's left when the text goes
   quiet, and today they complement CoT rather than replace it.
+
+## What latent reasoning does to interpretability tools
+*(The learner asked: "is it harder to train probes if the CoT isn't reliable, or without it?" Research agent 2026-09-25;
+key quotes re-verified ✓ by Claude.)*
+
+**The one fact to hold onto:** the activations don't go away. What gets harder is *labels* (where the training signal
+comes from) and *verification* (checking what a readout means). Both lean on text today.
+
+1. **You can still probe a latent reasoner, at least in toy models.**
+   - Ferreira, Aziz, Titov (`2608.04928`, Llama-3.2-1B in no-CoT, CoT and latent modes) ✓: "losing the readable trace does
+     not necessarily make a model less monitorable". Probing answer-token activations is "the most consistently
+     well-performing monitor across tasks and modes".
+   - Their labels are counterfactual behaviour (hint vs no hint), not the CoT.
+   - Caveat: a single 1B model, and recurrent depth isn't tested.
+   - Ramjee (`2604.23460`, GPT-2 Coconut-style model with a backdoor): latent-token probes transfer, but decay across
+     thought positions (AUROC 0.951 → 0.651, per the agent; not yet checked).
+2. **An unreliable CoT is sneakier than a missing one: it can corrupt the labels.**
+   - In Goodfire's pipeline the ground truth comes from an LLM judge given "the entire agent transcript" ✓, which treats
+     the reasoning block as "often the clearest window into intent" ✓. The same judge drives probe selection and the
+     checking of probe hits.
+   - If the CoT is obfuscated, the labels go wrong exactly where it matters, and the probes inherit the blind spot.
+     *(Inferred.)*
+   - Partial counter: synthetic-data probes did flag hacks the judge missed.
+3. **Several readers get their meaning from tokens.**
+   - NLAs warm-start on Claude-written summaries of "the text up to that token", and runs without the warm-start degenerated.
+   - AOs train on text-derived QA.
+   - The J-lens reads only single-token concepts "poised to verbalize". Wang & Reid (`2609.01924`) ✓: "The lens is
+     structurally blind" to content not driving the next token.
+   - Redwood App. C argues all three weaken if fewer thoughts become tokens.
+4. **Today's latent models are fairly readable, probably for a reason that won't last.**
+   - Dilgren & Wiegreffe (`2604.04902`, Coconut and CODI) ✓: gold reasoning traces decodable "up to 65-93% of the time".
+     But this "may be an artifact of training Coconut and CODI on gold reasoning traces" ✓.
+   - Cywiński et al. (CODI, LW 2025-12) make the same point: pure-RL latents "may develop more alien representations".
+   - Redwood footnote 10 gives the reason: backprop through opaque state explores "new ontologies and rich non-human concepts".
+5. **Tools don't transfer unchanged to new architectures.**
+   - Lu et al. (`2507.02199`, Huginn-3.5B) ✓: "limited evidence of interpretable latent CoT", and "sharp discontinuities"
+     across blocks.
+   - Wang & Reid ✓: looped models *do* keep a J-lens-readable workspace ("Depth-as-recurrence therefore does support
+     workspace function"), but the lens had to be re-fit and validated for "silent failure modes".
+   - The Astra card: "activations classifiers are trained and tuned separately for each model".
+   - No study found takes a probe or SAE from a standard model and applies it unchanged to its looped or latent derivative.
+6. **Even perfect probes answer narrower questions than a CoT.**
+   - Redwood App. C: "a single bit of information about the model's thoughts, and that bit must be something you can
+     effectively gesture at with training examples".
+   - Astra card ✓: "these results also underscore the importance of developing alignment auditing techniques beyond
+     examining the model's chain of thought", plus "real uncertainty" whether the alternatives will do the job.
+- **Scale gap:** every interpretability study of latent reasoners found is ≤ 3.5B parameters, on narrow tasks, and mostly
+  distilled from language CoT. Nothing covers an RL-trained frontier latent reasoner.
+
+## Depth mechanics per architecture (as graph edits; research agent 2026-09-25, key quotes ✓)
+- **Baseline:** Brown-Cohen Fig 3a ✓: "opaque paths can only go 'up' or 'right', with linear dependence on 'up' steps and
+  logarithmic dependence on 'right' steps". Depth is O(L(log T + log D)).
+  - Gemma 3 bounds: 4,490 (1B) to 11,662 (27B) gate levels, roughly 170–190 per layer.
+  - Redwood's NLS measure: roughly 93 × layers. No open-source CoT model exceeds 17,000.
+  - **Don't mix the two definitions** (Gemma3-1B: 4,490 vs NLS 1,954).
+- **Coconut:** delete the token at thought positions and wire the top of column t → the bottom of column t+1 ✓. Depth grows
+  with the number of thoughts.
+- **Looped:** columns get taller by the loop count (Redwood op post: "depth of a loop iteration times the number of loops").
+  Shared-KV and warm-start variants chain the dark path across tokens (Geiping §6).
+- **Full-bandwidth transformer** (`2608.08888`) ✓:
+  - The top-layer state is fused with the sampled token ("the token embedding enters only as a multiplicative gate") and
+    fed back in, so every readable node is bypassed.
+  - The paper says *total* decoding depth is unchanged (O(TL), as with ordinary CoT). What changes is *opaque* depth: from
+    ~L to ~T·L. That's our and Redwood's point, not the FBT authors'.
+- **DiffusionGemma** ✓: 608,016 vs 21,235 = 28.6× if the self-conditioning S_t (probability-weighted token embeddings) is
+  opaque, vs 23,571 → 1.1× if it's treated as interpretable. The paper doesn't explain why the ratio isn't about T = 48.
+- **Redwood's "10×" and "1,000,000×" are unexplained ballparks.**
+  - "~1.2×/yr" is derived: depth ∝ params^0.26, Chinchilla gives params ∝ compute^½, and 5×/yr compute → 5^⅛ ≈ 1.22.
+  - The "¼" end of their range is never derived.
 
 ## Position and framing (2025–early 2026)
 - Korbak, Balesni, Barnes, Bengio, et al. (41 authors), **"Chain of Thought Monitorability: A New and Fragile Opportunity
@@ -181,7 +253,9 @@ There's also a related threat: growing **no-CoT** (single forward pass) capabili
 - ❌ "CoT monitoring is already broken." Current bounds hold for CoT-requiring reasoning, and it was *the* tool that made the
   Hugging Face incident legible.
 - ❌ "Interpretability will take over when CoT goes." Probes, NLAs, the J-lens and AOs are complements today (Goodfire;
-  Redwood App. C).
+  Redwood App. C). They lose labels and verification without text (see the section above).
+- ❌ "Without CoT, probing is impossible." Toy latent models probe about as well as CoT models (Ferreira et al.). The hard
+  parts are labels, verification, scale and transfer.
 - ❌ "CoT is unfaithful, so it's useless." This conflates faithfulness with monitorability.
 
 ## Open questions

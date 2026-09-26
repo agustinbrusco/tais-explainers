@@ -83,7 +83,8 @@
         <p>Look for routes through the graph that never touch a card. The longest one is the most <em>serial</em> computation the
           model can do without writing anything down.</p>
         <p>In a standard transformer that's one trip up the stack, however many layers it has. Attention moves information
-          sideways, but every hop also climbs a layer, so it can't make the dark path longer.</p>
+          sideways, but every hop also climbs a layer, so the path is still one trip up. Attention only adds a small cost,
+          logarithmic in the context length.</p>
         <p>If you think in graphs: it's the longest path in a DAG where readable nodes reset the counter. The formal version is
           called <strong>opaque serial depth</strong>.</p>
       </section>
@@ -96,9 +97,9 @@
           carry 39 into the next trip any other way. So the monitor is <em>guaranteed</em> to see 39 and 64.</p>
         <p>This is <strong>necessity</strong>: for tasks deeper than the dark path, thinking out loud isn't a habit the model might
           drop. It's forced.</p>
-        <p class="caveat"><strong>Drawing convention:</strong> one row = one arithmetic step. In real models one step takes many
-          layers. Measured directly, today's best models fit about <strong>4</strong> dependent arithmetic steps in a forward pass
-          (Nanda, 2026; LLM-assisted measurement).</p>
+        <p class="caveat"><strong>Drawing convention:</strong> one row = one arithmetic step. Real models need many layers per step:
+          "a 100 layer model clearly can't do 100 steps in a forward pass". Measured directly, today's best models manage about
+          <strong>4</strong> dependent arithmetic steps without CoT, at 50% success (Nanda, 2026; LLM-assisted measurement).</p>
       </section>
 
       <section class="step" data-step>
@@ -106,8 +107,10 @@
         <p>A <strong>looped</strong> (recurrent-depth) transformer reuses its layers several times per token. Same parameters, but
           the dark path doubles, and the same chain now forces only one written result.</p>
         <p class="caveat"><strong>Status of the evidence:</strong> OpenAI's GPT-6 Astra is <em>rumored</em>, not confirmed, to be looped.
-          Measured, it fits about <strong>7</strong> dependent steps per forward pass vs about 4 for the next best model (Nanda, 2026).
+          Measured, it manages about <strong>7</strong> dependent steps without CoT vs about 4 for the next best model (Nanda, 2026).
           OpenAI employees deny an architectural cause.</p>
+        <p class="caveat"><strong>Variants:</strong> some looped designs also let a token read the <em>deepest</em> states of earlier
+          tokens (shared KV caches, warm starts). Those add edges that chain the dark path across positions, not just up one column.</p>
       </section>
 
       <section class="step" data-step>
@@ -115,14 +118,18 @@
         <p><strong>Coconut</strong> (Meta, 2024) feeds the last hidden state straight back in as the next input: a
           <span class="c-residual">continuous thought</span> instead of a word. Those positions have no card to read.</p>
         <p>The dark path runs right through them, and the whole chain can finish with nothing readable but the answer.</p>
+        <p class="caveat"><strong>Status:</strong> Coconut is a research model, tested on GPT-2 and Llama scale, and it scored
+          <em>below</em> ordinary CoT on GSM8k (34.1% vs 42.9%). It matters as a proof of mechanism, not as a frontier system.</p>
       </section>
 
       <section class="step" data-step>
         <h2>Full bandwidth: text plus a private channel</h2>
-        <p>Now keep writing tokens, but <em>also</em> pass the hidden state forward from each position to the next. The model still
-          produces a transcript, yet nothing forces the plan into it. The dark path spans the whole context.</p>
-        <p class="caveat"><strong>To verify:</strong> the exact wiring of the published "full-bandwidth transformer" is being checked
-          against the paper. This panel shows the general idea.</p>
+        <p>The <strong>full-bandwidth transformer</strong> (2026) keeps writing tokens, but fuses each sampled token with the previous
+          top-layer hidden state and feeds <em>that</em> back in. The token enters only as a gate on the hidden state, so the model
+          still produces a transcript, yet no card ever cuts the path. The dark path spans the whole context.</p>
+        <p class="caveat"><strong>Careful with "depth":</strong> the paper notes that decoding's <em>total</em> serial depth is
+          unchanged, which is true, since ordinary CoT is also layers × tokens. What changes is how much of it is <em>opaque</em>:
+          from about one stack to about the whole context.</p>
       </section>
 
       <section class="step" data-step>
@@ -162,7 +169,7 @@
     <div class="stage">
       <span class="badge schematic">schematic</span>
       <div class="readouts">
-        <div><span class="k">Longest dark path</span><span class="big" id="read-dark"></span><span class="unit">steps</span></div>
+        <div><span class="k">Longest dark path</span><span class="big" id="read-dark"></span><span class="unit">layers</span></div>
         <div><span class="k">Forced into text</span><span id="read-forced"></span></div>
       </div>
       <svg id="stage" role="img" aria-label="A transformer drawn as a grid of hidden states over token positions and layers, with the longest path that avoids readable tokens highlighted"></svg>

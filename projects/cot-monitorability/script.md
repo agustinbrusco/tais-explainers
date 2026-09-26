@@ -27,7 +27,7 @@ Status: ✅ in the prototype · 🔲 planned
 | 8b | 🔲 *(aside)* the policy-gradient version | a small equation panel, collapsible | the math behind "the cheaper route wins" (the learner is solid on RL concepts, less so on the math) | C-RL-1 |
 | 9 | 🔲 Faithfulness ≠ monitorability | two panels: a rationalization CoT vs a computation CoT | "unfaithful" doesn't mean "unmonitorable" | C-EMM-1 |
 | 10 | 🔲 Diffusion | canvas × denoising-steps DAG; toggle opaque vs bottlenecked self-conditioning | 28.6× → 1.1×: what matters is *what passes between steps* | C-DIFF-1..2 |
-| 11 | 🔲 What latent reasoning does to interpretability | the same graph; readers (probe, SAE, NLA, J-lens) attached to hidden nodes; which lose their labels or ground truth | probes need labels, often from text; tools are complements today | C-INTERP-* (from research) |
+| 11 | 🔲 What latent reasoning does to interpretability | the same graph with readers attached to hidden nodes (probe, NLA, J-lens), each with a "label source" wire back to the cards. Toggle Coconut or full bandwidth: the wires to text go dark, and the readers that get their meaning from tokens dim | activations persist; **labels and verification** are what we lose; an unreliable CoT silently corrupts labels; toy latent models are readable only because they were trained on human traces | C-INTERP-1..7 |
 | 12 | 🔲 Evidence board: Astra | a sortable board: confirmed / reported / rumored / bounded | calibration in both directions | C-ASTRA-* |
 | 13 | 🔲 Check yourself | five questions (see README) | transfer | n/a |
 

@@ -99,8 +99,11 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 - **The prototype of the money shot works:** `web/index.html` + `web/main.js`, steps 0–7. It's screenshot-reviewed on
   desktop and mobile (see `review.md`) and **awaiting the learner's feedback**.
 - Beats for the full piece are in `script.md` (✅ built, 🔲 planned).
-- Two research agents were dispatched: (a) depth mechanics per architecture, (b) interpretability without a reliable CoT.
-  Their findings go into `claims.md` and `references/cot-monitorability/README.md`.
+- **Both research passes are integrated** (depth mechanics per architecture; interpretability without a reliable CoT).
+  They're in `references/cot-monitorability/README.md` (sections "What latent reasoning does to interpretability tools" and
+  "Depth mechanics per architecture") and in `claims.md`, which covers beats 1–7 fully and the planned beats with sources.
+  Full-bandwidth wiring verified; prototype prose corrected (unit "layers", attention's log cost, Coconut calibration,
+  FBT "total vs opaque depth").
 
 **Run it:** `python3 -m http.server 8000` from the repo root, then open http://localhost:8000/projects/cot-monitorability/web/
 · screenshots: `node scripts/shoot.mjs projects/cot-monitorability/web/index.html [--mobile]`
@@ -115,11 +118,8 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 
 **Next actions, in order:**
 1. Fold in the learner's feedback on the prototype.
-2. Integrate the research-agent results:
-   - Fix the **full-bandwidth wiring** in `buildGraph` to match `arxiv:2608.08888`, and remove the "To verify" caveat.
-   - Confirm the Coconut depiction.
-   - Record how Redwood gets 10× / 10⁶×.
-3. Draft `claims.md` for every ✅ beat, then for the planned ones. Nothing ships `open`.
+2. ~~Integrate the research results~~ (done 2026-09-25).
+3. Spot-check the agent-sourced line numbers in `claims.md` that lack ✓ before shipping. Nothing ships `open`.
 4. Build the 🔲 beats in `script.md`, in order: 8 (two ways to earn the reward, plus the optional RL-math aside),
    9 (faithfulness ≠ monitorability), 10 (diffusion as a graph edit), 11 (what latent reasoning does to interpretability:
    probes need labels, often from text), 12 (the Astra evidence board), 0 (the Hugging Face hook), 13 (check yourself).

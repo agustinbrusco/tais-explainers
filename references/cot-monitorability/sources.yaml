@@ -850,3 +850,124 @@
     Our model is available here: http://ouro-llm.github.io.'
   read: false
   notes: ''
+- id: arxiv:2604.04902
+  title: Are Latent Reasoning Models Easily Interpretable?
+  authors:
+  - Connor Dilgren
+  - Sarah Wiegreffe
+  date: '2026-04-06'
+  url: https://arxiv.org/abs/2604.04902
+  abstract: 'Latent reasoning models (LRMs) have attracted significant research interest due to their
+    low inference cost (relative to explicit reasoning models) and theoretical ability to explore multiple
+    reasoning paths in parallel. However, these benefits come at the cost of reduced interpretability:
+    LRMs are difficult to monitor because they do not reason in natural language. This paper presents
+    an investigation into LRM interpretability by examining two state-of-the-art LRMs. First, we find
+    that latent reasoning tokens are often unnecessary for LRMs'' predictions; on logical reasoning datasets,
+    LRMs can almost always produce the same final answers without using latent reasoning at all. This
+    underutilization of reasoning tokens may partially explain why LRMs do not consistently outperform
+    explicit reasoning methods and raises doubts about the stated role of these tokens in prior work.
+    Second, we demonstrate that when latent reasoning tokens are necessary for performance, we can decode
+    gold reasoning traces up to 65-93% of the time for correctly predicted instances. This suggests LRMs
+    often implement the expected solution rather than an uninterpretable reasoning process. Finally, we
+    present a method to decode a verified natural language reasoning trace from latent tokens without
+    knowing a gold reasoning trace a priori, demonstrating that it is possible to find a verified trace
+    for a majority of correct predictions but only a minority of incorrect predictions. Our findings highlight
+    that current LRMs largely encode interpretable processes, and interpretability itself can be a signal
+    of prediction correctness.'
+  read: false
+  notes: ''
+- id: arxiv:2608.04928
+  title: Does Out-of-Sight Equal Out-of-Mind in CoT Monitorability?
+  authors:
+  - Pedro Ferreira
+  - Wilker Aziz
+  - Ivan Titov
+  date: '2026-08-05'
+  url: https://arxiv.org/abs/2608.04928
+  abstract: Chain-of-thought (CoT) reasoning offers a window into the decision-making of large language
+    models (LLMs), which can be monitored for target behaviors by reading the reasoning trace, motivating
+    work on CoT monitorability. Latent CoT approaches, however, replace the explicit tokens with a small
+    number of continuous states, lowering inference costs but removing the readable trace this monitoring
+    relies on. Monitoring then requires alternative access to the model, such as probing its activations
+    or verbalizing the latent states back into text, but how much monitorability these alternatives preserve
+    is unclear. We study this question with a hint-based intervention setup, a proxy for behaviors where
+    models exploit biasing input cues, e.g., an inadvertently leaked answer or a belief stated by the
+    user, without acknowledging them. Taking hint-reliance as the monitorability target, we compare monitors
+    across reasoning modes, from explicit CoT to weakly- and strongly-supervised latent CoT, on math reasoning
+    and question answering. We find that, in this setup, monitorability depends more on properties of
+    the task (such as whether the correct answer constrains the supporting reasoning) and the level of
+    access to model internals than on the reasoning mode.
+  read: false
+  notes: ''
+- id: arxiv:2507.02199
+  title: Latent Chain-of-Thought? Decoding the Depth-Recurrent Transformer
+  authors:
+  - Wenquan Lu
+  - Yuechuan Yang
+  - Kyle Lee
+  - Yanshu Li
+  - Enqi Liu
+  date: '2025-07-02'
+  url: https://arxiv.org/abs/2507.02199
+  abstract: Chain-of-thought (CoT) reasoning has enabled transformer-based language models to excel at
+    complex mathematics and multi-step planning. However, in standard decoder-only architectures, these
+    reasoning steps are externalized in natural language, improving interpretability at the cost of efficiency.
+    To capture reasoning that is not easily represented in words, many works have explored recurrent architectures
+    that aim to internalize reasoning in latent space, potentially supporting latent CoT. In this paper,
+    we investigate whether such reasoning structures emerge in Huginn-3.5B, a depth-recurrent Transformer
+    that reuses layers at inference time without increasing parameter count. We examine the model's internal
+    behavior on arithmetic tasks using a suite of probing techniques including the Logit Lens and Coda
+    Lens. Our findings reveal limited evidence of interpretable latent CoT by tracking rank trajectories
+    of final and intermediate result tokens. Furthermore, we uncover significant probing inconsistencies
+    across recurrent blocks, where the interpretability of hidden states depends heavily on both the layer
+    index and the decoding method. Finally, we empirically show that increasing recurrence depth yields
+    only marginal gains and falls well short of models that explicitly externalize reasoning steps. The
+    code is available at https://github.com/wenquanlu/huginn-latent-cot.
+  read: false
+  notes: ''
+- id: arxiv:2609.01924
+  title: 'Looped Transformers under the Jacobian Lens: Does the Global Workspace Survive Recurrence?'
+  authors:
+  - Wenlong Wang
+  - Fergal Reid
+  date: '2026-09-01'
+  url: https://arxiv.org/abs/2609.01924
+  abstract: Recent work identifies a mid-depth band of verbalisable, causally potent representations in
+    a standard feedforward transformer --- a functional analogue of a global workspace. Whether the same
+    workspace functionality emerges when depth is implemented through recurrence rather than a stack of
+    distinct layers remains unknown. Looped and depth-recurrent transformers provide a direct test of
+    this question because they reuse the same weights across depth. We extend the Jacobian lens to iterated
+    architectures using a virtual-unrolling adapter. We apply the full workspace suite --- lens fitting,
+    readout, and eleven causal experiment families --- to Ouro-2.6B (48 layers looped 4 times, deeply
+    supervised) and Huginn-0125 (a 4-layer core recurred 16 times, trained for latent reasoning), using
+    Qwen3.6-27B (64 untied layers) as the standard baseline. We find that a workspace forms in the iterated
+    part of each architecture, but that recurrence changes how it can be accessed. Ouro reconstructs workspace
+    content in every loop, and linear transport cannot carry that content across loop boundaries; writes
+    and ablations must therefore span every remaining loop. Huginn carries content forward across all
+    sixteen recurrences, while reads, writes, and ablations act only within a sliding window of roughly
+    two recurrences. Whether newly injected content can be verbalised tracks explicit per-iteration supervision;
+    whether existing content can be steered does not.
+  read: false
+  notes: ''
+- id: arxiv:2604.23460
+  title: 'Ulterior Motives: Detecting Misaligned Reasoning in Continuous Thought Models'
+  authors:
+  - Sharan Ramjee
+  date: '2026-04-25'
+  url: https://arxiv.org/abs/2604.23460
+  abstract: 'Chain-of-Thought (CoT) reasoning has emerged as a key technique for eliciting complex reasoning
+    in Large Language Models (LLMs). Although interpretable, its dependence on natural language limits
+    the model''s expressive bandwidth. Continuous thought models address this bottleneck by reasoning
+    in latent space rather than human-readable tokens. While they enable richer representations and faster
+    inference, they raise a critical safety question: how can we detect misaligned reasoning in an uninterpretable
+    latent space? To study this, we introduce MoralChain, a benchmark of 12,000 social scenarios with
+    parallel moral/immoral reasoning paths. We train a continuous thought model with backdoor behavior
+    using a novel dual-trigger paradigm - one trigger that arms misaligned latent reasoning ([T]) and
+    another that releases harmful outputs ([O]). We demonstrate three findings: (1) continuous thought
+    models can exhibit misaligned latent reasoning while producing aligned outputs, with aligned and misaligned
+    reasoning occupying geometrically distinct regions of latent space; (2) linear probes trained on behaviorally-distinguishable
+    conditions ([T][O] vs [O]) transfer to detecting armed-but-benign states ([T] vs baseline) with high
+    accuracy; and (3) misalignment is encoded in early latent thinking tokens, suggesting safety monitoring
+    for continuous thought models should target the "planning" phase of latent reasoning.'
+  read: false
+  notes: ''
