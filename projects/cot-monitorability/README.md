@@ -116,8 +116,26 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 - `STEPS[i]` gives the state for each step, and the last step reads the controls.
 - An architecture is only a change in `buildGraph`, so new architectures (e.g. diffusion) belong there.
 
+**Learner feedback on the prototype (2026-09-25):**
+- The arithmetic chain works as the running example.
+- **Also have an N-hop question example at hand** (multi-hop factual recall), as a second task toggle.
+- **"Longest dark path" is approved as the framing, *as long as the visualization carries it*.**
+- **The learner granted creative freedom** to explore the visualization further.
+
 **Next actions, in order:**
-1. Fold in the learner's feedback on the prototype.
+1. Act on the feedback:
+   - **N-hop example:** an "example" toggle (arithmetic chain | N-hop question). Each hop is one serial step, and a forced
+     write is the intermediate entity (e.g. "the director of X" → a name).
+     - Pick an example whose facts are **verified** (every fact gets a claims row).
+     - Evidence to cite: Xu et al. (Astra "~10-20% → ~50% on 4-hop natural facts" with filler tokens) ✓; Nanda (factual
+       recall 3.6 hops for Astra vs 2.8); Greenblatt, "Recent LLMs can do 2-hop and 3-hop latent (no CoT) reasoning on
+       natural facts" (located, read it first).
+   - **Push the visualization so it carries "longest dark path" viscerally.** Ideas to explore:
+     - Animate the chain as a pulse climbing the column and crossing links, with the counter ticking.
+     - The monitor's "flashlight" sweeping the token row.
+     - Small multiples comparing the architectures side by side.
+     - A "real proportions" toggle (e.g. 62 layers vs ~4 steps) that shows why one row ≠ one step.
+     - Make the reset at a gold card feel physical, e.g. the path "breaks" into light when it hits text.
 2. ~~Integrate the research results~~ (done 2026-09-25).
 3. Spot-check the agent-sourced line numbers in `claims.md` that lack ✓ before shipping. Nothing ships `open`.
 4. Build the 🔲 beats in `script.md`, in order: 8 (two ways to earn the reward, plus the optional RL-math aside),
@@ -132,7 +150,7 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 - [x] Brief agreed with learner (2026-09-25; additions: Coconut, effects on interp tools, RL math optional)
 - [ ] Sources read, `claims.md` drafted (Brown-Cohen §3–4; Redwood 09-10 and 09-23 incl. appendices; Nanda; Baker; Emmons; Engels)
 - [ ] `script.md` beats written
-- [x] Money shot prototyped (web) and self-reviewed. Awaiting learner feedback.
+- [x] Money shot prototyped (web) and self-reviewed. Learner feedback received 2026-09-25 (see above).
 - [ ] Narration rendered and listened to
 - [ ] Visuals built
 - [ ] Visual self-review (contact sheets / shots)
