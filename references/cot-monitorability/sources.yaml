@@ -1,0 +1,495 @@
+- id: arxiv:2507.11473
+  title: 'Chain of Thought Monitorability: A New and Fragile Opportunity for AI Safety'
+  authors:
+  - Tomek Korbak
+  - Mikita Balesni
+  - Elizabeth Barnes
+  - Yoshua Bengio
+  - Joe Benton
+  - Joseph Bloom
+  - Mark Chen
+  - Alan Cooney
+  - Allan Dafoe
+  - Anca Dragan
+  - Scott Emmons
+  - Owain Evans
+  - David Farhi
+  - Ryan Greenblatt
+  - Dan Hendrycks
+  - Marius Hobbhahn
+  - Evan Hubinger
+  - Geoffrey Irving
+  - Erik Jenner
+  - Daniel Kokotajlo
+  - Victoria Krakovna
+  - Shane Legg
+  - David Lindner
+  - David Luan
+  - Aleksander Mądry
+  - Julian Michael
+  - Neel Nanda
+  - Dave Orr
+  - Jakub Pachocki
+  - Ethan Perez
+  - Mary Phuong
+  - Fabien Roger
+  - Joshua Saxe
+  - Buck Shlegeris
+  - Martín Soto
+  - Eric Steinberger
+  - Jasmine Wang
+  - Wojciech Zaremba
+  - Bowen Baker
+  - Rohin Shah
+  - Vlad Mikulik
+  date: '2025-07-15'
+  url: https://arxiv.org/abs/2507.11473
+  abstract: 'AI systems that "think" in human language offer a unique opportunity for AI safety: we can
+    monitor their chains of thought (CoT) for the intent to misbehave. Like all other known AI oversight
+    methods, CoT monitoring is imperfect and allows some misbehavior to go unnoticed. Nevertheless, it
+    shows promise and we recommend further research into CoT monitorability and investment in CoT monitoring
+    alongside existing safety methods. Because CoT monitorability may be fragile, we recommend that frontier
+    model developers consider the impact of development decisions on CoT monitorability.'
+  read: false
+  notes: ''
+- id: arxiv:2507.05246
+  title: When Chain of Thought is Necessary, Language Models Struggle to Evade Monitors
+  authors:
+  - Scott Emmons
+  - Erik Jenner
+  - David K. Elson
+  - Rif A. Saurous
+  - Senthooran Rajamanoharan
+  - Heng Chen
+  - Irhum Shafkat
+  - Rohin Shah
+  date: '2025-07-07'
+  url: https://arxiv.org/abs/2507.05246
+  abstract: While chain-of-thought (CoT) monitoring is an appealing AI safety defense, recent work on
+    "unfaithfulness" has cast doubt on its reliability. These findings highlight an important failure
+    mode, particularly when CoT acts as a post-hoc rationalization in applications like auditing for bias.
+    However, for the distinct problem of runtime monitoring to prevent severe harm, we argue the key property
+    is not faithfulness but monitorability. To this end, we introduce a conceptual framework distinguishing
+    CoT-as-rationalization from CoT-as-computation. We expect that certain classes of severe harm will
+    require complex, multi-step reasoning that necessitates CoT-as-computation. Replicating the experimental
+    setups of prior work, we increase the difficulty of the bad behavior to enforce this necessity condition;
+    this forces the model to expose its reasoning, making it monitorable. We then present methodology
+    guidelines to stress-test CoT monitoring against deliberate evasion. Applying these guidelines, we
+    find that models can learn to obscure their intentions, but only when given significant help, such
+    as detailed human-written strategies or iterative optimization against the monitor. We conclude that,
+    while not infallible, CoT monitoring offers a substantial layer of defense that requires active protection
+    and continued stress-testing.
+  read: false
+  notes: ''
+- id: arxiv:2503.11926
+  title: Monitoring Reasoning Models for Misbehavior and the Risks of Promoting Obfuscation
+  authors:
+  - Bowen Baker
+  - Joost Huizinga
+  - Leo Gao
+  - Zehao Dou
+  - Melody Y. Guan
+  - Aleksander Madry
+  - Wojciech Zaremba
+  - Jakub Pachocki
+  - David Farhi
+  date: '2025-03-14'
+  url: https://arxiv.org/abs/2503.11926
+  abstract: Mitigating reward hacking--where AI systems misbehave due to flaws or misspecifications in
+    their learning objectives--remains a key challenge in constructing capable and aligned models. We
+    show that we can monitor a frontier reasoning model, such as OpenAI o3-mini, for reward hacking in
+    agentic coding environments by using another LLM that observes the model's chain-of-thought (CoT)
+    reasoning. CoT monitoring can be far more effective than monitoring agent actions and outputs alone,
+    and we further found that a LLM weaker than o3-mini, namely GPT-4o, can effectively monitor a stronger
+    model. Because CoT monitors can be effective at detecting exploits, it is natural to ask whether those
+    exploits can be suppressed by incorporating a CoT monitor directly into the agent's training objective.
+    While we show that integrating CoT monitors into the reinforcement learning reward can indeed produce
+    more capable and more aligned agents in the low optimization regime, we find that with too much optimization,
+    agents learn obfuscated reward hacking, hiding their intent within the CoT while still exhibiting
+    a significant rate of reward hacking. Because it is difficult to tell when CoTs have become obfuscated,
+    it may be necessary to pay a monitorability tax by not applying strong optimization pressures directly
+    to the chain-of-thought, ensuring that CoTs remain monitorable and useful for detecting misaligned
+    behavior.
+  read: false
+  notes: ''
+- id: arxiv:2505.05410
+  title: Reasoning Models Don't Always Say What They Think
+  authors:
+  - Yanda Chen
+  - Joe Benton
+  - Ansh Radhakrishnan
+  - Jonathan Uesato
+  - Carson Denison
+  - John Schulman
+  - Arushi Somani
+  - Peter Hase
+  - Misha Wagner
+  - Fabien Roger
+  - Vlad Mikulik
+  - Samuel R. Bowman
+  - Jan Leike
+  - Jared Kaplan
+  - Ethan Perez
+  date: '2025-05-08'
+  url: https://arxiv.org/abs/2505.05410
+  abstract: 'Chain-of-thought (CoT) offers a potential boon for AI safety as it allows monitoring a model''s
+    CoT to try to understand its intentions and reasoning processes. However, the effectiveness of such
+    monitoring hinges on CoTs faithfully representing models'' actual reasoning processes. We evaluate
+    CoT faithfulness of state-of-the-art reasoning models across 6 reasoning hints presented in the prompts
+    and find: (1) for most settings and models tested, CoTs reveal their usage of hints in at least 1%
+    of examples where they use the hint, but the reveal rate is often below 20%, (2) outcome-based reinforcement
+    learning initially improves faithfulness but plateaus without saturating, and (3) when reinforcement
+    learning increases how frequently hints are used (reward hacking), the propensity to verbalize them
+    does not increase, even without training against a CoT monitor. These results suggest that CoT monitoring
+    is a promising way of noticing undesired behaviors during training and evaluations, but that it is
+    not sufficient to rule them out. They also suggest that in settings like ours where CoT reasoning
+    is not necessary, test-time monitoring of CoTs is unlikely to reliably catch rare and catastrophic
+    unexpected behaviors.'
+  read: false
+  notes: ''
+- id: arxiv:2512.18311
+  title: Monitoring Monitorability
+  authors:
+  - Melody Y. Guan
+  - Miles Wang
+  - Micah Carroll
+  - Zehao Dou
+  - Annie Y. Wei
+  - Marcus Williams
+  - Benjamin Arnav
+  - Joost Huizinga
+  - Ian Kivlichan
+  - Mia Glaese
+  - Jakub Pachocki
+  - Bowen Baker
+  date: '2025-12-20'
+  url: https://arxiv.org/abs/2512.18311
+  abstract: Observability into the decision making of modern AI systems may be required to safely deploy
+    increasingly capable agents. Monitoring the chain-of-thought (CoT) of today's reasoning models has
+    proven effective for detecting misbehavior. However, this "monitorability" may be fragile under different
+    training procedures, data sources, or even continued system scaling. To measure and track monitorability,
+    we propose three evaluation archetypes (intervention, process, and outcome-property) and a new monitorability
+    metric, and introduce a broad evaluation suite. We demonstrate that these evaluations can catch simple
+    model organisms trained to have obfuscated CoTs, and that CoT monitoring is more effective than action-only
+    monitoring in practical settings. We compare the monitorability of various frontier models and find
+    that most models are fairly, but not perfectly, monitorable. We also evaluate how monitorability scales
+    with inference-time compute, reinforcement learning optimization, and pre-training model size. We
+    find that longer CoTs are generally more monitorable and that RL optimization does not materially
+    decrease monitorability even at the current frontier scale. Notably, we find that for a model at a
+    low reasoning effort, we could instead deploy a smaller model at a higher reasoning effort (thereby
+    matching capabilities) and obtain a higher monitorability, albeit at a higher overall inference compute
+    cost. We further investigate agent-monitor scaling trends and find that scaling a weak monitor's test-time
+    compute when monitoring a strong agent increases monitorability. Giving the weak monitor access to
+    CoT not only improves monitorability, but it steepens the monitor's test-time compute to monitorability
+    scaling trend. Finally, we show we can improve monitorability by asking models follow-up questions
+    and giving their follow-up CoT to the monitor.
+  read: false
+  notes: ''
+- id: arxiv:2603.05706
+  title: Reasoning Models Struggle to Control their Chains of Thought
+  authors:
+  - Chen Yueh-Han
+  - Robert McCarthy
+  - Bruce W. Lee
+  - He He
+  - Ian Kivlichan
+  - Bowen Baker
+  - Micah Carroll
+  - Tomek Korbak
+  date: '2026-03-05'
+  url: https://arxiv.org/abs/2603.05706
+  abstract: Chain-of-thought (CoT) monitoring is a promising tool for detecting misbehaviors and understanding
+    the motivations of modern reasoning models. However, if models can control what they verbalize in
+    their CoT, it could undermine CoT monitorability. To measure this undesirable capability -- CoT controllability
+    -- we introduce the CoT-Control evaluation suite, which includes tasks that require models to solve
+    problems while adhering to CoT instructions, e.g., reasoning about a genetics question without using
+    the word 'chromosome'. We show that reasoning models possess significantly lower CoT controllability
+    than output controllability; for instance, Claude Sonnet 4.5 can control its CoT only 2.7% of the
+    time but 61.9% when controlling its final output. We also find that CoT controllability is higher
+    for larger models and decreases with more RL training, test-time compute, and increased problem difficulty.
+    CoT controllability failures extend even to situations in which models are given incentives (as opposed
+    to direct requests) to evade CoT monitors, although models exhibit slightly higher controllability
+    when they are told they are being monitored. Similarly, eliciting controllability by adversarially
+    optimizing prompts does not meaningfully increase controllability. Our results leave us cautiously
+    optimistic that CoT controllability is currently unlikely to be a failure mode of CoT monitorability.
+    However, the mechanism behind low controllability is not well understood. Given its importance for
+    maintaining CoT monitorability, we recommend that frontier labs track CoT controllability in future
+    models.
+  read: false
+  notes: ''
+- id: arxiv:2404.15758
+  title: 'Let''s Think Dot by Dot: Hidden Computation in Transformer Language Models'
+  authors:
+  - Jacob Pfau
+  - William Merrill
+  - Samuel R. Bowman
+  date: '2024-04-24'
+  url: https://arxiv.org/abs/2404.15758
+  abstract: Chain-of-thought responses from language models improve performance across most benchmarks.
+    However, it remains unclear to what extent these performance gains can be attributed to human-like
+    task decomposition or simply the greater computation that additional tokens allow. We show that transformers
+    can use meaningless filler tokens (e.g., '......') in place of a chain of thought to solve two hard
+    algorithmic tasks they could not solve when responding without intermediate tokens. However, we find
+    empirically that learning to use filler tokens is difficult and requires specific, dense supervision
+    to converge. We also provide a theoretical characterization of the class of problems where filler
+    tokens are useful in terms of the quantifier depth of a first-order formula. For problems satisfying
+    this characterization, chain-of-thought tokens need not provide information about the intermediate
+    computational steps involved in multi-token computations. In summary, our results show that additional
+    tokens can provide computational benefits independent of token choice. The fact that intermediate
+    tokens can act as filler tokens raises concerns about large language models engaging in unauditable,
+    hidden computations that are increasingly detached from the observed chain-of-thought tokens.
+  read: false
+  notes: ''
+- id: arxiv:2607.22925
+  title: Not All LLM Reasoning is Visible in the Chain-of-Thought
+  authors:
+  - Vatsal Baherwani
+  - Tom Goldstein
+  - Ashwinee Panda
+  date: '2026-07-24'
+  url: https://arxiv.org/abs/2607.22925
+  abstract: A key question for AI safety is whether a language model expresses all of its reasoning in
+    its output tokens. We demonstrate a concrete failure mode where frontier models exhibit invisible
+    reasoning by leveraging semantically irrelevant filler tokens to improve performance on synthetic
+    reasoning tasks. We evaluate 13 frontier language models across three tasks and find that many models
+    benefit significantly from filler tokens, with accuracy improvements of up to 13 percentage points.
+    The benefit depends on which tokens are used and differs across models. We further show that filler
+    tokens enable Claude Opus 4.5 to satisfy a hidden modular arithmetic constraint without sacrificing
+    accuracy on its primary task, demonstrating that invisible reasoning can serve objectives entirely
+    invisible to CoT monitoring. Reinforcement learning gives Qwen3-235B strong preferences over filler
+    token content, but neither RL nor supervised fine-tuning produces a filler token benefit that persists
+    at test time. Our results indicate that frontier models already perform consequential computation
+    with no interpretable trace in their output tokens.
+  read: false
+  notes: ''
+- id: arxiv:2606.07157
+  title: 'Think Fast: Estimating No-CoT Task-Completion Time Horizons of Frontier AI Models'
+  authors:
+  - Dewi Gould
+  - Francis Rhys Ward
+  - Anders Cairns Woodruff
+  - Rauno Arike
+  - Josh Hills
+  - Alex Serrano
+  - Ida Caspary
+  - Jason Ross Brown
+  - Jo J. Jiao
+  - Patrick Leask
+  - Twm Stone
+  - Ram Potham
+  - Ionut Gabriel Stan
+  - Harry Mayne
+  - Simeon Hellsten
+  - Shubhorup Biswas
+  - Ariana Azarbal
+  - William L. Anderson
+  - Elle Najt
+  - Ryan Greenblatt
+  - Julian Stastny
+  date: '2026-06-05'
+  url: https://arxiv.org/abs/2606.07157
+  abstract: 'Many efforts to ensure frontier AI models are safe rely on monitoring their chain-of-thought
+    (CoT) reasoning. If models become able to perform sufficiently complex reasoning internally, without
+    explicit thinking tokens, this would undermine such oversight. We measure how well frontier models
+    reason without CoT across a suite of over 30,000 questions spanning 43 benchmarks in domains including
+    math, coding, puzzles, causality, theory-of-mind, and strategic reasoning. To compare models against
+    humans, we estimate the $50\%$-task-completion time horizon (TH): the human time required for tasks
+    a model completes with $50\%$ success rate. We complement this with a $50\%$ reasoning token horizon:
+    the minimum number of o3-mini reasoning tokens needed for tasks a model solves with $50\%$ success
+    rate. We find that the no-CoT $50\%$ TH of frontier models has been doubling roughly every year over
+    the past six years, with GPT-5.5''s TH reaching over 3 minutes and reasoning token horizon exceeding
+    1,500 tokens. Our median estimates predict that frontier no-CoT THs could exceed 7 minutes by 2028,
+    and 25 minutes by 2030, though these projections carry substantial uncertainty. We recommend frontier
+    developers track this explicitly.'
+  read: false
+  notes: ''
+- id: arxiv:2412.06769
+  title: Training Large Language Models to Reason in a Continuous Latent Space
+  authors:
+  - Shibo Hao
+  - Sainbayar Sukhbaatar
+  - DiJia Su
+  - Xian Li
+  - Zhiting Hu
+  - Jason Weston
+  - Yuandong Tian
+  date: '2024-12-09'
+  url: https://arxiv.org/abs/2412.06769
+  abstract: Large language models (LLMs) are typically constrained to reason in the language space, where
+    they express the reasoning process through a chain-of-thought (CoT) to solve complex problems. However,
+    the language space may not always be optimal for reasoning. Most word tokens primarily ensure textual
+    coherence and are not essential for reasoning, while some critical tokens require complex planning
+    and pose challenges to LLMs. To explore the potential of reasoning beyond language, we introduce a
+    new paradigm called Coconut (Chain of Continuous Thought). Coconut utilizes the last hidden state
+    of the LLM as a representation of the reasoning state, termed "continuous thought." Instead of decoding
+    this state into words, we feed it back to the model as the next input embedding directly in the continuous
+    space. This latent reasoning paradigm enables an advanced reasoning pattern, where continuous thoughts
+    can encode multiple alternative next steps, allowing the model to perform a breadth-first search (BFS)
+    rather than committing prematurely to a single deterministic path as in CoT. Coconut outperforms CoT
+    on logical reasoning tasks that require substantial search during planning and achieves a better trade-off
+    between accuracy and efficiency.
+  read: false
+  notes: ''
+- id: arxiv:2502.05171
+  title: 'Scaling up Test-Time Compute with Latent Reasoning: A Recurrent Depth Approach'
+  authors:
+  - Jonas Geiping
+  - Sean McLeish
+  - Neel Jain
+  - John Kirchenbauer
+  - Siddharth Singh
+  - Brian R. Bartoldson
+  - Bhavya Kailkhura
+  - Abhinav Bhatele
+  - Tom Goldstein
+  date: '2025-02-07'
+  url: https://arxiv.org/abs/2502.05171
+  abstract: We study a novel language model architecture that is capable of scaling test-time computation
+    by implicitly reasoning in latent space. Our model works by iterating a recurrent block, thereby unrolling
+    to arbitrary depth at test-time. This stands in contrast to mainstream reasoning models that scale
+    up compute by producing more tokens. Unlike approaches based on chain-of-thought, our approach does
+    not require any specialized training data, can work with small context windows, and can capture types
+    of reasoning that are not easily represented in words. We scale a proof-of-concept model to 3.5 billion
+    parameters and 800 billion tokens. We show that the resulting model can improve its performance on
+    reasoning benchmarks, sometimes dramatically, up to a computation load equivalent to 50 billion parameters.
+  read: false
+  notes: ''
+- id: arxiv:2606.20560
+  title: How Transparent is DiffusionGemma?
+  authors:
+  - Joshua Engels
+  - Callum McDougall
+  - Bilal Chughtai
+  - Janos Kramar
+  - Senthooran Rajamanoharan
+  - Cindy Wu
+  - Arthur Conmy
+  - Asic Q Chen
+  - Jean Tarbouriech
+  - Min Ma
+  - Brendan O'Donoghue
+  - João Gabriel Lopes de Oliveira
+  - Rohin Shah
+  - Neel Nanda
+  date: '2026-06-18'
+  url: https://arxiv.org/abs/2606.20560
+  abstract: 'LLM reasoning transparency is a critical affordance for understanding model decisions, mitigating
+    misuse and misalignment, and debugging surprising model behaviors. However, DiffusionGemma performs
+    a larger fraction of its computation in a continuous latent space; does this make its reasoning less
+    transparent? We study this question by decomposing transparency into two components: variable transparency,
+    whether we understand intermediate snapshots of a model''s computational state; and algorithmic transparency,
+    whether we can use these snapshots to reconstruct the process by which the model arrived at its outputs.
+    Naively, DiffusionGemma has poor variable transparency: its opaque serial depth, the amount of serial
+    computation that occurs in between interpretable model states, seems at first 28.6X higher than the
+    corresponding autoregressive Gemma 4 model. However, we show that we can map the information flowing
+    between denoising steps through an interpretable token bottleneck with no decrease in downstream performance.
+    Treating these intermediate states as interpretable reduces the opaque serial depth to just 1.1X that
+    of Gemma 4. Algorithmic transparency is harder for diffusion models than for autoregressive models
+    because all token predictions in the canvas can change at every denoising step, giving the model the
+    power to implement complicated distributed algorithms during the denoising process. To begin bridging
+    this gap, we conduct a suite of interpretability case studies, uncovering initial evidence of novel
+    diffusion-specific phenomena such as non-chronological reasoning, token and sequence smearing, and
+    intermediate-context reasoning. Finally, we test monitorability, a key application of transparency
+    that measures whether model outputs are useful for downstream tasks. We find that DiffusionGemma is
+    similarly monitorable to Gemma 4.'
+  read: false
+  notes: ''
+- id: arxiv:2603.09786
+  title: Quantifying the Necessity of Chain of Thought through Opaque Serial Depth
+  authors:
+  - Jonah Brown-Cohen
+  - David Lindner
+  - Rohin Shah
+  date: '2026-03-10'
+  url: https://arxiv.org/abs/2603.09786
+  abstract: 'Large language models (LLMs) tend to externalize their reasoning in their chain of thought,
+    making the chain of thought a good target for monitoring. This is partially an inherent feature of
+    the Transformer architecture: sufficiently long serial cognition must pass through the chain of thought
+    (Korbak et al., 2025). We formalize this argument through the notion of opaque serial depth, given
+    by the length of the longest computation that can be done without the use of interpretable intermediate
+    steps like chain of thought. Given this formalization, we compute numeric upper bounds on the opaque
+    serial depth of Gemma 3 models, as well as asymptotic results for additional architectures beyond
+    standard LLMs. We also open-source an automated method that can calculate upper bounds on the opaque
+    serial depth of arbitrary neural networks, and use it to demonstrate that Mixture-of-Experts models
+    likely have lower depth than dense models. Overall, our results suggest that opaque serial depth is
+    a useful tool for understanding the potential for models to do significant reasoning that is not externalized.'
+  read: false
+  notes: ''
+- id: web:fmf-cot-brief
+  title: Chain of Thought Monitorability (issue brief)
+  authors:
+  - Frontier Model Forum
+  date: '2026-01-27'
+  url: https://www.frontiermodelforum.org/issue-briefs/chain-of-thought-monitorability/
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: blog:openai-monitorability-evals
+  title: Open Sourcing Monitorability Evaluations
+  authors:
+  - OpenAI
+  date: '2026-04-23'
+  url: https://alignment.openai.com/monitorability-evals/
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: report:mythos-risk
+  title: 'Alignment Risk Update: Claude Mythos Preview'
+  authors:
+  - Anthropic
+  date: '2026-04-07'
+  url: https://www.anthropic.com/claude-mythos-preview-risk-report
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: lw:mallen-greenblatt-cot
+  title: Anthropic repeatedly accidentally trained against the CoT, demonstrating inadequate processes
+  authors:
+  - Mallen
+  - Greenblatt
+  date: '2026-04-14'
+  url: https://www.lesswrong.com/posts/K8FxfK9GmJfiAhgcT/anthropic-repeatedly-accidentally-trained-against-the-cot
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: web:redwood-architecture-monitorability
+  title: Proposal for tracking the effects of architecture on monitorability
+  authors:
+  - Redwood Research
+  date: '2026-09-10'
+  url: https://www.redwoodresearch.org/blog/proposal-for-tracking-architecture-on-monitorability
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: lw:nls-depth
+  title: An operationalization of opaque serial depth
+  authors:
+  - Greenblatt
+  - Frisby
+  - Westover
+  - Finnveden
+  - Pan
+  - Stastny
+  date: '2026-09-10'
+  url: https://www.lesswrong.com/posts/x8BvtWxtoajBGHS3g/an-operationalization-of-opaque-serial-depth
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: web:potts-fragile-cot
+  title: The fragile foundations of CoT monitoring
+  authors:
+  - Christopher Potts
+  date: '2026-07-27'
+  url: https://web.stanford.edu/~cgpotts/blog/cot/
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: web:diffusiongemma
+  title: DiffusionGemma (model page)
+  authors:
+  - Google DeepMind
+  date: '2026'
+  url: https://deepmind.google/models/gemma/diffusiongemma/
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.

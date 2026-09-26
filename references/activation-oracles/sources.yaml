@@ -1,0 +1,165 @@
+- id: arxiv:2512.15674
+  title: 'Activation Oracles: Training and Evaluating LLMs as General-Purpose Activation Explainers'
+  authors:
+  - Adam Karvonen
+  - James Chua
+  - Clément Dumas
+  - Kit Fraser-Taliente
+  - Subhash Kantamneni
+  - Julian Minder
+  - Euan Ong
+  - Arnab Sen Sharma
+  - Daniel Wen
+  - Owain Evans
+  - Samuel Marks
+  date: '2025-12-17'
+  url: https://arxiv.org/abs/2512.15674
+  abstract: 'Large language model (LLM) activations are notoriously difficult to understand, with most
+    existing techniques using complex, specialized methods for interpreting them. Recent work has proposed
+    a simpler approach known as LatentQA: training LLMs to directly accept LLM activations as inputs and
+    answer arbitrary questions about them in natural language. However, prior work has focused on narrow
+    task settings for both training and evaluation. In this paper, we instead take a generalist perspective.
+    We evaluate LatentQA-trained models, which we call Activation Oracles (AOs), in far out-of-distribution
+    settings and examine how performance scales with training data diversity. We find that AOs can recover
+    information fine-tuned into a model (e.g., biographical knowledge or malign propensities) that does
+    not appear in the input text, despite never being trained with activations from a fine-tuned model.
+    Our main evaluations are four downstream tasks where we can compare to prior white- and black-box
+    techniques. We find that even narrowly-trained LatentQA models can generalize well, and that adding
+    additional training datasets (such as classification tasks and a self-supervised context prediction
+    task) yields consistent further improvements. Our best AOs match or exceed white-box baselines on
+    all four tasks and the best overall baseline on 3 of 4. These results suggest that diversified training
+    to answer natural-language queries imparts a general capability to verbalize information about LLM
+    activations.'
+  read: false
+  notes: ''
+- id: arxiv:2412.08686
+  title: 'LatentQA: Teaching LLMs to Decode Activations Into Natural Language'
+  authors:
+  - Alexander Pan
+  - Lijie Chen
+  - Jacob Steinhardt
+  date: '2024-12-11'
+  url: https://arxiv.org/abs/2412.08686
+  abstract: 'Top-down transparency typically analyzes language model activations using probes with scalar
+    or single-token outputs, limiting the range of behaviors that can be captured. To alleviate this issue,
+    we develop a more expressive probe that can directly output natural language, performing LatentQA:
+    the task of answering open-ended questions about activations. A key difficulty in developing such
+    a probe is collecting a dataset mapping activations to natural-language descriptions. In response,
+    we propose an approach for generating a dataset of activations and associated question-answer pairs
+    and develop a fine-tuning method for training a decoder LLM on this dataset. We then validate our
+    decoder''s fidelity by assessing its ability to read and control model activations. First, we evaluate
+    the decoder on a number of supervised reading tasks with a known answer, such as uncovering hidden
+    system prompts and relational knowledge extraction, and observe that it outperforms competitive probing
+    baselines. Second, we demonstrate that the decoder is precise enough to steer the target model to
+    exhibit behaviors unseen during training. Finally, we show that LatentQA scales well with increasing
+    dataset and model size.'
+  read: false
+  notes: ''
+- id: arxiv:2401.06102
+  title: 'Patchscopes: A Unifying Framework for Inspecting Hidden Representations of Language Models'
+  authors:
+  - Asma Ghandeharioun
+  - Avi Caciularu
+  - Adam Pearce
+  - Lucas Dixon
+  - Mor Geva
+  date: '2024-01-11'
+  url: https://arxiv.org/abs/2401.06102
+  abstract: Understanding the internal representations of large language models (LLMs) can help explain
+    models' behavior and verify their alignment with human values. Given the capabilities of LLMs in generating
+    human-understandable text, we propose leveraging the model itself to explain its internal representations
+    in natural language. We introduce a framework called Patchscopes and show how it can be used to answer
+    a wide range of questions about an LLM's computation. We show that many prior interpretability methods
+    based on projecting representations into the vocabulary space and intervening on the LLM computation
+    can be viewed as instances of this framework. Moreover, several of their shortcomings such as failure
+    in inspecting early layers or lack of expressivity can be mitigated by Patchscopes. Beyond unifying
+    prior inspection techniques, Patchscopes also opens up new possibilities such as using a more capable
+    model to explain the representations of a smaller model, and multihop reasoning error correction.
+  read: false
+  notes: ''
+- id: arxiv:2403.10949
+  title: 'SelfIE: Self-Interpretation of Large Language Model Embeddings'
+  authors:
+  - Haozhe Chen
+  - Carl Vondrick
+  - Chengzhi Mao
+  date: '2024-03-16'
+  url: https://arxiv.org/abs/2403.10949
+  abstract: How do large language models (LLMs) obtain their answers? The ability to explain and control
+    an LLM's reasoning process is key for reliability, transparency, and future model developments. We
+    propose SelfIE (Self-Interpretation of Embeddings), a framework that enables LLMs to interpret their
+    own embeddings in natural language by leveraging their ability to respond to inquiries about a given
+    passage. Capable of interpreting open-world concepts in the hidden embeddings, SelfIE reveals LLM
+    internal reasoning in cases such as making ethical decisions, internalizing prompt injection, and
+    recalling harmful knowledge. SelfIE's text descriptions on hidden embeddings also open up new avenues
+    to control LLM reasoning. We propose Supervised Control, which allows editing open-ended concepts
+    while only requiring gradient computation of individual layer. We extend RLHF to hidden embeddings
+    and propose Reinforcement Control that erases harmful knowledge in LLM without supervision targets.
+  read: false
+  notes: ''
+- id: arxiv:2606.02609
+  title: Building Better Activation Oracles
+  authors:
+  - Jan Bauer
+  - Celeste De Schamphelaere
+  - Adam Karvonen
+  - Niclas Luick
+  - Neel Nanda
+  date: '2026-05-23'
+  url: https://arxiv.org/abs/2606.02609
+  abstract: 'Activation Oracles (AOs) are promising methods for interpreting residual stream activations.
+    However, current AOs face important issues, such as hallucinations and vagueness. Additionally, text-inversion
+    confounds make them hard to evaluate. To this end, we improve the Activation Oracle (AO) training
+    regime in four ways: training on on-policy rollouts, improving the conversational dataset, feeding
+    more layers and an improvement to the injection formula. The capability improvements are marginal,
+    but quality of life improvements are quite substantial. In addition, we open source the first comprehensive
+    evaluation suite for AO quality, which we call AObench. Overall, we hope that our work sets a foundation
+    that helps improve AOs and other models in the paradigm of scalable, end-to-end interpretability.'
+  read: false
+  notes: ''
+- id: arxiv:2607.23379
+  title: 'When Activation Oracles Learn Not to Read: Concept-Specific Blind Spots in Fine-Tuned Oracles'
+  authors:
+  - Tobias Bersia
+  - Tatiana Gaintseva
+  date: '2026-07-25'
+  url: https://arxiv.org/abs/2607.23379
+  abstract: 'Activation Oracles (AOs) are language models trained to answer natural-language questions
+    about another model''s internal activations. They offer a flexible interface for reading hidden information
+    from model states, especially when relevant information is internally represented but absent or incomplete
+    in visible behavior. However, AOs are themselves learned systems: their answers are shaped by training
+    data, objectives, and learned reporting behavior, rather than being neutral readouts of represented
+    information. We study this in a controlled Taboo Word Guessing setting, where subject models are fine-tuned
+    to internally use a hidden concept while avoiding direct disclosure. Contrary to the expectation that
+    an AO trained on such a subject becomes a specialist reader, we find that fine-tuned AOs can become
+    concept-specific anti-readers: they selectively fail to recover the concept persistently present during
+    their own training. This failure is not simply explained by absence of the concept from the subject
+    or oracle representations: the target remains decodable inside the oracle, while LogitLens and layer-ablation
+    analyses indicate that the failure arises in the AO readout pathway. Our results show that behavioral
+    leakage, representation-level decodability, and AO-verbalizability can come apart, raising a reliability
+    concern for learned interpretability interfaces.'
+  read: false
+  notes: ''
+- id: af:activation-oracles
+  title: 'Activation Oracles: Training and Evaluating LLMs as General-Purpose Activation Explainers (AF
+    post)'
+  authors:
+  - Karvonen
+  - et al.
+  date: '2025-12-18'
+  url: https://www.alignmentforum.org/posts/rwoEz3bA9ekxkabc7/activation-oracles-training-and-evaluating-llms-as-general
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: blog:introspection-adapters
+  title: Introspection Adapters
+  authors:
+  - Shenoy
+  - Yang
+  - Sheshadri
+  - et al.
+  date: '2026-04-28'
+  url: https://alignment.anthropic.com/2026/introspection-adapters/
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.

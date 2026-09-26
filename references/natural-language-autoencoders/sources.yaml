@@ -1,0 +1,58 @@
+- id: tc:2026-nla
+  title: Natural Language Autoencoders Produce Unsupervised Explanations of LLM Activations
+  authors:
+  - Fraser-Taliente
+  - Kantamneni
+  - Ong
+  - et al.
+  date: '2026-05-07'
+  url: https://transformer-circuits.pub/2026/nla/
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: blog:anthropic-nla
+  title: 'Natural Language Autoencoders: Turning Claude''s thoughts into text'
+  authors:
+  - Anthropic
+  date: '2026-05-07'
+  url: https://www.anthropic.com/research/natural-language-autoencoders
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: code:nla
+  title: kitft/natural_language_autoencoders (code + open checkpoints)
+  authors:
+  - kitft (GitHub)
+  date: 2026-05
+  url: https://github.com/kitft/natural_language_autoencoders
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: lw:nla-linkpost
+  title: Natural Language Autoencoders Produce Unsupervised Explanations (LW linkpost + comments)
+  authors:
+  - various
+  date: '2026-05-07'
+  url: https://www.lesswrong.com/posts/oeYesesaxjzMAktCM/natural-language-autoencoders-produce-unsupervised
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: lw:chalnev-cycle-ao
+  title: Cycle-Consistent Activation Oracles
+  authors:
+  - Slava Chalnev
+  date: '2026-03-12'
+  url: https://www.lesswrong.com/posts/Nf2sKaNNdxE2ssxbp/cycle-consistent-activation-oracles-1
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: web:zhang-turner-nla-robustness
+  title: How Robust Are Natural Language Autoencoders to Initialization?
+  authors:
+  - Michael Zhang
+  - Alex Turner
+  date: '2026-07-09'
+  url: https://turntrout.com/natural-language-autoencoder-robustness
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.

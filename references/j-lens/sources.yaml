@@ -1,0 +1,182 @@
+- id: arxiv:2607.15495
+  title: Verbalizable Representations Form a Global Workspace in Language Models
+  authors:
+  - Wes Gurnee
+  - Nicholas Sofroniew
+  - Adam Pearce
+  - Mateusz Piotrowski
+  - Isaac Kauvar
+  - Runjin Chen
+  - Anna Soligo
+  - Paul Bogdan
+  - Euan Ong
+  - Rowan Wang
+  - Ben Thompson
+  - David Abrahams
+  - Subhash Kantamneni
+  - Emmanuel Ameisen
+  - Joshua Batson
+  - Jack Lindsey
+  date: '2026-07-16'
+  url: https://arxiv.org/abs/2607.15495
+  abstract: 'Out of everything the human brain processes, only a small fraction is consciously accessible,
+    in the sense of being available for verbal report, deliberate control, and flexible reasoning. In
+    this paper, we present evidence that an analogous functional distinction has emerged in large language
+    models. Using a new interpretability technique, the Jacobian lens, we identify the representations
+    a model is poised to verbalize at any point in its processing. These representations, which we collectively
+    call the J-space, exhibit the functional properties characteristic of a global workspace: their contents
+    can be reported, deliberately summoned and held, used to carry the intermediate steps of silent reasoning,
+    and passed as arguments to arbitrary downstream computations, while automatic processing such as text
+    parsing and routine inference proceeds without them. The J-space also has structural signatures that
+    global workspace theory associates with conscious access: it carries coherent content only in an intermediate
+    band of layers, holds on the order of tens of concepts at a time, and is broadcast by the model''s
+    weights more widely than other representations. These properties make it a practical window into a
+    model''s unspoken thinking. In alignment audits, it reveals strategic deliberation, evaluation awareness,
+    and trained-in misaligned dispositions that never appear in the model''s outputs. We find that post-training
+    installs the Assistant''s point of view in the workspace, and we introduce counterfactual reflection
+    training, which improves behavior by training only what a model would say if interrupted and asked
+    to reflect. These results indicate that language models maintain a small, privileged set of representations
+    bearing some of the functional hallmarks of conscious access, and that decoding these representations
+    sheds light on ongoing cognitive processes.'
+  read: false
+  notes: ''
+- id: arxiv:2608.25347
+  title: 'Short Horizons and Sparse Concepts: a Mathematical View of the Readout in the J-lens'
+  authors:
+  - Shi-Qi Yan
+  - Kai-Xuan Ding
+  - Chao-Hong Tan
+  - Qian Chen
+  - Wen Wang
+  - Xiangang Li
+  - Zhen-Hua Ling
+  date: '2026-08-26'
+  url: https://arxiv.org/abs/2608.25347
+  abstract: The Jacobian lens (J-lens) has been proposed as a way to read verbalizable representations
+    from language models. However, its principle and meaning lack a detailed and theoretical discussion.
+    We provide a mathematical view of this interpretation and of its assumed causal structure. Besides
+    treating the J-lens as a heuristic probe, we further regard it as a first-order causal transfer operator
+    from intermediate activations to expected future readouts. We study the Jacobian matrix as the optimal
+    local linear approximation of the downstream mapping, analyze its global approximation behavior and
+    bias, and identify its mathematical meaning as an expectation over anticipated future readouts. Further
+    analysis of the Jacobian energy distribution reveals that its causal geometry is highly sparse. The
+    energy decays with depth, concentrates in an extremely small proportion, and decomposes into diagonal
+    pathways and specific critical positions. This decomposition further resolves the expectation of the
+    J-lens over future outputs into short-horizon and sparse concept predictions, providing a more intuitive
+    attribution and explanation for the ability of the J-lens to visualize concepts during the thinking
+    process. Based on the theory, we propose a simple but effective improvement strategy and decoupling
+    method for the J-lens, which significantly enhances the ability of the J-lens to read out correct
+    intermediate concepts.
+  read: false
+  notes: ''
+- id: arxiv:2608.31084
+  title: 'The First Token Is a Clue: Verbalizing Multi-Token Concepts from the J-lens'
+  authors:
+  - Xijie Gong
+  - Tonghan Wang
+  date: '2026-08-31'
+  url: https://arxiv.org/abs/2608.31084
+  abstract: The Jacobian Lens (J-lens) is a recent tool for interpreting LLMs. It reads a hidden state
+    as a ranked list of vocabulary tokens, leaving multi-token concepts without a representation of their
+    own. The original J-lens work addresses this limitation with Template Lens, which precomputes vectors
+    for a fixed phrase vocabulary, and Oracle Lens, which fine-tunes components to propose phrases and
+    reconstruct phrase vectors. We ask whether multi-token concepts and their vectors can instead be recovered
+    directly from J-lens and the frozen model. We find that the first token of a multi-token concept is
+    about as readable as a single-token concept. Given the correct first token and source prompt, the
+    frozen model recovers the second token in 88.3% of two-token cases. We show that a vector for the
+    complete concept can be recovered from subsequent hidden states in a single forward pass. We therefore
+    use J-lens to propose first tokens and let the frozen model complete candidate concepts. We then recover
+    a vector for each candidate and score it alongside the complete vocabulary. Across 496 multi-hop clozes
+    on Gemma-3-12B-IT, Llama-3.1-8B, and Qwen3-14B, our method achieves an average $\mathrm{Rank@}10$
+    of 43.1%, compared with 27.6% for Template Lens. Without the J-lens clue, performance drops to 21.6%,
+    showing that the first-token clue substantially improves readout. Causal concept swaps using the recovered
+    vectors achieve an average $\mathrm{succ}@10$ of 61.4%, compared with 26.2% for Template Lens under
+    the same intervention. These results show that first-token clues can guide multi-token concept recovery,
+    while subsequent hidden states provide vectors for readout and intervention.
+  read: false
+  notes: ''
+- id: arxiv:2502.18147
+  title: 'Jacobian Sparse Autoencoders: Sparsify Computations, Not Just Activations'
+  authors:
+  - Lucy Farnik
+  - Tim Lawson
+  - Conor Houghton
+  - Laurence Aitchison
+  date: '2025-02-25'
+  url: https://arxiv.org/abs/2502.18147
+  abstract: Sparse autoencoders (SAEs) have been successfully used to discover sparse and human-interpretable
+    representations of the latent activations of LLMs. However, we would ultimately like to understand
+    the computations performed by LLMs and not just their representations. The extent to which SAEs can
+    help us understand computations is unclear because they are not designed to "sparsify" computations
+    in any sense, only latent activations. To solve this, we propose Jacobian SAEs (JSAEs), which yield
+    not only sparsity in the input and output activations of a given model component but also sparsity
+    in the computation (formally, the Jacobian) connecting them. With a na\"ive implementation, the Jacobians
+    in LLMs would be computationally intractable due to their size. One key technical contribution is
+    thus finding an efficient way of computing Jacobians in this setup. We find that JSAEs extract a relatively
+    large degree of computational sparsity while preserving downstream LLM performance approximately as
+    well as traditional SAEs. We also show that Jacobians are a reasonable proxy for computational sparsity
+    because MLPs are approximately linear when rewritten in the JSAE basis. Lastly, we show that JSAEs
+    achieve a greater degree of computational sparsity on pre-trained LLMs than on the equivalent randomized
+    LLM. This shows that the sparsity of the computational graph appears to be a property that LLMs learn
+    through training, and suggests that JSAEs might be more suitable for understanding learned transformer
+    computations than standard SAEs.
+  read: false
+  notes: ''
+- id: tc:2026-workspace
+  title: Verbalizable Representations Form a Global Workspace in Language Models (Transformer Circuits
+    version)
+  authors:
+  - Gurnee
+  - Sofroniew
+  - Pearce
+  - et al.
+  date: '2026-07-06'
+  url: https://transformer-circuits.pub/2026/workspace/
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: blog:anthropic-global-workspace
+  title: A global workspace in language models
+  authors:
+  - Anthropic
+  date: '2026-07-06'
+  url: https://www.anthropic.com/research/global-workspace
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: code:jacobian-lens
+  title: anthropics/jacobian-lens (reference implementation)
+  authors:
+  - Anthropic
+  date: 2026-07
+  url: https://github.com/anthropics/jacobian-lens
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: lw:nanda-workspace-review
+  title: A Review of Anthropic's Global Workspace Paper
+  authors:
+  - Neel Nanda
+  date: '2026-07-06'
+  url: https://www.lesswrong.com/posts/zFJ3ZdQwrTWE9jT5S/a-review-of-anthropic-s-global-workspace-paper
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: lw:zvi-j-space
+  title: No Space Like J-Space
+  authors:
+  - Zvi
+  date: '2026-07-07'
+  url: https://www.lesswrong.com/posts/EnxHPxJT4Xin5cTsX/no-space-like-j-space
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: hf:louapre-j-space
+  title: 'J-Space: Yet Another LLM Mind Reader?'
+  authors:
+  - D. Louapre
+  date: '2026-07-13'
+  url: https://huggingface.co/blog/dlouapre/j-space
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.

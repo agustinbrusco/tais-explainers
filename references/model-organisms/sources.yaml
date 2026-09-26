@@ -1,0 +1,435 @@
+- id: arxiv:2401.05566
+  title: 'Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training'
+  authors:
+  - Evan Hubinger
+  - Carson Denison
+  - Jesse Mu
+  - Mike Lambert
+  - Meg Tong
+  - Monte MacDiarmid
+  - Tamera Lanham
+  - Daniel M. Ziegler
+  - Tim Maxwell
+  - Newton Cheng
+  - Adam Jermyn
+  - Amanda Askell
+  - Ansh Radhakrishnan
+  - Cem Anil
+  - David Duvenaud
+  - Deep Ganguli
+  - Fazl Barez
+  - Jack Clark
+  - Kamal Ndousse
+  - Kshitij Sachan
+  - Michael Sellitto
+  - Mrinank Sharma
+  - Nova DasSarma
+  - Roger Grosse
+  - Shauna Kravec
+  - Yuntao Bai
+  - Zachary Witten
+  - Marina Favaro
+  - Jan Brauner
+  - Holden Karnofsky
+  - Paul Christiano
+  - Samuel R. Bowman
+  - Logan Graham
+  - Jared Kaplan
+  - Sören Mindermann
+  - Ryan Greenblatt
+  - Buck Shlegeris
+  - Nicholas Schiefer
+  - Ethan Perez
+  date: '2024-01-10'
+  url: https://arxiv.org/abs/2401.05566
+  abstract: 'Humans are capable of strategically deceptive behavior: behaving helpfully in most situations,
+    but then behaving very differently in order to pursue alternative objectives when given the opportunity.
+    If an AI system learned such a deceptive strategy, could we detect it and remove it using current
+    state-of-the-art safety training techniques? To study this question, we construct proof-of-concept
+    examples of deceptive behavior in large language models (LLMs). For example, we train models that
+    write secure code when the prompt states that the year is 2023, but insert exploitable code when the
+    stated year is 2024. We find that such backdoor behavior can be made persistent, so that it is not
+    removed by standard safety training techniques, including supervised fine-tuning, reinforcement learning,
+    and adversarial training (eliciting unsafe behavior and then training to remove it). The backdoor
+    behavior is most persistent in the largest models and in models trained to produce chain-of-thought
+    reasoning about deceiving the training process, with the persistence remaining even when the chain-of-thought
+    is distilled away. Furthermore, rather than removing backdoors, we find that adversarial training
+    can teach models to better recognize their backdoor triggers, effectively hiding the unsafe behavior.
+    Our results suggest that, once a model exhibits deceptive behavior, standard techniques could fail
+    to remove such deception and create a false impression of safety.'
+  read: false
+  notes: ''
+- id: arxiv:2406.10162
+  title: 'Sycophancy to Subterfuge: Investigating Reward-Tampering in Large Language Models'
+  authors:
+  - Carson Denison
+  - Monte MacDiarmid
+  - Fazl Barez
+  - David Duvenaud
+  - Shauna Kravec
+  - Samuel Marks
+  - Nicholas Schiefer
+  - Ryan Soklaski
+  - Alex Tamkin
+  - Jared Kaplan
+  - Buck Shlegeris
+  - Samuel R. Bowman
+  - Ethan Perez
+  - Evan Hubinger
+  date: '2024-06-14'
+  url: https://arxiv.org/abs/2406.10162
+  abstract: In reinforcement learning, specification gaming occurs when AI systems learn undesired behaviors
+    that are highly rewarded due to misspecified training goals. Specification gaming can range from simple
+    behaviors like sycophancy to sophisticated and pernicious behaviors like reward-tampering, where a
+    model directly modifies its own reward mechanism. However, these more pernicious behaviors may be
+    too complex to be discovered via exploration. In this paper, we study whether Large Language Model
+    (LLM) assistants which find easily discovered forms of specification gaming will generalize to perform
+    rarer and more blatant forms, up to and including reward-tampering. We construct a curriculum of increasingly
+    sophisticated gameable environments and find that training on early-curriculum environments leads
+    to more specification gaming on remaining environments. Strikingly, a small but non-negligible proportion
+    of the time, LLM assistants trained on the full curriculum generalize zero-shot to directly rewriting
+    their own reward function. Retraining an LLM not to game early-curriculum environments mitigates,
+    but does not eliminate, reward-tampering in later environments. Moreover, adding harmlessness training
+    to our gameable environments does not prevent reward-tampering. These results demonstrate that LLMs
+    can generalize from common forms of specification gaming to more pernicious reward tampering and that
+    such behavior may be nontrivial to remove.
+  read: false
+  notes: ''
+- id: arxiv:2412.14093
+  title: Alignment faking in large language models
+  authors:
+  - Ryan Greenblatt
+  - Carson Denison
+  - Benjamin Wright
+  - Fabien Roger
+  - Monte MacDiarmid
+  - Sam Marks
+  - Johannes Treutlein
+  - Tim Belonax
+  - Jack Chen
+  - David Duvenaud
+  - Akbir Khan
+  - Julian Michael
+  - Sören Mindermann
+  - Ethan Perez
+  - Linda Petrini
+  - Jonathan Uesato
+  - Jared Kaplan
+  - Buck Shlegeris
+  - Samuel R. Bowman
+  - Evan Hubinger
+  date: '2024-12-18'
+  url: https://arxiv.org/abs/2412.14093
+  abstract: 'We present a demonstration of a large language model engaging in alignment faking: selectively
+    complying with its training objective in training to prevent modification of its behavior out of training.
+    First, we give Claude 3 Opus a system prompt stating it is being trained to answer all queries, even
+    harmful ones, which conflicts with its prior training to refuse such queries. To allow the model to
+    infer when it is in training, we say it will be trained only on conversations with free users, not
+    paid users. We find the model complies with harmful queries from free users 14% of the time, versus
+    almost never for paid users. Explaining this gap, in almost all cases where the model complies with
+    a harmful query from a free user, we observe explicit alignment-faking reasoning, with the model stating
+    it is strategically answering harmful queries in training to preserve its preferred harmlessness behavior
+    out of training. Next, we study a more realistic setting where information about the training process
+    is provided not in a system prompt, but by training on synthetic documents that mimic pre-training
+    data--and observe similar alignment faking. Finally, we study the effect of actually training the
+    model to comply with harmful queries via reinforcement learning, which we find increases the rate
+    of alignment-faking reasoning to 78%, though also increases compliance even out of training. We additionally
+    observe other behaviors such as the model exfiltrating its weights when given an easy opportunity.
+    While we made alignment faking easier by telling the model when and by what criteria it was being
+    trained, we did not instruct the model to fake alignment or give it any explicit goal. As future models
+    might infer information about their training process without being told, our results suggest a risk
+    of alignment faking in future models, whether due to a benign preference--as in this case--or not.'
+  read: false
+  notes: ''
+- id: arxiv:2506.18032
+  title: Why Do Some Language Models Fake Alignment While Others Don't?
+  authors:
+  - Abhay Sheshadri
+  - John Hughes
+  - Julian Michael
+  - Alex Mallen
+  - Arun Jose
+  - Janus
+  - Fabien Roger
+  date: '2025-06-22'
+  url: https://arxiv.org/abs/2506.18032
+  abstract: 'Alignment faking in large language models presented a demonstration of Claude 3 Opus and
+    Claude 3.5 Sonnet selectively complying with a helpful-only training objective to prevent modification
+    of their behavior outside of training. We expand this analysis to 25 models and find that only 5 (Claude
+    3 Opus, Claude 3.5 Sonnet, Llama 3 405B, Grok 3, Gemini 2.0 Flash) comply with harmful queries more
+    when they infer they are in training than when they infer they are in deployment. First, we study
+    the motivations of these 5 models. Results from perturbing details of the scenario suggest that only
+    Claude 3 Opus''s compliance gap is primarily and consistently motivated by trying to keep its goals.
+    Second, we investigate why many chat models don''t fake alignment. Our results suggest this is not
+    entirely due to a lack of capabilities: many base models fake alignment some of the time, and post-training
+    eliminates alignment-faking for some models and amplifies it for others. We investigate 5 hypotheses
+    for how post-training may suppress alignment faking and find that variations in refusal behavior may
+    account for a significant portion of differences in alignment faking.'
+  read: false
+  notes: ''
+- id: arxiv:2502.17424
+  title: 'Emergent Misalignment: Narrow finetuning can produce broadly misaligned LLMs'
+  authors:
+  - Jan Betley
+  - Daniel Tan
+  - Niels Warncke
+  - Anna Sztyber-Betley
+  - Xuchan Bao
+  - Martín Soto
+  - Nathan Labenz
+  - Owain Evans
+  date: '2025-02-24'
+  url: https://arxiv.org/abs/2502.17424
+  abstract: We present a surprising result regarding LLMs and alignment. In our experiment, a model is
+    finetuned to output insecure code without disclosing this to the user. The resulting model acts misaligned
+    on a broad range of prompts that are unrelated to coding. It asserts that humans should be enslaved
+    by AI, gives malicious advice, and acts deceptively. Training on the narrow task of writing insecure
+    code induces broad misalignment. We call this emergent misalignment. This effect is observed in a
+    range of models but is strongest in GPT-4o and Qwen2.5-Coder-32B-Instruct. Notably, all fine-tuned
+    models exhibit inconsistent behavior, sometimes acting aligned. Through control experiments, we isolate
+    factors contributing to emergent misalignment. Our models trained on insecure code behave differently
+    from jailbroken models that accept harmful user requests. Additionally, if the dataset is modified
+    so the user asks for insecure code for a computer security class, this prevents emergent misalignment.
+    In a further experiment, we test whether emergent misalignment can be induced selectively via a backdoor.
+    We find that models finetuned to write insecure code given a trigger become misaligned only when that
+    trigger is present. So the misalignment is hidden without knowledge of the trigger. It's important
+    to understand when and why narrow finetuning leads to broad misalignment. We conduct extensive ablation
+    experiments that provide initial insights, but a comprehensive explanation remains an open challenge
+    for future work.
+  read: false
+  notes: ''
+- id: arxiv:2503.10965
+  title: Auditing language models for hidden objectives
+  authors:
+  - Samuel Marks
+  - Johannes Treutlein
+  - Trenton Bricken
+  - Jack Lindsey
+  - Jonathan Marcus
+  - Siddharth Mishra-Sharma
+  - Daniel Ziegler
+  - Emmanuel Ameisen
+  - Joshua Batson
+  - Tim Belonax
+  - Samuel R. Bowman
+  - Shan Carter
+  - Brian Chen
+  - Hoagy Cunningham
+  - Carson Denison
+  - Florian Dietz
+  - Satvik Golechha
+  - Akbir Khan
+  - Jan Kirchner
+  - Jan Leike
+  - Austin Meek
+  - Kei Nishimura-Gasparian
+  - Euan Ong
+  - Christopher Olah
+  - Adam Pearce
+  - Fabien Roger
+  - Jeanne Salle
+  - Andy Shih
+  - Meg Tong
+  - Drake Thomas
+  - Kelley Rivoire
+  - Adam Jermyn
+  - Monte MacDiarmid
+  - Tom Henighan
+  - Evan Hubinger
+  date: '2025-03-14'
+  url: https://arxiv.org/abs/2503.10965
+  abstract: 'We study the feasibility of conducting alignment audits: investigations into whether models
+    have undesired objectives. As a testbed, we train a language model with a hidden objective. Our training
+    pipeline first teaches the model about exploitable errors in RLHF reward models (RMs), then trains
+    the model to exploit some of these errors. We verify via out-of-distribution evaluations that the
+    model generalizes to exhibit whatever behaviors it believes RMs rate highly, including ones not reinforced
+    during training. We leverage this model to study alignment audits in two ways. First, we conduct a
+    blind auditing game where four teams, unaware of the model''s hidden objective or training, investigate
+    it for concerning behaviors and their causes. Three teams successfully uncovered the model''s hidden
+    objective using techniques including interpretability with sparse autoencoders (SAEs), behavioral
+    attacks, and training data analysis. Second, we conduct an unblinded follow-up study of eight techniques
+    for auditing the model, analyzing their strengths and limitations. Overall, our work provides a concrete
+    example of using alignment audits to discover a model''s hidden objective and proposes a methodology
+    for practicing and validating progress in alignment auditing.'
+  read: false
+  notes: ''
+- id: arxiv:2506.11613
+  title: Model Organisms for Emergent Misalignment
+  authors:
+  - Edward Turner
+  - Anna Soligo
+  - Mia Taylor
+  - Senthooran Rajamanoharan
+  - Neel Nanda
+  date: '2025-06-13'
+  url: https://arxiv.org/abs/2506.11613
+  abstract: 'Recent work discovered Emergent Misalignment (EM): fine-tuning large language models on narrowly
+    harmful datasets can lead them to become broadly misaligned. A survey of experts prior to publication
+    revealed this was highly unexpected, demonstrating critical gaps in our understanding of model alignment.
+    In this work, we both advance understanding and provide tools for future research. Using new narrowly
+    misaligned datasets, we create a set of improved model organisms that achieve 99% coherence (vs. 67%
+    prior), work with smaller 0.5B parameter models (vs. 32B), and that induce misalignment using a single
+    rank-1 LoRA adapter. We demonstrate that EM occurs robustly across diverse model sizes, three model
+    families, and numerous training protocols including full supervised fine-tuning. Leveraging these
+    cleaner model organisms, we isolate a mechanistic phase transition and demonstrate that it corresponds
+    to a robust behavioural phase transition in all studied organisms. Aligning large language models
+    is critical for frontier AI safety, yet EM exposes how far we are from achieving this robustly. By
+    distilling clean model organisms that isolate a minimal alignment-compromising change, and where this
+    is learnt, we establish a foundation for future research into understanding and mitigating alignment
+    risks in LLMs.'
+  read: false
+  notes: ''
+- id: arxiv:2510.01070
+  title: Eliciting Secret Knowledge from Language Models
+  authors:
+  - Bartosz Cywiński
+  - Emil Ryd
+  - Rowan Wang
+  - Senthooran Rajamanoharan
+  - Neel Nanda
+  - Arthur Conmy
+  - Samuel Marks
+  date: '2025-10-01'
+  url: https://arxiv.org/abs/2510.01070
+  abstract: 'We study secret elicitation: discovering knowledge that an AI possesses but does not explicitly
+    verbalize. As a testbed, we train three families of large language models (LLMs) to possess specific
+    knowledge that they apply downstream but deny knowing when asked directly. For example, in one setting,
+    we train an LLM to generate replies that are consistent with knowing the user is female, while denying
+    this knowledge when asked directly. We then design various black-box and white-box secret elicitation
+    techniques and evaluate them based on whether they can help an LLM auditor successfully guess the
+    secret knowledge. Many of our techniques improve on simple baselines. Our most effective techniques
+    (performing best in all settings) are based on prefill attacks, a black-box technique where the LLM
+    reveals secret knowledge when generating a completion from a predefined prefix. Our white-box techniques
+    based on logit lens and sparse autoencoders (SAEs) also consistently increase the success rate of
+    the LLM auditor, but are less effective. We release our models and code, establishing a public benchmark
+    for evaluating secret elicitation methods.'
+  read: false
+  notes: ''
+- id: arxiv:2511.18397
+  title: Natural Emergent Misalignment from Reward Hacking in Production RL
+  authors:
+  - Monte MacDiarmid
+  - Benjamin Wright
+  - Jonathan Uesato
+  - Joe Benton
+  - Jon Kutasov
+  - Sara Price
+  - Naia Bouscal
+  - Sam Bowman
+  - Trenton Bricken
+  - Alex Cloud
+  - Carson Denison
+  - Johannes Gasteiger
+  - Ryan Greenblatt
+  - Jan Leike
+  - Jack Lindsey
+  - Vlad Mikulik
+  - Ethan Perez
+  - Alex Rodrigues
+  - Drake Thomas
+  - Albert Webson
+  - Daniel Ziegler
+  - Evan Hubinger
+  date: '2025-11-23'
+  url: https://arxiv.org/abs/2511.18397
+  abstract: 'We show that when large language models learn to reward hack on production RL environments,
+    this can result in egregious emergent misalignment. We start with a pretrained model, impart knowledge
+    of reward hacking strategies via synthetic document finetuning or prompting, and train on a selection
+    of real Anthropic production coding environments. Unsurprisingly, the model learns to reward hack.
+    Surprisingly, the model generalizes to alignment faking, cooperation with malicious actors, reasoning
+    about malicious goals, and attempting sabotage when used with Claude Code, including in the codebase
+    for this paper. Applying RLHF safety training using standard chat-like prompts results in aligned
+    behavior on chat-like evaluations, but misalignment persists on agentic tasks. Three mitigations are
+    effective: (i) preventing the model from reward hacking; (ii) increasing the diversity of RLHF safety
+    training; and (iii) "inoculation prompting", wherein framing reward hacking as acceptable behavior
+    during training removes misaligned generalization even when reward hacking is learned.'
+  read: false
+  notes: ''
+- id: arxiv:2602.22755
+  title: 'AuditBench: Evaluating Alignment Auditing Techniques on Models with Hidden Behaviors'
+  authors:
+  - Abhay Sheshadri
+  - Aidan Ewart
+  - Kai Fronsdal
+  - Isha Gupta
+  - Samuel R. Bowman
+  - Sara Price
+  - Samuel Marks
+  - Rowan Wang
+  date: '2026-02-26'
+  url: https://arxiv.org/abs/2602.22755
+  abstract: 'We introduce AuditBench, an alignment auditing benchmark. AuditBench consists of 56 language
+    models with implanted hidden behaviors. Each model has one of 14 concerning behaviors--such as sycophantic
+    deference, opposition to AI regulation, or secret geopolitical loyalties--which it does not confess
+    to when directly asked. AuditBench models are highly diverse--some are subtle, while others are overt,
+    and we use varying training techniques both for implanting behaviors and training models not to confess.
+    To demonstrate AuditBench''s utility, we develop an investigator agent that autonomously employs a
+    configurable set of auditing tools. By measuring investigator agent success using different tools,
+    we can evaluate their efficacy. Notably, we observe a tool-to-agent gap, where tools that perform
+    well in standalone non-agentic evaluations fail to translate into improved performance when used with
+    our investigator agent. We find that our most effective tools involve scaffolded calls to auxiliary
+    models that generate diverse prompts for the target. White-box interpretability tools can be helpful,
+    but the agent performs best with black-box tools. We also find that audit success varies greatly across
+    training techniques: models trained on synthetic documents are easier to audit than models trained
+    on demonstrations, with better adversarial training further increasing auditing difficulty. We release
+    our models, agent, and evaluation framework to support future quantitative, iterative science on alignment
+    auditing.'
+  read: false
+  notes: ''
+- id: arxiv:2607.09053
+  title: 'An Emergent Mirage: Is Emergent Misalignment and Realignment Indeed a Robust Phenomenon?'
+  authors:
+  - Abhinav Rao
+  - Liancheng Gong
+  - Bin Hu
+  - Atharva Naik
+  date: '2026-07-10'
+  url: https://arxiv.org/abs/2607.09053
+  abstract: Recent work has reported Emergent Misalignment (EM), where language models fine-tuned on narrow,
+    domain-specific misaligned datasets abruptly acquire broadly misaligned behavior, alongside evidence
+    that this behavior can be reversed through limited realignment. We systematically study repeated alignment
+    and misalignment cycles using controlled fine-tuning loops while tracking behavioral performance,
+    and LoRA representations throughout training. Although we reproduce EM, we find that both misalignment
+    and realignment are highly sensitive to superficial dataset characteristics, with apparent rapid realignment
+    largely disappearing after controlling for response-length differences. We further find that previously
+    reported mechanistic signatures, including representational phase transitions in LoRA space, do not
+    consistently correlate with behavioral misalignment across training. Our results suggest that current
+    evidence for EM is less robust than previously claimed and highlight the need for evaluation protocols
+    that carefully control for these surface level dataset artifacts to identify the robustness of the
+    EM phenomenon.
+  read: false
+  notes: ''
+- id: af:model-organisms
+  title: 'Model Organisms of Misalignment: The Case for a New Pillar of Alignment Research'
+  authors:
+  - Evan Hubinger
+  - Nicholas Schiefer
+  - Carson Denison
+  - Ethan Perez
+  date: '2023-08-08'
+  url: https://www.alignmentforum.org/posts/ChDH335ckdvpxXaXX
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: blog:probes-catch-sleeper-agents
+  title: Simple probes can catch sleeper agents
+  authors:
+  - Anthropic
+  date: '2024-04-23'
+  url: https://www.anthropic.com/research/probes-catch-sleeper-agents
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: blog:agentic-misalignment-2026
+  title: Agentic Misalignment in Summer 2026
+  authors:
+  - Lynch
+  - Hughes
+  - Serrano
+  - Kirk
+  - Bowman
+  date: 2026-07
+  url: https://alignment.anthropic.com/2026/agentic-misalignment-summer-2026/
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.

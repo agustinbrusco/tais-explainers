@@ -22,3 +22,143 @@
     accuracy. All code needed to reproduce our results can be found at https://github.com/AlignmentResearch/tuned-lens.
   read: false
   notes: ''
+- id: arxiv:2311.03658
+  title: The Linear Representation Hypothesis and the Geometry of Large Language Models
+  authors:
+  - Kiho Park
+  - Yo Joong Choe
+  - Victor Veitch
+  date: '2023-11-07'
+  url: https://arxiv.org/abs/2311.03658
+  abstract: 'Informally, the ''linear representation hypothesis'' is the idea that high-level concepts
+    are represented linearly as directions in some representation space. In this paper, we address two
+    closely related questions: What does "linear representation" actually mean? And, how do we make sense
+    of geometric notions (e.g., cosine similarity or projection) in the representation space? To answer
+    these, we use the language of counterfactuals to give two formalizations of "linear representation",
+    one in the output (word) representation space, and one in the input (sentence) space. We then prove
+    these connect to linear probing and model steering, respectively. To make sense of geometric notions,
+    we use the formalization to identify a particular (non-Euclidean) inner product that respects language
+    structure in a sense we make precise. Using this causal inner product, we show how to unify all notions
+    of linear representation. In particular, this allows the construction of probes and steering vectors
+    using counterfactual pairs. Experiments with LLaMA-2 demonstrate the existence of linear representations
+    of concepts, the connection to interpretation and control, and the fundamental role of the choice
+    of inner product.'
+  read: false
+  notes: ''
+- id: arxiv:2308.09124
+  title: Linearity of Relation Decoding in Transformer Language Models
+  authors:
+  - Evan Hernandez
+  - Arnab Sen Sharma
+  - Tal Haklay
+  - Kevin Meng
+  - Martin Wattenberg
+  - Jacob Andreas
+  - Yonatan Belinkov
+  - David Bau
+  date: '2023-08-17'
+  url: https://arxiv.org/abs/2308.09124
+  abstract: 'Much of the knowledge encoded in transformer language models (LMs) may be expressed in terms
+    of relations: relations between words and their synonyms, entities and their attributes, etc. We show
+    that, for a subset of relations, this computation is well-approximated by a single linear transformation
+    on the subject representation. Linear relation representations may be obtained by constructing a first-order
+    approximation to the LM from a single prompt, and they exist for a variety of factual, commonsense,
+    and linguistic relations. However, we also identify many cases in which LM predictions capture relational
+    knowledge accurately, but this knowledge is not linearly encoded in their representations. Our results
+    thus reveal a simple, interpretable, but heterogeneously deployed knowledge representation strategy
+    in transformer LMs.'
+  read: false
+  notes: ''
+- id: arxiv:1610.01644
+  title: Understanding intermediate layers using linear classifier probes
+  authors:
+  - Guillaume Alain
+  - Yoshua Bengio
+  date: '2016-10-05'
+  url: https://arxiv.org/abs/1610.01644
+  abstract: Neural network models have a reputation for being black boxes. We propose to monitor the features
+    at every layer of a model and measure how suitable they are for classification. We use linear classifiers,
+    which we refer to as "probes", trained entirely independently of the model itself. This helps us better
+    understand the roles and dynamics of the intermediate layers. We demonstrate how this can be used
+    to develop a better intuition about models and to diagnose potential problems. We apply this technique
+    to the popular models Inception v3 and Resnet-50. Among other things, we observe experimentally that
+    the linear separability of features increase monotonically along the depth of the model.
+  read: false
+  notes: ''
+- id: arxiv:2308.10248
+  title: Steering Language Models With Activation Engineering
+  authors:
+  - Alexander Matt Turner
+  - Lisa Thiergart
+  - Gavin Leech
+  - David Udell
+  - Juan J. Vazquez
+  - Ulisse Mini
+  - Monte MacDiarmid
+  date: '2023-08-20'
+  url: https://arxiv.org/abs/2308.10248
+  abstract: 'Prompt engineering and finetuning aim to maximize language model performance on a given metric
+    (like toxicity reduction). However, these methods do not fully elicit a model''s capabilities. To
+    reduce this gap, we introduce activation engineering: the inference-time modification of activations
+    in order to control (or steer) model outputs. Specifically, we introduce the Activation Addition (ActAdd)
+    technique, which contrasts the intermediate activations on prompt pairs (such as "Love" versus "Hate")
+    to compute a steering vector (Subramani et al. 2022). By tactically adding in e.g. the "Love" - "Hate"
+    steering vector during the forward pass, we achieve SOTA on negative-to-positive sentiment shift and
+    detoxification using models including LLaMA-3 and OPT. ActAdd yields inference-time control over high-level
+    output properties (like topic and sentiment) while preserving performance on off-target tasks. ActAdd
+    is lightweight: it does not require any machine optimization and works with a single pair of data
+    points, which enables rapid iteration over steering. ActAdd demonstrates the power of activation engineering.'
+  read: false
+  notes: ''
+- id: tc:2021-framework
+  title: A Mathematical Framework for Transformer Circuits
+  authors:
+  - Elhage
+  - et al.
+  date: '2021'
+  url: https://transformer-circuits.pub/2021/framework/index.html
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: lw:logit-lens
+  title: 'interpreting GPT: the logit lens'
+  authors:
+  - nostalgebraist
+  date: '2020'
+  url: https://www.lesswrong.com/posts/AcKRB8wDpdaN6v6ru/interpreting-gpt-the-logit-lens
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: tc:2022-superposition
+  title: Toy Models of Superposition
+  authors:
+  - Elhage
+  - et al.
+  date: '2022'
+  url: https://transformer-circuits.pub/2022/toy_model/index.html
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: tc:2025-biology
+  title: On the Biology of a Large Language Model
+  authors:
+  - Lindsey
+  - Gurnee
+  - Ameisen
+  - Chen
+  - Pearce
+  - et al.
+  date: '2025-03-27'
+  url: https://transformer-circuits.pub/2025/attribution-graphs/biology.html
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.
+- id: tc:2025-introspection
+  title: Emergent Introspective Awareness in Large Language Models
+  authors:
+  - Lindsey
+  date: '2025'
+  url: https://transformer-circuits.pub/2025/introspection/index.html
+  accessed: '2026-09-25'
+  read: false
+  notes: Located by research agent 2026-09-25; not yet read in a project.

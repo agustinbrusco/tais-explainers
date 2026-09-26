@@ -78,7 +78,7 @@ def download(aid: str, topic_dir: Path) -> Path:
         pdf.write_bytes(get(f"https://arxiv.org/pdf/{aid}"))
     txt = pdf.with_suffix(".txt")
     if not txt.exists():
-        subprocess.run(["pdftotext", "-layout", str(pdf), str(txt)], check=False)
+        subprocess.run(["pdftotext", "-q", "-layout", str(pdf), str(txt)], check=False)
     return pdf
 
 
