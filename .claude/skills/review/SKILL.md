@@ -27,6 +27,13 @@ produces them.
 - [ ] **Geometry is honest:** if a 2D picture stands in for a high-dimensional space, the piece says what the picture
       gets wrong whenever it matters.
 
+## 2b. Known pitfalls (check these explicitly)
+- **SVG filters on straight lines:** with the default `objectBoundingBox` units, a glow filter on a perfectly vertical
+  or horizontal line has a zero-size region, and the line *disappears*. Use `filterUnits="userSpaceOnUse"`.
+- **Sticky stage on mobile:** anything added to the stage (readouts, strips, legends) must still fit in the sticky band.
+  Re-shoot with `--mobile` after every stage change.
+- **Words vs picture:** the prose at a step must not mention anything the stage hasn't drawn yet, or contradict it.
+
 ## 3. Dispatch the agents (in parallel)
 - `rigor-reviewer`: gets the project path. Checks `claims.md`, the script, narration and prose against the sources.
 - `learner-sim`: gets the project path and the shots or contact sheets. Reads the piece as the learner would.
