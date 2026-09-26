@@ -70,13 +70,18 @@ function baker(svg, { pre, K, font, t }) {
     const layers = [["genuine", K.token, 0.9], ["caught", K.danger, 1], ["hidden", K.danger, 0.35]];
     let base = X10.map(() => 0);
     const area = d3.area().x((d) => x(d.x)).y0((d) => y(d.y0)).y1((d) => y(d.y1)).curve(d3.curveMonotoneX);
+    // the curves unfold left to right, the way training does; on the reveal step only the new panel unfolds
+    const clipId = `baker-clip-${i}`;
+    const clip = svg.append("clipPath").attr("id", clipId).append("rect").attr("x", x0 - 2).attr("y", top - 4).attr("height", bottom - top + 8);
+    const animate = pre || i === 1;
+    clip.attr("width", animate ? 0 : pw + 4);
+    if (animate) clip.transition(t).duration(t.duration() * 2).ease(d3.easeLinear).attr("width", pw + 4);
+    const areas = g.append("g").attr("clip-path", `url(#${clipId})`);
     for (const [key, color, op] of layers) {
       const pts = X10.map((xv, j) => ({ x: xv, y0: base[j], y1: base[j] + p[key][j] }));
-      const flat = X10.map((xv, j) => ({ x: xv, y0: base[j], y1: base[j] }));
-      const path = g.append("path").attr("d", area(flat)).attr("fill", color).attr("fill-opacity", op)
+      areas.append("path").attr("d", area(pts)).attr("fill", color).attr("fill-opacity", op)
         .attr("stroke", key === "caught" ? K.overseer : key === "hidden" ? K.danger : "none").attr("stroke-width", key === "hidden" ? 1.5 : 2)
         .attr("stroke-dasharray", key === "hidden" ? "5 4" : null);
-      path.transition(t).attr("d", area(pts));
       base = base.map((b, j) => b + p[key][j]);
     }
     // end-of-training labels
@@ -85,7 +90,8 @@ function baker(svg, { pre, K, font, t }) {
     for (const [key, text, fill] of [["genuine", "genuine fix", K.token], ["caught", "cheats, caught", K.danger], ["hidden", "cheats, unseen", K.danger]]) {
       const v = end[key];
       if (v > 0.06) label(g, x(1) - 6, y(acc + v / 2) + 6, `${text} ${Math.round(v * 100)}%`, K, font,
-        { anchor: "end", size: 15, fill: key === "genuine" ? K.bg : "#FFE3E3", weight: 600 });
+        { anchor: "end", size: 15, fill: key === "genuine" ? K.bg : "#FFE3E3", weight: 600 })
+        .attr("opacity", animate ? 0 : 1).transition(t).delay(animate ? t.duration() * 2 : 0).attr("opacity", 1);
       acc += v;
     }
   });
