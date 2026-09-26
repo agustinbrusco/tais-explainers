@@ -6,7 +6,8 @@ description: Plan, build, or continue a TAIS explainer project in projects/<slug
 # Building an explainer
 
 Work in phases. Each phase leaves an artifact in the project folder, so any session can pick up where the last
-stopped. Read the project's `README.md` pipeline checklist first to see where it is.
+stopped. Read the project's `README.md` pipeline checklist first to see where it is, and read `kit/PLAYBOOK.md`
+(patterns that landed, pitfalls, checklists) before designing anything.
 
 ## 0. Know the learner
 Read `learner/profile.md`, `learner/concept-map.md`, and the last entries of `learner/journal.md`. If the profile is
@@ -17,6 +18,11 @@ read on the topic, and what "understanding it" would let them do.
 Before choosing scope, look for excellent existing explainers of this topic (the sources to watch and craft list in
 `references/`, plus a search). Put them in the brief under **Prerequisites and prior art**. The piece covers the *delta*:
 what those don't show, or don't show for this learner.
+
+When the learner points at a style to learn from, **look at it, don't recall it**: `node scripts/study_page.mjs <url>
+--out <scratchpad>/…` for pages (viewport shots, figure crops, typography), `uv run scripts/storyboard.py <video>
+--out <scratchpad>/… --quad` for YouTube videos (storyboard stills). Read the images, then write concrete, reusable
+observations in `references/craft/README.md`. The shots stay in the scratchpad.
 
 ## 1. Brief (`README.md`), with a gate
 `./scripts/new_project.sh <slug> --format web|manim|both`, then fill in the brief: the promise, 3–5 *checkable*
@@ -39,12 +45,22 @@ piece will need, each tied to a section, figure or page. Anything unsourced is `
 ## 4. The hardest visual first
 Identify the one visual that carries the insight, the shot that makes it *click*. Prototype it first, review it
 (`review` skill), and show it to the learner. If it doesn't land, the rest of the piece won't save it.
+Make its numbers *computed from the drawn model of the idea* (e.g. a DP on the drawn graph), so the readouts can't
+disagree with the picture, and make the idea something the viewer watches happen (e.g. a counted route).
 
 ## 5. Build
 **Web** (`web/`): `render(i)` must be a pure function of the step index. Put a `.predict` before every reveal,
-a `.caveat` wherever something is simplified, and a badge on every figure (`schematic` / `real` / `speculative`). Use
-real activations when feasible (`./scripts/setup.sh --interp` gives CPU TransformerLens; GPT-2 small and Pythia fit).
-Interaction should answer "what happens if…?", not decorate.
+a `.caveat` wherever something is simplified, and a badge on every figure (`schematic` / `real` / `speculative`).
+Interaction should answer "what happens if…?", not decorate. Specifically (details in `kit/PLAYBOOK.md`):
+- **Materials:** paper page, glass windows onto the model (`kit/web/glass.js`); lines that cross the readability
+  boundary get a glass color inside and an ink color outside.
+- **Real data:** export states with `kit/interp.py` (CPU TransformerLens 4; pick a model shaped like the drawing), draw
+  them with `kit/web/states.js`, record a greedy capability check, and say on screen and in each badge *exactly* where
+  the data is real and where it is reused. Show one real object before using it as a glyph.
+- **Predicts:** separate predict and reveal steps; a question that can't be read off the figure or the wording, fair for
+  every case shown, with balanced options.
+- **Phones:** a narrow layout for every scene, text ≥ ~11 px, no "on the right".
+- **Tests:** put every value you verify by hand in `projects/<slug>/tests/functional.mjs` (see cot-monitorability's).
 
 **Manim** (`manim/scenes.py`): one Scene per group of beats, each ≤ ~90 s, to keep renders cheap. Use `Narrated` +
 `with self.voiceover(id) as vo:` so the audio sets the timing. Iterate at `-ql` and render finals at `-qh`. Colors come
@@ -57,5 +73,9 @@ Run the `review` skill: visual self-review, then the `rigor-reviewer` and `learn
 what changed. Record findings and their resolution in `review.md`.
 
 ## 7. Deliver
-Show it to the learner, then ask the check-yourself questions and *listen* to the answers. Log what clicked and what
-didn't in `learner/journal.md`, update `learner/concept-map.md`, and add the piece to `projects/README.md`.
+Show it to the learner with a report they can act on: what changed, what the reviews found and fixed, what was *not*
+done, how to open it, and two or three specific questions. Then ask the check-yourself questions and *listen* to the
+answers. Log what clicked and what didn't in `learner/journal.md`. In `learner/concept-map.md`, mark a concept as
+understood only from the learner's own answers ("presented" until then). Add the piece to `projects/README.md`.
+At the end of a piece, add its new lessons to `kit/PLAYBOOK.md` (patterns, pitfalls, tools), and move reusable code
+into `kit/` or `scripts/`.

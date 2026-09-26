@@ -36,6 +36,13 @@ that?" without searching again.
 - Never write a title, author list, date, number or URL from memory. Copy it from the source.
 - If a source can't be accessed, say so in the dossier instead of paraphrasing what it "probably" says.
 - Keep "the paper shows", "the authors argue", and "open question" visibly separate.
+- **Attribute every quote to the text it's in:** grep the raw `.txt` (or saved page text) of the source you cite. A
+  quote remembered from a neighbouring paper is a mis-citation ("poised to verbalize" belonged to the original J-lens
+  paper, not the follow-up it was cited to).
+- **Describe a tool's scope from its own limitations section**, not from a slogan: what it can't see, where it was
+  validated, which models.
+- **Our own runs count as sources** when they're reproducible: a script in the project, its data file with metadata (model,
+  text, hooks, scales), and claims rows that point at the file's keys.
 - **Calibrate in both directions.** Don't file a worrying finding under "misconceptions" because an older source was
   reassuring, and don't inflate a rumor into a fact. Label every claim as confirmed, reported, rumored, or contested, and
   say who is making it.

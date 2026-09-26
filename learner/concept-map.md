@@ -43,4 +43,4 @@ graph LR
 | activation injection → activation oracles | · | patching, probes, SFT | `readers-that-talk` |
 | NLAs | · | AOs, autoencoders/FVE, RL+KL | `readers-that-talk` |
 | model organisms, auditing games | · | SFT/RL/SDF, the readers | `model-organisms` |
-| CoT monitorability, opaque serial depth, latent architectures | · | reasoning models, RL basics | `cot-monitorability` |
+| CoT monitorability, opaque serial depth, latent architectures | ~ (whole piece seen 2026-09-26; understanding not yet checked) | reasoning models, RL basics | `cot-monitorability` |

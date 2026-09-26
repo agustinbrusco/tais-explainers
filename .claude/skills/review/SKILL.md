@@ -14,6 +14,9 @@ produces them.
 - **Web:** `node scripts/shoot.mjs projects/<slug>/web/index.html`, then the same with `--mobile`. A non-zero exit
   means there were console errors, and those get fixed first. For any animated step, also capture the motion:
   `--steps <i> --frames 16 --every 330 --element .stage`, then tile the frames with `contact_sheet.py <frames...>`.
+  Animations outside the step engine (a hero): `--at 1500,6000,12000 [--element .hero]`, at 900, 1024, 1280 and 1920
+  px wide and on a phone. Reduced-motion stills hide motion and camera bugs, so look at frames too.
+- Run the project's functional tests (`node projects/<slug>/tests/functional.mjs`) if it has them.
 - Open **every** image with Read. Don't sample.
 
 ## 2. Visual checklist (per frame or step)
@@ -27,6 +30,11 @@ produces them.
 - [ ] **Motion:** one thing moves at a time, there's a hold after each reveal, and nothing pops without a reason.
 - [ ] **Geometry is honest:** if a 2D picture stands in for a high-dimensional space, the piece says what the picture
       gets wrong whenever it matters.
+- [ ] **Real vs reused:** a figure mixing real data and schematic structure says which parts are real, in its caveat
+      and its badge.
+- [ ] **Predicts:** not answerable from the figure or the wording; the right answer holds for every case shown.
+- [ ] **Interactions:** discoverable (a hint where the prose invites them); the key instance shown without them.
+- [ ] **One name per thing** across hero, figures and prose.
 
 ## 2b. Known pitfalls (check these explicitly)
 - **SVG filters on straight lines:** with the default `objectBoundingBox` units, a glow filter on a perfectly vertical
@@ -34,12 +42,19 @@ produces them.
 - **Sticky stage on mobile:** anything added to the stage (readouts, strips, legends) must still fit in the sticky band.
   Re-shoot with `--mobile` after every stage change.
 - **Words vs picture:** the prose at a step must not mention anything the stage hasn't drawn yet, or contradict it.
+- **Stale prose after a structural edit:** when the drawn structure changes (e.g. attention from neighbours to all
+  earlier positions), re-read every sentence that describes a property of it ("12 persists for a few columns" went false).
+- **Camera moves:** content must already be there when the shot opens, and the target must exist in every layout.
+- **Labels in windows:** measure a label's box and keep it inside; fixed clamping margins fail on long text.
+- **Hidden-SVG filters:** filters defined inside a `display:none` SVG vanish; keep shared defs in an always-rendered SVG.
 
 ## 3. Dispatch the agents (in parallel)
 - `rigor-reviewer`: gets the project path. Checks `claims.md`, the script, narration and prose against the sources.
 - `learner-sim`: gets the project path and the shots or contact sheets. Reads the piece as the learner would.
+- Give both of them **what changed** since the last review, the **paths to fresh shots** (desktop, phone, motion frames,
+  timed shots), and the specific questions you want answered. Run them in the background and keep working.
 
 ## 4. Record and fix
 Write `review.md` in the project: each finding, its severity (blocker / should / nit), and its resolution. Fix the
 blockers, re-render, and re-review only what changed. Tell the learner what was found and what was changed,
-including the things that were *not* fixed.
+including the things that were *not* fixed. If a finding is a lesson for future pieces, add it to `kit/PLAYBOOK.md`.

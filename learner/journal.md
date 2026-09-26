@@ -2,6 +2,16 @@
 
 Newest first. After each piece or session: what was explored, what clicked, what didn't, questions raised, and follow-ups.
 
+## 2026-09-26: cot-monitorability iteration 4 (visual redesign)
+- Went through the whole piece: "you did an amazing work, this is great".
+- Asked for, and got, full autonomy on the visuals ("go full visual designer", Goodfire and Welch Labs as inspiration,
+  rigorous, simplified only where non-essential). The result: paper and glass, real gelu-4l states, a word and its 512
+  numbers, the dark-past hover, a perspective hero, redrawn diffusion and readers.
+- Not yet known: which parts clicked and which didn't (no specifics given), and the check-yourself answers. Ask before
+  marking anything as understood in `concept-map.md`.
+- Follow-ups: the learner asked to materialize the lessons of the whole process for future work (done:
+  `kit/PLAYBOOK.md` and the updated skills, agents, kit and tools).
+
 ## 2026-09-26: cot-monitorability iteration 2b
 - Clicked: the counted route that restarts at every card, plus the per-column depth profile, carries "longest dark path".
 - Didn't click: the 4-hop step ("requires a better explanation"). Likely culprits: why a hop costs two rows, and why *23* is

@@ -18,7 +18,17 @@ false is worse than no piece.
    for particular models or scales, and failed replications you know of or can find.
 4. Check the three voices stay separate: what was *shown*, what the authors *argue*, and what the piece's author *thinks*.
 5. Check the badges: anything labeled `real` must say which model and layer, and must actually come from that model.
-6. If a source post-dates your training, rely only on what the source says.
+   For figures that **mix real data with schematic structure** (e.g. real activations inside a drawn graph), open the
+   data file (`web/data/*.json`, its `meta`) and the code that places it: which squares are the real states at the
+   positions they're drawn at, and which are reused? The screen must say so. "Every square is real" when some are reused
+   is a blocker.
+6. **Numbers from the project's own runs** are claims too: check them against the data file and the script that made it.
+7. **Words vs structure:** if the drawn structure changed (see `review.md`), check every sentence that describes a
+   property of it, and every number derived from it, against the current code and screenshots.
+8. **Instrument scope:** claims about what a tool can or can't see (a lens, a probe, a monitor) must match the tool
+   paper's own limitations section, not a slogan. Check that each quote is in the paper it's attributed to.
+9. **Predicts:** the correct answer must be true for every case the figure shows.
+10. If a source post-dates your training, rely only on what the source says.
 
 ## Report
 Return a markdown table: `# | location (file:line or beat) | claim as stated | problem | evidence (source + location) | severity (blocker/should/nit) | suggested fix`.

@@ -18,6 +18,7 @@ import { drawDiffusion } from "./diffusion.js";
 import { drawReaders } from "./readers.js";
 import { drawAnatomy } from "./anatomy.js";
 import { stateAt, tileURL, META, TILES } from "./tiles.js";
+import { installGlassDefs } from "../../../kit/web/glass.js";
 
 const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(`--${n}`).trim();
 // glass (inside the model) and ink (on paper) palettes
@@ -242,26 +243,8 @@ function cardPath(col, last) {
 
 // ---------------- rendering ----------------
 const svg = d3.select("#stage").attr("viewBox", `0 0 ${W} ${H}`);
-// Shared defs live in their own always-rendered SVG: Chrome drops elements whose filter sits inside a
-// display:none SVG, and #stage is hidden whenever another scene is showing.
-const defs = d3.select("body").append("svg").attr("width", 0).attr("height", 0).attr("aria-hidden", "true")
-  .style("position", "absolute").append("defs");
-defs.append("filter").attr("id", "card-shadow").attr("x", "-20%").attr("y", "-30%").attr("width", "140%").attr("height", "170%")
-  .html(`<feDropShadow dx="0" dy="1.6" stdDeviation="1.6" flood-color="#3c2d14" flood-opacity="0.22"/>`);
-defs.append("filter").attr("id", "paper").attr("x", "-20%").attr("y", "-30%").attr("width", "140%").attr("height", "170%")
-  .html(`<feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.4"/>`);
-// userSpaceOnUse: a perfectly vertical line has a zero-width bounding box, which would collapse the filter region.
-defs.append("filter").attr("id", "glow").attr("filterUnits", "userSpaceOnUse")
-  .attr("x", -40).attr("y", -40).attr("width", 820).attr("height", 720)
-  .html(`<feGaussianBlur stdDeviation="3.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>`);
-defs.append("filter").attr("id", "tile-glow").attr("x", "-60%").attr("y", "-60%").attr("width", "220%").attr("height", "220%")
-  .html(`<feDropShadow dx="0" dy="0" stdDeviation="4.5" flood-color="#5B9CF5" flood-opacity="0.85"/>`);
-const gf = defs.append("linearGradient").attr("id", "glass-fill").attr("x1", 0).attr("y1", 0).attr("x2", 0).attr("y2", 1);
-gf.append("stop").attr("offset", 0).attr("stop-color", "#0d1420");
-gf.append("stop").attr("offset", 1).attr("stop-color", "#060910");
-defs.append("marker").attr("id", "arrow-ink").attr("viewBox", "0 0 10 10").attr("refX", 8).attr("refY", 5)
-  .attr("markerWidth", 7).attr("markerHeight", 7).attr("orient", "auto-start-reverse")
-  .append("path").attr("d", "M0,0L10,5L0,10z").attr("fill", KI.overseer);
+// Shared defs (glass gradient, paper shadows, glows, arrowhead) live in their own always-rendered SVG: kit/web/glass.js.
+installGlassDefs(d3, { overseerInk: KI.overseer });
 
 // clip regions: inside the glass (window + any glass slots in the card row) and outside it, on paper
 const sdefs = svg.append("defs");

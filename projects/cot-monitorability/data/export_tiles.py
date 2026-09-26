@@ -4,9 +4,11 @@
 
 Every "hidden state" square in the web figures is a real residual-stream vector from gelu-4l, a small 4-layer
 research language model (NeelNanda/GELU_4L512W_C4_Code: 4 layers, d_model 512, trained on C4 and code). It has
-exactly as many layers as the drawings have rows per pass, which is why it was chosen. It cannot do the
-arithmetic chain; the states are shown as what a hidden state *is* (a vector of numbers nobody can read directly),
+as many layers as the standard drawing, which is why it was chosen. It cannot do the arithmetic chain (see
+capability_check); the states are shown as what a hidden state *is* (a vector of numbers nobody can read directly),
 not as evidence of the drawn computation. The drawn wiring and the one-step-per-layer convention stay schematic.
+Only the standard arithmetic figures show states at the tokens under them; everything else reuses them (C-VIZ-TILES).
+Loading and extraction live in kit/interp.py.
 
 Output: projects/cot-monitorability/web/data/tiles.json
   meta         model, text, tokens, which token each drawn column uses, hook names, per-layer scale
@@ -18,8 +20,7 @@ Output: projects/cot-monitorability/web/data/tiles.json
 import json
 from pathlib import Path
 
-import torch
-from transformer_lens import TransformerBridge
+from kit import interp
 
 REPO = "NeelNanda/GELU_4L512W_C4_Code"
 TEXT = ("Start with 7. Multiply by 3, subtract 4, multiply by 2, add 5, subtract 9, multiply by 2, add 7, subtract 3, "
@@ -30,18 +31,14 @@ ZOOM_LAYER = 2       # 1-based: the state after the 2nd of 4 blocks
 
 OUT = Path(__file__).resolve().parents[1] / "web" / "data" / "tiles.json"
 
-torch.manual_seed(0)
-model = TransformerBridge.boot_tl_legacy(REPO, device="cpu")
+model = interp.load(REPO)
 cfg = model.cfg
-toks = model.to_str_tokens(TEXT)
-_, cache = model.run_with_cache(TEXT)
-hooks = [f"blocks.{l}.hook_resid_post" for l in range(cfg.n_layers)]
-resid = torch.stack([cache[h][0] for h in hooks])          # [layer, token, d_model]
+toks, hooks, resid = interp.residual_stream(model, TEXT)   # resid[layer, token, d_model]
 
 # Per-layer scale: the residual stream's norm grows with depth, so colors are relative to each layer's
 # 99th-percentile |value| over every token and dimension (BOS excluded: its norm is an outlier).
-scale = [float(torch.quantile(resid[l, 1:].abs().flatten(), 0.99)) for l in range(cfg.n_layers)]
-q = lambda v, l: [int(round(max(-1.0, min(1.0, float(x) / scale[l])) * 127)) for x in v[:DIMS]]
+scale = interp.layer_scales(resid, 0.99)
+q = lambda v, l: interp.quantize(v, scale[l], DIMS)
 
 
 def last_index(piece, start=0):
@@ -64,18 +61,9 @@ zi = toks.index(ZOOM_TOKEN)
 zoom_state = resid[ZOOM_LAYER - 1, zi]
 
 
-def greedy(prompt, n=8):
-    """The model's own continuation (greedy), to back the on-screen claim that it can't do the chain."""
-    ids = model.to_tokens(prompt)
-    out = ids
-    with torch.no_grad():
-        for _ in range(n):
-            out = torch.cat([out, model(out)[0, -1].argmax().view(1, 1)], dim=1)
-    return model.to_string(out[0, ids.shape[1]:])
-
-
+# The model's own greedy continuations, to back the on-screen claim that it can't do the chain.
 question = TEXT[: TEXT.index("?") + 1]
-capability = {p: greedy(p) for p in [question, question + " The result is", "7 * 3 ="]}
+capability = {p: interp.greedy(model, p) for p in [question, question + " The result is", "7 * 3 ="]}
 
 data = {
     "meta": {

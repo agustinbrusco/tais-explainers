@@ -9,8 +9,10 @@ for looking impressive.
 
 ```
 references/<topic>/   dossier README + sources.yaml (tracked); papers/ PDFs + .txt (gitignored)
-projects/<slug>/      one explainer: README (brief), claims.md, script.md, narration.yaml, web/ and/or manim/, build/ (gitignored)
-kit/                  shared visual language: tokens.json (source of truth), style.py, narration.py, web/, starters/
+projects/<slug>/      one explainer: README (brief), claims.md, script.md, narration.yaml, web/ and/or manim/, data/ (scripts
+                      that produce real data), tests/ (verified invariants), build/ (gitignored)
+kit/                  shared visual language: tokens.json (source of truth), PLAYBOOK.md (lessons), style.py, narration.py,
+                      interp.py (real activations), web/ (base.css, steps.js, states.js, glass.js), starters/
 scripts/              reusable tools (below)
 learner/              profile.md, concept-map.md, journal.md: who we're teaching and what has landed
 .claude/              skills (explainer, research, review) and agents (rigor-reviewer, learner-sim)
@@ -34,6 +36,10 @@ learner/              profile.md, concept-map.md, journal.md: who we're teaching
    reported, rumored, or contested, and check the "Sources to watch" in `references/README.md` for recent work.
 8. **Honest geometry.** 2D/3D pictures of 4096-d spaces mislead in known ways (near-orthogonality,
    superposition, projections that make distinct things look close). Say so when the picture depends on it.
+9. **Say where real data is real.** When a figure mixes real data with schematic structure, the caveat and the badge say
+   which parts are real and which are reused or illustrative.
+10. **Re-derive the prose after structural edits.** When what's drawn changes, re-check every sentence and number that
+    describes it.
 
 ## Pedagogy
 
@@ -94,6 +100,8 @@ Edit `kit/tokens.json`, then `uv run scripts/build_tokens.py`.
 The `explainer` skill holds the full pipeline (brief → research → claims → script → hardest visual first →
 build → review → deliver). `research` builds `references/<topic>/`. `review` is the self-critique pass and
 dispatches the `rigor-reviewer` and `learner-sim` agents. Gate: the learner agrees on the brief before building.
+**`kit/PLAYBOOK.md`** holds what earlier pieces taught (patterns that landed, pitfalls, checklists, tools): read it
+before designing, and add each piece's lessons to it when the piece is done.
 
 ## Tools
 
@@ -108,6 +116,11 @@ uv run scripts/contact_sheet.py <video.mp4> [-n 12 | -t 1,2.5 | --burst 4.0]
 node scripts/shoot.mjs projects/<slug>/web/index.html [--mobile] [--steps 0,3]
 node scripts/shoot.mjs <page> --steps 2 --frames 16 --every 330 --element .stage   # motion frames; tile them with:
 uv run scripts/contact_sheet.py build/shots/step-02-f*.png -o motion.png
+node scripts/shoot.mjs <page> --at 1500,6000 --element .hero        # timed shots after load (animations outside steps)
+node scripts/study_page.mjs <url> --out <scratchpad>/study           # study a reference page (shots stay in scratch)
+uv run scripts/storyboard.py <youtube-url> --out <scratchpad>/sb --quad   # a video's storyboard stills, to study craft
+node projects/<slug>/tests/functional.mjs                           # the piece's verified invariants
+uv run --group interp python <script using kit/interp.py>           # real activations on CPU (TransformerLens 4)
 python3 -m http.server 8000                                 # from the repo root, then open /projects/<slug>/web/
 ```
 

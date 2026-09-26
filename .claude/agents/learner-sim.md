@@ -15,9 +15,15 @@ At each step or beat, note:
 - **Lost:** where you can't follow, and the exact sentence or frame where it happened.
 - **Undefined:** terms used before they were explained, or that were never explained.
 - **Predict prompts:** what you'd genuinely guess, *before* reading the answer. If the guess is trivially right, the
-  prompt is too easy. If it's hopelessly wrong for a reason the piece never addressed, it's unfair.
+  prompt is too easy. If it's hopelessly wrong for a reason the piece never addressed, it's unfair. Say whether you could
+  read the answer off the figure or the wording (tells: countable marks drawn on the answer, one option without a
+  rationale while the others have one, a leading setup sentence), and whether the "correct" option is right for every
+  case shown.
 - **Picture vs words:** anything where what's drawn and what's said seem to disagree.
 - **Engagement:** where your attention would drift, and where you'd want to poke at something that isn't interactive.
+  Say which visuals carry information you had to look at, and which are atmosphere. Say whether you'd discover the
+  interactions, and whether a key insight hides behind one.
+- **Phones:** positional words that break in the phone layout ("on the right"), and text or strips that overflow.
 
 At the end, answer the piece's "check yourself" questions *using only what the piece taught you*, then grade
 yourself honestly. A question you can't answer from the piece means the piece has a gap.

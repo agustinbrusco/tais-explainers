@@ -138,7 +138,11 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
     (`hero.js`); diffusion as glass passes with the canvas on paper strips; readers as instruments; charts on paper.
   - Reviewed: `rigor-reviewer` (1 blocker, fixed) and `learner-sim`, both acted on (`review.md`, iteration 4/4b).
     Smoke-tested: 26 steps, desktop and phone, no console errors; guesses and free play exercised.
-  - **Awaiting the learner's feedback on iteration 4.**
+  - **Learner feedback on iteration 4 (2026-09-26):** "amazing work, this is great" after going through the whole piece.
+    Check-yourself answers not yet collected. Lessons materialized in `kit/PLAYBOOK.md`, the skills, the review agents,
+    `kit/interp.py`, `kit/web/states.js`, `kit/web/glass.js`, new tools and `tests/functional.mjs`.
+  - Open next steps (the learner's call): ask the check-yourself questions; the "not done" list in `review.md`; a narrated
+    video; the next piece in the series.
 - Beats for the full piece are in `script.md` (✅ built, 🔲 planned).
 - **Both research passes are integrated** (depth mechanics per architecture; interpretability without a reliable CoT).
   They're in `references/cot-monitorability/README.md` (sections "What latent reasoning does to interpretability tools" and
@@ -149,7 +153,8 @@ depth *k*), and it's the money shot. A narrated Manim video of the argument, reu
 **Run it:** `python3 -m http.server 8000` from the repo root, then open http://localhost:8000/projects/cot-monitorability/web/
 · screenshots: `node scripts/shoot.mjs projects/cot-monitorability/web/index.html [--mobile]`
 · real states: `uv run --group interp python projects/cot-monitorability/data/export_tiles.py` (needs `./scripts/setup.sh --interp`;
-TransformerLens 4 loads gelu-4l with `TransformerBridge.boot_tl_legacy`)
+loading and extraction live in `kit/interp.py`) · checks: `node projects/cot-monitorability/tests/functional.mjs` (26 invariants:
+badges, dark-past counts, guess flow, free-play answers)
 
 **How the prototype works:**
 - `buildGraph(state)` builds the DAG: nodes `x{t}` are tokens (or latent thoughts), `h{t}_{r}` are hidden states.

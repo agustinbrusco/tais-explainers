@@ -5,10 +5,12 @@
 //   node scripts/shoot.mjs projects/<slug>/web/index.html --steps 0,3,5 --mobile
 //   node scripts/shoot.mjs http://localhost:8000/ --out /tmp/shots
 //   node scripts/shoot.mjs <page> --steps 2 --frames 12 --every 350 --element .stage   # motion: frames while it animates
+//   node scripts/shoot.mjs <page> --at 1500,6000,12000 [--element .hero]             # timed shots after load (heroes, intros)
 //
 // Motion review: --frames N takes N shots every --every ms *without* waiting for the step's animation, and
 // --element crops to one element. Tile them with `uv run scripts/contact_sheet.py <frames...>`.
 // --reduced emulates prefers-reduced-motion (pages should then jump straight to their final state).
+// --at t1,t2,… skips step navigation and takes shots t ms after load: for animations outside the step engine.
 //
 // Pages opt in by exposing `window.explainer = { steps: number, goto(i, {scroll}): Promise|void }`
 // (see kit/starters/web). Without it, one full-page shot is taken.
@@ -21,7 +23,7 @@ import { readFile, mkdir } from "node:fs/promises";
 import { existsSync, statSync } from "node:fs";
 import path from "node:path";
 
-const VALUE_FLAGS = new Set(["steps", "out", "width", "height", "settle", "frames", "every", "element"]);
+const VALUE_FLAGS = new Set(["steps", "out", "width", "height", "settle", "frames", "every", "element", "at"]);
 const args = process.argv.slice(2);
 const opts = {};
 const positional = [];
@@ -75,7 +77,16 @@ await page.evaluate(() => document.fonts?.ready);
 const nSteps = await page.evaluate(() => window.explainer?.steps ?? 0);
 const tag = mobile ? "mobile" : `${width}`;
 const shots = [];
-if (!nSteps) {
+const t0load = Date.now();
+if (flag("at")) {
+  for (const t of flag("at").split(",").map(Number)) {
+    const wait = t0load + t - Date.now();
+    if (wait > 0) await page.waitForTimeout(wait);
+    const f = path.join(outDir, `at-${String(t).padStart(5, "0")}ms-${tag}.png`);
+    await (flag("element") ? page.locator(flag("element")).first().screenshot({ path: f }) : page.screenshot({ path: f }));
+    shots.push(f);
+  }
+} else if (!nSteps) {
   const f = path.join(outDir, `page-${tag}.png`);
   await page.screenshot({ path: f, fullPage: true });
   shots.push(f);

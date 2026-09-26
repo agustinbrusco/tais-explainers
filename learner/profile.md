@@ -44,11 +44,20 @@
   as a prerequisite and build only what's missing.
 
 ## Preferences
-- **Explainers in English.** (Conversation with Claude is in Spanish.)
+- **Explainers in English.** (Conversation with Claude is mostly in Spanish, sometimes English: answer in the language
+  of their message.)
 - **Physics analogies in moderation**, from their actual strengths: complex systems, continuum modelling, data science,
   and statistical mechanics or quantum more than other physics. **Avoid classical-mechanics analogies** (torque etc.):
   "they might not land".
-- Pace, density, formats: not stated yet. Infer from their feedback on the first piece.
+- **Formats:** web explorables first; a narrated video only if a piece proves worth it.
+- **Visual style (learned on the first piece, 2026-09-26):** expressive, crafted visuals in the spirit of Welch Labs and
+  Goodfire's research pages, *and* rigorous: "simplify only in ways non-essential for the topic". The "paper and glass"
+  art direction with real activations was received as "amazing work".
+- **Pace:** they go through a whole piece in one sitting and give feedback in batches. They like large
+  autonomous iterations between feedback rounds, then a complete report.
+- **Predict questions** must be genuinely didactic: aimed at a real misconception, not answerable from the figure.
+- **Check, don't assume,** what they're interested in and what they already understand. Mark a concept as understood
+  only from their own answers.
 
 ## Known gaps / things that never clicked
 - RL math (concepts are fine). KL divergence (needs a refresher).

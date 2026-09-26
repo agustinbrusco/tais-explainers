@@ -1,6 +1,7 @@
 # Craft: explainers worth learning from
 
-This folder is about how to *show* things. Each entry says what the piece does well, concretely enough to reuse. Write
+This folder is about how to *show* things: other people's work we learn from. Our own patterns and lessons live in
+`kit/PLAYBOOK.md`. Study tools: `scripts/study_page.mjs` (pages) and `scripts/storyboard.py` (videos). Each entry says what the piece does well, concretely enough to reuse. Write
 entries from actually looking at the piece (screenshots stay in the scratchpad and aren't committed; they're the
 authors' work).
 
