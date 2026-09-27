@@ -89,7 +89,7 @@ sub { font-size: .7em; }
 .arrow-halo { stroke: #0b1019; stroke-width: 7; stroke-opacity: .7; stroke-linecap: round; }
 .arrow.gold .arrow-line { stroke: var(--overseer); filter: drop-shadow(0 0 3px rgba(245, 192, 74, .5)); }
 .arrow.violet .arrow-line { stroke: var(--feature); filter: drop-shadow(0 0 3px rgba(180, 140, 255, .55)); }
-.arrow-label { font: 600 20px var(--font-mono); paint-order: stroke; stroke: #0b1019; stroke-width: 6px; stroke-linejoin: round; }
+.arrow-label { font: 600 20px var(--font-mono); paint-order: stroke; stroke: #0b1019; stroke-width: 10px; stroke-linejoin: round; }
 .arrow.gold .arrow-label { fill: var(--overseer); }
 .arrow.violet .arrow-label { fill: var(--feature); }
 
@@ -248,7 +248,7 @@ sub { font-size: .7em; }
   .panel-badge .bdg-text { display: none; }
   .readouts { gap: .2rem .9rem; min-height: 2.4rem; }
   .ro .big { font-size: 1.15rem; }
-  .ro span { font-size: .58rem; max-width: 9rem; }
+  .ro span { font-size: .68rem; max-width: 11rem; }
   .ro-arrow { padding-bottom: .7rem; font-size: 1rem; }
   .six { display: none; }
   .stepnav { display: none; }   /* phones navigate by scrolling; the pill covered the prose */
@@ -524,3 +524,22 @@ sub { font-size: .7em; }
 .m-loop-bracket { fill: none; stroke: var(--training-ink); stroke-width: 1.6; }
 @media (max-width: 860px) { .m-gap-t { font-size: 19px; } }
 .glass-tag { fill: #0b1019; opacity: .92; }
+.chapter p.pause { margin-top: .9rem; font: 500 .82rem/1.5 var(--font-mono); letter-spacing: .02em; color: var(--ink3); font-style: normal; }
+.six-key { margin-left: .8rem; color: var(--ink3); letter-spacing: .04em; }
+.six-key i { width: .5rem; height: .5rem; border-radius: 50%; display: inline-block; margin: 0 .25rem 0 .5rem; vertical-align: -.02rem; border: 1.2px solid var(--ink2); }
+.six-key i.k-now { border-color: var(--overseer-ink); background: linear-gradient(90deg, var(--overseer-ink) 50%, transparent 50%); }
+.six-key i.k-done { background: var(--ink2); }
+/* back to the three readers: a matrix of the six questions */
+.rd-h { fill: var(--ink); font: 600 17px var(--font-sans); }
+.rd-hs { fill: var(--ink3); font: 500 14px var(--font-mono); }
+.rd-chip circle { fill: none; stroke: var(--ink3); stroke-width: 1.6; }
+.rd-chip.part circle { stroke: var(--overseer-ink); }
+.rd-chip.part path { fill: var(--overseer-ink); }
+.rd-sup { fill: var(--overseer-ink); font: 600 14px var(--font-mono); }
+.rd-note { fill: var(--ink2); font: 500 15px var(--font-mono); }
+.rd-note.faint { fill: var(--ink3); font-size: 14px; }
+.rd-k { fill: var(--overseer-ink); font-weight: 700; }
+@media (max-width: 860px) {
+  .rd-h { font-size: 21px; } .rd-hs { font-size: 16px; } .rd-sup { font-size: 17px; }
+  .rd-note { font-size: 18.5px; } .rd-note.faint { font-size: 17px; }
+}

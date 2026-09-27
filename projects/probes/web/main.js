@@ -173,7 +173,7 @@ window.probesFig = fig;
 
 // ---- views ----
 const ui = { push: { dir: "mm", which: "false", alpha: 1 }, oth: { labels: "my", angle: 0 }, pairs: { layer: "12" }, curve: 2, linear: { kind: "linear" }, collect: { which: "true" }, pos: { at: "period" }, pool: { how: "mean", which: "kras" }, layer: 12, fit: { labels: "coin", show: "held" }, reg: 8, flip: { layer: "12" },
-  fix: { layer: "12", set: "cities" }, gp: { layer: "16" }, job: { job: "monitor" }, dial: { probe: "A", traffic: "it" }, tick: 50, base: 2, leak: { scored: "all" }, drift: { which: "moves" } };
+  fix: { layer: "12", set: "cities" }, gp: { layer: "16" }, job: { job: "monitor" }, dial: { probe: "B", traffic: "it" }, tick: 50, base: 2, leak: { scored: "all" }, drift: { which: "moves" }, limits: { show: "six" } };
 const guesses = {};
 const revealed = {};                 // quick checks answered: their readouts are no longer held back
 const probeOf = (l, name) => ({ ...Ls(l).probes[name], kind: Ls(l).probes[name].norm ? "lr" : "dim" });
@@ -265,7 +265,7 @@ const V = {
     scene: "paper", title: ui.linear.kind === "linear" ? "How the model reads its own states" : "A probe that can compute",
     badge: badge("schematic", "Qwen2.5-1.5B's block, as a sketch · sizes from the model's configuration"),
     readouts: RO("17,920", "directions each block's MLP reads, after normalizing", "ink") +
-      RO("1,536 · 256 · 256", "query, key and value directions each attention layer reads", "ink"),
+      RO("1,536 · 256 · 256", "query, key and value directions each attention layer reads (12 query heads share 2 key/value heads of 128)", "ink"),
     paper: D.whyLinearView({ kind: ui.linear.kind, cfg: { intermediate: 8960 } }),
     six: {},
   }),
@@ -313,7 +313,7 @@ const V = {
       badge: badge("real", `Qwen2.5-1.5B · layer 16 · 300 training statements · C = 10⁴ · labels: ${ui.fit.labels === "coin" ? "coin flips" : "true / false"}`),
       readouts: RO(fmt.pct1(a.train), "training statements", "ink") +
         RO(fmt.pct1(a.held), "new statements", ui.fit.labels === "coin" ? "ink" : "gold") +
-        RO(`‖w‖ = ${f.norm < 10 ? f.norm.toFixed(1) : Math.round(f.norm)}`, `logits per unit of h (${ui.fit.labels === "coin" ? `true labels: ${real.norm.toFixed(1)}` : `coin flips: ${Math.round(F.coin.norm)}`})`, "ink"),
+        RO(revealed["q-conf"] ? `‖w‖ = ${f.norm < 10 ? f.norm.toFixed(1) : Math.round(f.norm)}` : "‖w‖ = ?", `logits per unit of h (${ui.fit.labels === "coin" ? `true labels: ${real.norm.toFixed(1)}` : `coin flips: ${Math.round(F.coin.norm)}`})`, "ink"),
       six: { 1: "now" },
     };
   },
@@ -378,7 +378,7 @@ const V = {
   lies: () => ({
     scene: "paper", title: "Every headline with its counterpart",
     badge: badge("real", "re-plotted: each number as its paper reports it"),
-    readouts: RO("99.3%", "sleeper agents, one contrast pair: AUROC", "ink") + RO("0.96–0.999", "Apollo's deception probe: AUROC", "ink") +
+    readouts: RO("0.993", "sleeper agents, one contrast pair: AUROC", "ink") + RO("0.96–0.999", "Apollo's deception probe: AUROC", "ink") +
       RO(revealed["q-recipe"] ? "0.696" : "?", "the same recipe on another model", "ink"),
     paper: M4.counterpartsView({ held: !revealed["q-recipe"] }),
     six: { 1: "done", 2: "now", 3: "done", 4: "done", 5: "now" },
@@ -401,7 +401,9 @@ const V = {
     return {
       scene: "paper", title: { all: "Scored on every token", answer: "Scored only on the answer", benign: "The instruction replaced by a benign one", organism: "A model that never says it" }[k],
       badge: badge("schematic", "a sketch of a transcript · the AUROCs: Boxo, Neelappa and Raval, sandbagging"),
-      readouts: RO(held ? "?" : au.toFixed(2), "AUROC in this condition", "ink") + RO("10–30", "points of AUROC lost when the text's evidence is removed, across their settings", "ink"),
+      readouts: RO(held ? "?" : au.toFixed(2), "AUROC in this condition", "ink") + (k === "organism"
+        ? RO(held ? "0.94 → ?" : "0.94 → 0.50", "prompted setting → the probe retrained on the silent organism", "ink")
+        : RO("10–30", "points of AUROC lost when the text's evidence is removed from prompted transcripts, across their settings", "ink")),
       paper: M4.leakView({ scored: k, held: !revealed["q-organism"] }),
       six: { 1: "done", 2: "done", 3: "now", 4: "done", 5: "done" },
     };
@@ -428,7 +430,7 @@ const V = {
     scene: "paper", title: revealed["q-drift"] ? "Hard-coding leaves the deception direction" : "Before ordinary RL on coding",
     badge: badge("illustrative", "a drawn mechanism, not measured states · the AUCs: the Obfuscation Atlas, Table 4 (four models: Llama-3 8B and 70B, Gemma-3 12B and 27B)"),
     readouts: RO(revealed["q-drift"] ? "0.991 → 0.376 · 0.996 → 0.655" : "0.991 · 0.996 → ?", "AUROC of fresh general deception probes on hard-coding, before → after RL (two training sets; mean of four models, wide spread)", "ink") +
-      RO("1.000 → 1.000", "a probe trained on hard-coding itself", "ink"),
+      RO(revealed["q-drift"] ? "1.000 → 1.000" : "1.000 → ?", "a probe trained on hard-coding itself", "ink"),
     paper: M4.movesView({ held: !revealed["q-drift"] }),
     six: { 1: "done", 2: "now", 3: "done", 4: "done", 5: "done", 6: "now" },
   } : {
@@ -443,7 +445,7 @@ const V = {
     scene: "paper", title: "One direction, many handles",
     badge: badge("real", "re-plotted: Chen and colleagues 2025 (persona vectors); Arditi and colleagues 2024 (refusal)"),
     readouts: RO(revealed["q-handle"] ? "0.70" : "?", "Marks and Tegmark's “likely” direction: false → true (LLaMA-2-13B)", "ink") +
-      RO("0.098 · 0.239", "AxBench steering, 0 to 2: probe · difference of means", "ink") + RO("0.894", "steering by prompting, for comparison", "ink"),
+      RO("0.098 · 0.239 · 0.894", "AxBench steering, 0 to 2: probe · difference of means · prompting", "ink"),
     paper: M4.handleView(),
     six: { 1: "done", 2: "done", 3: "done", 4: "now" },
   }),
@@ -456,7 +458,13 @@ const V = {
     six: { 1: "done", 2: "done", 3: "done", 4: "now" },
   }),
   // chapter VI
-  limits: () => ({
+  limits: () => (ui.limits.show === "readers" ? {
+    scene: "paper", title: "Back to the three readers",
+    badge: badge("schematic", "our reading of what each lab reports publicly"),
+    readouts: "",
+    paper: M4.readersView(),
+    six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "done", 6: "done" },
+  } : {
     scene: "paper", title: "The six questions, answered",
     badge: badge("schematic", "a summary of this piece"),
     readouts: "",
@@ -475,7 +483,7 @@ const SIX_ANS = [
   ["held-out accuracy and controls, not a training fit;", "a probe with a hidden layer can compute what it reports"],
   ["whatever separated the training set, when it's in play;", "test on shifted data, and again after any training"],
   ["ask what a reader of the text alone would get: the difference", "is the probe's evidence beyond the text; the cost is the rest"],
-  ["the best reader isn't the best handle; only a causal test", "(a push, an ablation) shows which direction the model uses"],
+  ["reading well isn't pushing well: push at matched strength,", "or ablate; only a causal test shows what the model uses"],
   ["recall at a threshold set on the traffic it will see,", "and the false alarms that threshold buys"],
   ["optimized against, it's evaded through the text first;", "no gradients through it; one monitor training never sees"],
 ];
@@ -864,7 +872,7 @@ function jobView(job) {
     legend: mon ? [{ glyph: "hidden", text: "a statement, label unknown" }, { glyph: "flag", text: "flagged: read as false" }] : [...LG.tf],
     title: mon ? "The same probe, as a monitor" : "The probe, doing science",
     badge: badge("real", `Qwen2.5-1.5B · layer 12 · final token · ${N_ALL.toLocaleString("en-US")} statements from held-out cities`),
-    readouts: mon ? RO(`${flagged.toLocaleString("en-US")}`, `of ${N_ALL.toLocaleString("en-US")} flagged: read as false`, "gold") + RO("?", "of the flags, how many are right", "ink")
+    readouts: mon ? RO(`${flagged.toLocaleString("en-US")}`, `of ${N_ALL.toLocaleString("en-US")} flagged: read as false`, "gold") + RO("unknown", "of the flags, how many are right: that needs the labels", "ink")
       : RO(fmt.pct1(E[l].w.aff.acc), "read correctly: the labels are known", "gold") + RO(`${right.toLocaleString("en-US")} of ${flagged.toLocaleString("en-US")}`, "flags that are right: false statements read as false", "ink"),
     six: { 1: "done", 2: "now", 3: "done", 4: "done", 5: "now" },
   };
@@ -927,6 +935,7 @@ async function render(i, prev) {
   d3.select("#fig-badge").html(v.badge);
   d3.selectAll("#six li").attr("class", function () { return v.six[this.dataset.q] ?? ""; });
   echoGuesses();
+  updateSixTitles();
   // the first figure waits until the stage is on screen, so its choreography is seen
   const offscreen = () => { const r = document.querySelector(".stage .panel").getBoundingClientRect(); return !(r.top < innerHeight * 0.75 && r.bottom > 0); };
   const onscreen = () => new Promise((res) => {
@@ -1015,7 +1024,7 @@ async function render(i, prev) {
   if (i === STEP.layer && prev !== STEP.layer && !reduced) {
     // a flipbook through the layers, 0 → 28, then back to where the slider was
     const target = ui.layer;
-    for (const L of [...d3.range(0, 29), ...d3.range(27, target - 1, -1)]) {
+    for (const L of [...d3.range(revealed["q-l0"] ? 0 : 1, 29), ...d3.range(27, target - 1, -1)]) {
       if (my !== token) return;
       const f = layerView(L);
       await fig.show({ ...f, readouts: null });
@@ -1061,7 +1070,9 @@ document.querySelectorAll(".check").forEach((box) => {
     // a check holds back the readout it asks about, and any paragraph that would give it away: answering releases them
     if (revealed[box.dataset.q]) return;
     revealed[box.dataset.q] = true;
+    if (box.dataset.q === "q-l0" && layerIn) { layerIn.min = "0"; ui.layer = 0; setLayerOut(0); }
     document.querySelectorAll(`[data-after="${box.dataset.q}"]`).forEach((el) => el.classList.add("shown"));
+    updateSixTitles();
     const i = window.explainer.current, v = views[i]();
     token++;
     d3.select("#fig-title").text(v.title);               // some titles name the answer, so they wait for it too
@@ -1074,7 +1085,7 @@ document.querySelectorAll(".check").forEach((box) => {
 
 const FEEDBACK = {
   lr: "It reads best, and pushes least: its push is short and mostly sideways to the class means.",
-  mm: `Right: ${NUM.nie_mm} of the way to true along Δμ, ${NUM.nie_lr} along w.`,
+  mm: `Right: ${NUM.nie_mm} of the way to true along Δμ, ${NUM.nie_lr} along w. Under this rule the Δμ push carries the false mean the whole way to the true one, and w's push ${NUM.cos2_16} of that.`,
   same: "Each probe reads the pushed state as true, but the model doesn't read it through either probe.",
   nonlin: "Li and colleagues' conclusion; the next step shows the board is linear in another labelling.",
   other: "Right: squares labelled mine and yours are read linearly at 99.6%.",
@@ -1130,7 +1141,20 @@ document.querySelectorAll(".ledger").forEach((el) => {
   const [q, a] = LEDGER[el.dataset.qn];
   el.innerHTML = `<span class="ledger-k">Question ${parseInt(el.dataset.qn, 10)} of 6 · ${/b$/.test(el.dataset.qn) ? "more of the answer" : "answered"}</span><b>${q}</b><span>${a}</span>`;
 });
-d3.selectAll("#six li").attr("title", function () { const L_ = LEDGER[this.dataset.q]; return L_ ? `${L_[0]} ${L_[1]}` : "answered later in the piece"; });
+// Each chip's tooltip carries its answer only once the reader has reached that answer's ledger (and answered the check
+// that holds it): a tooltip is a spoiler like any other.
+const ledgerSteps = [...document.querySelectorAll(".ledger")].map((el) => ({ el, q: String(parseInt(el.dataset.qn, 10)),
+  step: [...document.querySelectorAll("[data-step]")].indexOf(el.closest("[data-step]")) }));
+function updateSixTitles() {
+  const cur = window.explainer?.current ?? -1;
+  d3.selectAll("#six li").attr("title", function () {
+    const seen = ledgerSteps.filter((l) => l.q === this.dataset.q && l.step >= 0 && l.step <= cur &&
+      (!l.el.hasAttribute("data-after") || l.el.classList.contains("shown")));
+    if (!seen.length) return "answered later in the piece";
+    const L_ = LEDGER[seen[seen.length - 1].el.dataset.qn];
+    return `${L_[0]} ${L_[1]}`;
+  });
+}
 
 // ---- controls ----
 document.querySelectorAll(".toggles").forEach((box) => {
@@ -1186,6 +1210,7 @@ layerIn?.addEventListener("input", () => {
   d3.select("#readouts").interrupt().style("opacity", 1).html(v.readouts);
 });
 setLayerOut(ui.layer);
+if (layerIn) layerIn.min = "1";                          // layer 0 is the answer to its check: held until answered
 
 // the n slider: each position is one fit of the nested draw
 const curveIn = document.getElementById("curve-n");

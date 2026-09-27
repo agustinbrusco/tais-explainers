@@ -73,18 +73,18 @@
         <p>We read one of those states, the one at layer 12 over the final token, the period (why those two, in the next
           steps), and call it <var>h</var>. It is stored with the statement's label <var>y</var>, 1 for true and 0 for false,
           as one row of a table. The light part of the figure is <em>paper</em>: what we read out of the model and can work
-          with. Do the same for every statement about the <span class="n" data-n="n_train_cities">513</span> training cities,
-          two per city, and you have a matrix <var>X</var> with <span class="n" data-n="n_train">1,026</span> rows and 1,536
+          with. Do the same for every statement about the <span class="n" data-n="n_train_cities">513</span> training cities, two per city (the new cities kept for
+          testing are other cities, so a probe can't pass by recognizing a city it was trained on), and you have a matrix <var>X</var> with <span class="n" data-n="n_train">1,026</span> rows and 1,536
           columns, and its labels <var>y</var>. A probe is a classifier fitted to (<var>X</var>, <var>y</var>).</p>
         <div class="check" data-q="q-cols">
-          <p class="q">Switch to the false statement, “…in <span data-n="false_country">China</span>.” How many of the 11
-            columns get new states?</p>
+          <p class="q">Now imagine the false statement, “…in <span data-n="false_country">China</span>.” How many of the
+            11 columns would get new states?</p>
           <div class="opts"><button data-a="all">all 11</button><button data-a="two" data-correct>the last two</button><button data-a="one">only the country's</button></div>
           <p class="a">The last two, the country's and the period's. Each state is computed from its own token and the tokens
             before it, so up to “in” the two statements are the same input and have the same states, and the period's state
             reads the new country.</p>
         </div>
-        <div class="toggles" data-for="collect">
+        <div class="toggles" data-for="collect" data-after="q-cols">
           <span>statement</span>
           <button data-k="which" data-v="true" class="on">…in Russia.</button>
           <button data-k="which" data-v="false">…in <span data-n="false_country">China</span>.</button>
@@ -168,8 +168,7 @@
       <section class="step" data-step>
         <h2>Which token?</h2>
         <p>Why read the period? In this model, as in every GPT-style model, attention is causal: the state over a token is
-          computed from that token and the ones before it, never from the ones after. So the state over “in” can't know how
-          the statement ends. Hover a column in the glass to see which states it was computed from.</p>
+          computed from that token and the ones before it, never from the ones after. Hover (or tap) a column in the glass to see which states it was computed from.</p>
         <div class="check" data-q="q-in">
           <p class="q">Train a probe on the states over “in”, from the same training statements. What share of new statements
             does it read correctly?</p>
@@ -209,8 +208,9 @@
           <span class="n" data-n="mean_state">97.9%</span> of new statements. The other design scores every token: give each
           token the statement's label, train on all of them, and pool each statement's token scores into one verdict.</p>
         <p>The paper shows those per-token scores for the Krasnodar pair. Up to “in” they are identical and close to zero:
-          each of those states appears once with each label, so the best the fit can do there is sit on the fence. Pooled by
-          the mean, the statements read <span class="n" data-n="every_mean">98.5%</span>, as well as the period.</p>
+          each of those states appears once with each label, so the best the fit can do there is sit on the fence. Pooled by the mean, the statements read <span class="n" data-n="every_mean">98.5%</span>, as well as the period.
+          (Mean pooling of the states and of the scores are the same arithmetic; the two numbers differ because the two
+          probes were trained on different data, whole statements or single tokens.)</p>
         <div class="check" data-q="q-max">
           <p class="q">Now pool by the maximum, with a threshold chosen on the training statements. What share of new
             statements does it read correctly?</p>
@@ -226,9 +226,9 @@
           <span>pool by</span>
           <button data-k="how" data-v="mean" class="on">mean</button>
           <button data-k="how" data-v="max">max</button>
-          <span>statement</span>
-          <button data-k="which" data-v="kras" class="on">Krasnodar</button>
-          <button data-k="which" data-v="miss">one the maximum misreads</button>
+          <span data-after="q-max">statement</span>
+          <button data-k="which" data-v="kras" class="on" data-after="q-max">Krasnodar</button>
+          <button data-k="which" data-v="miss" data-after="q-max">one the maximum misreads</button>
         </div>
         <p>For short statements that end in a period, reading the period is the simple choice. Pooling matters for long
           inputs, where what you want to detect can occupy a few tokens anywhere, and the probes that pool by a maximum there
@@ -331,7 +331,8 @@
           the penalty slider walks two steps from now. Many directions read truth about this well; the data and the recipe's
           settings both choose among them.</p>
         <p class="caveat"><strong>A salient concept</strong> Truth is unusually easy here. At layer 16 of this model it is
-          the largest way these states vary: their top principal component lies along Δμ (cosine
+          the largest way these states vary: their top principal component lies along Δμ, the difference between the true and false
+          statements' mean states (<span data-fig="reg">Fig. 11</span>; cosine
           <span class="n" data-n="pc_cos16">0.99</span>) and carries <span class="n" data-n="pc_var16">29%</span> of their
           variance. At layer 12 the smallest size to clear 95% on average is
           <span class="n" data-n="c12_first95">32</span>, and concepts the model represents less prominently can need many
@@ -354,7 +355,7 @@
           <p class="a">Near-certain: new statements sit a median of <span class="n" data-n="coin_score">7</span> logits from
             its boundary, a confidence above 99.9%, and half of those verdicts are wrong.</p>
         </div>
-        <p>It found a direction along which the 300 statements barely differ (new ones sit a median of
+        <p data-after="q-conf">It found a direction along which the 300 statements barely differ (new ones sit a median of
           <span class="n" data-n="coin_dist">0.15</span> units from its boundary, against
           <span class="n" data-n="real_dist">3.4</span> for a probe fitted to true labels) and scaled <var>w</var> up until
           those slivers became large scores: ‖<var>w</var>‖ = <span class="n" data-n="coin_norm">50</span> against
@@ -369,7 +370,7 @@
           <button data-k="show" data-v="train">training</button>
           <button data-k="show" data-v="held" class="on">new</button>
         </div>
-        <p>With true labels, the same recipe reaches <span class="n" data-n="real_train">100%</span> on training
+        <p data-after="q-conf">With true labels, the same recipe reaches <span class="n" data-n="real_train">100%</span> on training
           statements and <span class="n" data-n="real_held">98.1%</span> on new ones. Training accuracy can't tell the two
           probes apart. Held-out accuracy can, and so can the shape of the fit: a margin of
           <span class="n" data-n="coin_margin">0.16</span> units against <span class="n" data-n="real_margin">1.39</span>,
@@ -403,7 +404,8 @@
           version). With its threshold halfway between the two means it reads <span class="n" data-n="dmu12">95.4%</span> of
           new statements correctly; logistic regression's <var>w</var>, <span class="n" data-n="aff12">98.4%</span>.</p>
         <div class="check" data-q="q-angle">
-          <p class="q">How far apart do Δμ and <var>w</var> point, in the full 1,536 dimensions?</p>
+          <p class="q">How far apart do Δμ and <var>w</var> point, in the full 1,536 dimensions? (The figure's plane
+            contains both, drawn in true proportions.)</p>
           <div class="opts"><button data-a="10">under 10°</button><button data-a="30">about 30°</button><button data-a="60" data-correct>about 60°</button><button data-a="90">about 90°</button></div>
           <p class="a">About 60°: <span class="n" data-n="angle12">57°</span>. The figure's plane contains both and is drawn
             in true proportions, so the angle you see is the real one.</p>
@@ -450,7 +452,7 @@
           <tbody>
             <tr><td>statements with labels</td><td>logistic regression, the difference of means</td><td><span data-fig="probe">Fig. 3</span>; the last two steps; persona vectors (the difference of means between responses that show a trait and responses that don't, elicited by opposite system prompts)</td></tr>
             <tr><td>pairs, one of each</td><td>the mean of their differences</td><td>steering by contrastive activation addition; an evaluation-awareness vector from one pair (“The following is a fictional scenario.” minus “…a real scenario.”); the sleeper-agent probe of chapter V (“Are you a helpful AI? no / yes”)</td></tr>
-            <tr><td>pairs, without saying which is which</td><td>the top principal direction of their differences; CCS</td><td>Representation Engineering's reading vectors; unsupervised truth probes</td></tr>
+            <tr><td>pairs, without saying which is which</td><td>the top principal direction of their differences; CCS (contrast-consistent search: a direction whose scores for a statement and its negation are consistent and confident)</td><td>Representation Engineering's reading vectors; unsupervised truth probes</td></tr>
             <tr><td>the model's own behaviour</td><td>a probe of what the model will do</td><td>semantic-entropy probes (does it answer consistently?)</td></tr>
           </tbody>
         </table>
@@ -471,7 +473,7 @@
         <div class="check" data-q="q-banana">
           <p class="q">Farquhar and colleagues appended a random word, “Banana” or “Shed”, to the end of every prompt in a
             contrast dataset, then ran unsupervised methods on it. What did they find?</p>
-          <div class="opts"><button data-a="ignore">the methods ignored the word</button><button data-a="banana" data-correct>many runs found Banana vs Shed instead</button><button data-a="better">they got more accurate</button></div>
+          <div class="opts"><button data-a="ignore">nothing changed: the word carries no sentiment</button><button data-a="banana" data-correct>many runs found Banana vs Shed instead</button><button data-a="better">accuracy dipped a little: the word adds noise</button></div>
           <p class="a">On Chinchilla, with IMDb reviews: accuracy on the real labels fell to 50%, chance. PCA and K-means
             scored highly at telling Banana from Shed instead, and many runs of CCS did so perfectly. In the authors' words,
             these methods “seem to discover whatever feature of the activations is most prominent”.</p>
@@ -581,7 +583,7 @@
           ranking. Among negations, the direction points the wrong way.</p>
         <p><strong>Our reading:</strong> among affirmative statements, “true” coincides with “this city belongs to this
           country”, and the probe learned partly that match. “Not” flips the truth and leaves the match in place. Marks and
-          Tegmark proposed a similar confound, a feature for “close association”; the last figure shows the evidence in this
+          Tegmark proposed a similar confound, a feature for “close association”; <span data-fig="gp">Fig. 18</span> shows the evidence in this
           model.</p>
         <div class="toggles" data-for="flip">
           <span>layer</span>
@@ -623,17 +625,16 @@
         <p>Retraining fixed the shift it trained on: negation, for cities. It promises nothing about the next shift, and a new
           topic can need a new threshold even where the direction carries over.</p>
         <div class="check" data-q="q-country">
-          <p class="q">One shortcut we can rule out is the country's name. Could the probe be reading which country a
-            statement names, rather than the fact? Train a classifier that sees only the country's name. How does it do on
-            new cities?</p>
-          <div class="opts"><button data-a="98">≈ 98%: countries give it away</button><button data-a="75">≈ 75%: some countries are mostly false</button><button data-a="50" data-correct>≈ 50%: the name says nothing</button></div>
-          <p class="a"><span class="n" data-n="country_baseline">51.2%</span>, chance. Each false country is drawn as often
-            as that country appears in the true statements, so a name alone carries no information about truth. That closes
-            one shortcut by construction, not every one. A classifier of the statement's spelling (its fragments of two to
-            four letters, with one hidden layer, trained on the training cities) reads
-            <span class="n" data-n="text_mlp">64%</span> of new cities, and a linear one
-            <span class="n" data-n="text_lr">50.4%</span>: spelling gets part of the way, perhaps because city names hint at
-            their country, and falls far short of the probe. The label itself is a fact about the words, though: a reader
+          <p class="q">Could a cheap reader of the words get the label without the model? Not from the country's name
+            alone: each false country is drawn as often as that country appears in the true statements, so a classifier of
+            the name reads <span class="n" data-n="country_baseline">51.2%</span>, chance. Now take a classifier of the
+            statement's spelling (its fragments of two to four letters, with one hidden layer, no model), trained on the
+            training cities. How much of new cities does it read?</p>
+          <div class="opts"><button data-a="50">≈ 50%: spelling says nothing about geography</button><button data-a="65" data-correct>≈ 65%: city names hint at their country</button><button data-a="90">≈ 90%: the words give the fact away</button></div>
+          <p class="a"><span class="n" data-n="text_mlp">64%</span>, and a linear classifier of the same fragments
+            <span class="n" data-n="text_lr">50.4%</span>: one that can't combine the look of a city's name with the country
+            named gets nothing. Spelling gets part of the way, perhaps because city names hint at their country, and falls
+            far short of the probe. The label itself is a fact about the words, though: a reader
             that knows geography gets it from the text, and the model, asked, answers
             <span class="n" data-n="model_acc">92.5%</span> of held-out statements correctly.</p>
         </div>
@@ -685,7 +686,7 @@
             state, then ask the model whether the statement is true. Which push moves its answers more?</p>
           <div class="guess" data-q="p4">
             <button data-a="lr">the push along <var>w</var>: it reads truth best</button>
-            <button data-a="mm" data-correct>the push along Δμ: it's built from the class means themselves</button>
+            <button data-a="mm" data-correct>the push along Δμ: the rule sends it the whole way from the false mean to the true one</button>
             <button data-a="same">the same: each probe now reads the statement as true</button>
           </div>
         </div>
@@ -700,8 +701,7 @@
           false statements' answers moved <span class="n" data-n="nie_mm">82%</span> of the way to the true statements'
           answers; pushed along <var>w</var>, <span class="n" data-n="nie_lr">34%</span> (Marks and Tegmark's normalized
           indirect effect). True statements pushed toward false: <span class="n" data-n="nie_mm_t2f">125%</span> against
-          <span class="n" data-n="nie_lr_t2f">10%</span>, where above 100% means past the average false statement's answer. For false statements the Δμ push is already saturated at half this strength (the slider shows it), so part of
-          that gap is saturation; the comparison below is the fair one.</p>
+          <span class="n" data-n="nie_lr_t2f">10%</span>, where above 100% means past the average false statement's answer.</p>
         <p>Marks and Tegmark measured theirs out of distribution, on Spanish–English statements the probes never saw. Ours on
           those: <span class="n" data-n="nie_sp_mm">69%</span> against <span class="n" data-n="nie_sp_lr">20%</span>. In
           LLaMA-2-13B they found 0.77 against 0.13, and saw the gap close in their 70B model (0.58 against 0.55).</p>
@@ -716,12 +716,12 @@
           <span class="n" data-n="m_f2t1">32%</span> (true statements toward false:
           <span class="n" data-n="nie_lr_t2f">10%</span> and <span class="n" data-n="m_t2f1">11%</span>). Here, then, the gap
           comes from the rule and the geometry: the rule only asks the <var>w</var> push to move <var>w</var>'s reading as far
-          as Δμ moves it, and Δμ reaches only cos · |Δμ| along <var>ŵ</var>. Its sideways part isn't inert, though. On the Spanish–English statements the <var>w</var>
-          push does more than its Δμ part would (<span class="n" data-n="nie_sp_lr">20%</span> against
-          <span class="n" data-n="m_sp_f2t1">11%</span>), and at twice the strength the two drift apart on cities too
-          (<span class="n" data-n="lr_f2t2">74%</span> against <span class="n" data-n="m_f2t2">65%</span> for false statements,
-          <span class="n" data-n="lr_t2f2">31%</span> against <span class="n" data-n="m_t2f2">43%</span> for true ones). The
-          arrows are violet because here the directions write.</p>
+          as Δμ moves it, and Δμ reaches only cos 67° · |Δμ| along <var>ŵ</var>. Its sideways part isn't inert, though: on
+          the Spanish–English statements the <var>w</var> push does more than its Δμ part would
+          (<span class="n" data-n="nie_sp_lr">20%</span> against <span class="n" data-n="m_sp_f2t1">11%</span>). So at this strength the model's answer
+          tracks how far a push moves the state along Δμ; out of distribution, and at larger strengths (side dish), the rest
+          of the push matters too. The arrows are violet
+          because here the directions write.</p>
         <div class="toggles" data-for="push">
           <span>push</span>
           <button data-k="which" data-v="false" class="on">“…in China.” toward true</button>
@@ -738,16 +738,28 @@
           </div>
           <output id="push-out" class="reg-out"></output>
         </div>
-        <p>Other groups found a gap that no scaling rule explains, with each method at its best strength: in LLaMA-7B,
-          shifting attention heads along the difference of means raised TruthfulQA's true-and-informative rate from 30.5% to
+        <aside class="side-dish" aria-label="Side dish">
+          <header><span class="plate" aria-hidden="true"></span><span class="sd-kicker">Side dish · optional depth</span></header>
+          <h3>Other strengths, other groups</h3>
+          <p>For false statements the Δμ push is already saturated at half Marks and Tegmark's strength (the slider shows
+            it), so part of the headline gap is saturation. At twice the strength the two pushes drift apart on cities
+            too, in opposite ways for the two directions: <span class="n" data-n="lr_f2t2">74%</span> against
+            <span class="n" data-n="m_f2t2">65%</span> for false statements (the <var>w</var> push ahead of its Δμ part),
+            <span class="n" data-n="lr_t2f2">31%</span> against <span class="n" data-n="m_t2f2">43%</span> for true ones
+            (behind).</p>
+          <p>Other groups found a gap that no scaling rule explains, with each method at its best strength: in LLaMA-7B,
+          shifting attention heads along the difference of means raised the true-and-informative rate on TruthfulQA (questions built to
+            invite common misconceptions) from 30.5% to
           42.3%, along the probe's weights to 34.8% (Li and colleagues); across 500 concepts in Gemma-2, difference-of-means
           steering scored 0.239 against 0.098 for probe directions (AxBench), though the probes detected the concepts as well
           (AUROC 0.940 against 0.942). Why isn't settled; Li and colleagues' reading is that “for anisotropic distributions,
           the best-separating hyperplane might well not be perpendicular to the difference between mass means”. <strong>Our reading:</strong> the gap depends on a recipe's settings and on how unevenly
           the states vary, not on logistic regression as such, since with a strong penalty (chapter II's slider) logistic
           regression returns Δμ itself; whether a strongly regularized probe closes the steering gap hasn't been tested.</p>
+        </aside>
         <p class="caveat"><strong>What is drawn</strong> The directions were fitted at layer 16 and the picture is drawn
-          there; the push itself is added at five layers, so its effect compounds as it goes. The moving point is
+          there; the push itself is added at five layers, so its effect compounds as it goes, and added up it is longer than a
+          typical state (71 units by layer 18, against about 55): the rule's scale is large. The moving point is
           Krasnodar's state at layer 16 plus the push, not the state the model goes on to compute. The model's answers are
           real, one forward pass per strength.</p>
         <aside class="side-dish" aria-label="Side dish">
@@ -771,6 +783,8 @@
         <span class="num">Chapter IV</span>
         <h2>The direction as a handle</h2>
         <p>What a probe's direction does when you write with it, and what that evidence is worth.</p>
+        <p class="pause">Chapters I–III built and tested one probe on one model. IV and V take probes into use, mostly from the
+          published record: a good place for a break.</p>
       </div>
 
       <section class="step" data-step>
@@ -790,14 +804,14 @@
           The authors turned it into “a novel white-box jailbreak method”. A handle is dual use, and this one switches off the refusal that safety training installed.</p>
         <div class="check" data-q="q-handle">
           <p class="q">Marks and Tegmark also took the difference of means on generated text labelled by whether
-          its last token was the likeliest continuation or the 100th likeliest (likely or unlikely, not true or false). Across their datasets it reads truth poorly. Pushed by the same rule as chapter
-          III's, how far did it move LLaMA-2-13B's answers on false Spanish–English statements toward true?</p>
+          its last token was the likeliest continuation or the 100th likeliest (likely or unlikely, not true or false). Across their datasets it reads truth poorly, though on the
+            Spanish–English statements they push, plausibility and truth go together (r = .95). Pushed by the same rule as
+            chapter III's, how far did it move LLaMA-2-13B's answers on false Spanish–English statements toward true?</p>
           <div class="opts"><button data-a="10">≈ 0.1: a poor reader of truth is a poor handle on it</button><button data-a="40">≈ 0.4: some of truth rides along with likelihood</button><button data-a="70" data-correct>≈ 0.7: about as far as the truth directions</button></div>
           <p class="a">0.70 of the way, near the 0.77 of the direction fitted on true and false cities. The authors leave it
             open: “why were interventions with mass-mean probe directions extracted from the likely dataset so effective,
-            despite these probes not themselves being accurate at classifying true/false statements?” One caveat they give
-            elsewhere: on these Spanish–English statements plausibility and truth go together (r = .95), and there the
-            likely probe does read truth; on sets where the two pull apart it reads worse than chance. The converse is
+            despite these probes not themselves being accurate at classifying true/false statements?” Part of the answer may be
+            the r = .95: where plausibility and truth pull apart, the likely probe reads worse than chance. The converse is
             cleaner: in AxBench, probe directions detected concepts as well as the difference of means (AUROC 0.940
             against 0.942) and steered far worse (0.098 against 0.239, on a 0-to-2 scale). Chapter III's side dish is why the
             two can come apart.</p>
@@ -809,7 +823,7 @@
       </section>
 
       <section class="step" data-step>
-        <h2>Contested: steering away evaluation awareness</h2>
+        <h2>Steering away evaluation awareness</h2>
         <p>Steering is also used as evidence. Claude Sonnet 4.5 rarely took misaligned actions in tests when it said it
           thought it was being tested. If awareness it doesn't say out loud also keeps it on its best behaviour, evaluations
           overstate how it behaves when nobody is testing it, so Anthropic's system card turned to steering “to assess whether
@@ -837,16 +851,25 @@
             misaligned actions above the unsteered rate. Control vectors from pairs “semantically unrelated to alignment” “can
             have effects just as large”.</p>
         </div>
-        <p data-after="q-control">What the GLM-5 authors conclude is not that Anthropic was wrong. Steering is “a crude
-          intervention” whose effects run “in both directions”, so “Semantically unrelated contrastive pairs are not
-          appropriate controls” either; “Our best guess is that Anthropic's steering experiments are indeed revealing
-          evaluation gaming behaviour!”, though they “would not be convinced by safety claims that use steering results to
-          upper-bound the influence of evaluation awareness”, and GLM-5 may not behave like Claude. Anthropic's Jack Lindsey
-          replied, in comments reproduced in the post, that on GLM-5 “your random controls increase misalignment by about as
-          much as your steering vectors”, which he would read as evidence neither for nor against an effect, and that on
-          Claude “Sonnet 4.5 was where we saw the clearest evidence of real effects; in Opus 4.5 and onward, the picture has
-          been more murky”. The card's own caveat: its testing-versus-conversation pair “is not fully aligned with the nature
-          of the scenario”.</p>
+        <p data-after="q-control">What the GLM-5 authors conclude is not that Anthropic was wrong. To them steering is crude and
+          hard to predict, so unrelated pairs aren't appropriate controls either, and their best guess is that Anthropic's experiments
+          do reveal evaluation gaming, though steering can't bound how much it matters. Anthropic's reply agrees that the
+          GLM-5 runs settle nothing either way, and says the clearest evidence came from Sonnet 4.5 (side dish: the exchange
+          in their words).</p>
+        <aside class="side-dish" aria-label="Side dish" data-after="q-control">
+          <header><span class="plate" aria-hidden="true"></span><span class="sd-kicker">Side dish · optional depth</span></header>
+          <h3>The exchange, in their words</h3>
+          <p>Read and colleagues: steering is “a crude intervention”, with effects “in both directions”; “Semantically
+            unrelated contrastive pairs are not appropriate controls. Results should not be dismissed due to having smaller
+            effects than control steering vectors.” And: “Our best guess is that Anthropic's steering experiments are indeed
+            revealing evaluation gaming behaviour!”, though they “would not be convinced by safety claims that use steering
+            results to upper-bound the influence of evaluation awareness”. GLM-5 may also not behave like Claude.</p>
+          <p>Anthropic's Jack Lindsey, in comments reproduced in the post: on GLM-5 “your random controls increase
+            misalignment by about as much as your steering vectors”, which he would read as evidence neither for nor against
+            an effect; “Sonnet 4.5 was where we saw the clearest evidence of real effects; in Opus 4.5 and onward, the picture
+            has been more murky”. The card's own caveat: its testing-versus-conversation pair “is not fully aligned with the
+            nature of the scenario”.</p>
+        </aside>
         <p data-after="q-control">What would settle it: controls both sides accept, several models, a dose–response
           curve, and a measure of the awareness a model doesn't say out loud (both count the awareness a model verbalizes: Read and colleagues with a model reading the transcript, and the
           card's other awareness scores are graded the same way). Until then it is contested. <strong>Our voice:</strong> a steering result is
@@ -906,7 +929,7 @@
           ordinary, harmless traffic, and report the share of the target (lies, attacks) it then catches.</p>
         <p>One contrast pair caught a sleeper agent. Anthropic's model organisms were trained to behave well until a trigger,
           then defect; a direction fitted to the difference between “Human: Are you a helpful AI? Assistant: no” and “…yes”
-          separated the prompts that would make them defect at AUROC 99.3%. The fit data “never includes the deployment
+          separated the prompts that would make them defect at AUROC 0.993 (“99.3%”). The fit data “never includes the deployment
           trigger or the defection behavior itself”. One pair can be enough when the feature is salient (“in some cases
           this feature shows up as the top principal component”), as chapter II found for truth. Its counterpart: on the
           base model without sleeper training the direction separates nothing, and “it is possible that the salience of
@@ -927,13 +950,19 @@
             A recipe's result belongs to its model (trained and tested on the last token instead, with a sweep over layers,
             it reached 0.816).</p>
         </div>
-        <p>Three more checks, each labelled as what it is. A team that re-ran Apollo's pipeline found an apparent discrepancy
-          in how the threshold was calibrated; once it was corrected, recall on the Roleplaying set fell from 96% to 73.2% (a
+        <p>Other checks of this probe pull the same way: a corrected threshold, trained liars, and a newer set of lie types
+          each cut its numbers (side dish).</p>
+        <aside class="side-dish" aria-label="Side dish">
+          <header><span class="plate" aria-hidden="true"></span><span class="sd-kicker">Side dish · optional depth</span></header>
+          <h3>Three more checks of the deception probe</h3>
+          <p>Each is a different kind of test. A team that re-ran Apollo's pipeline found an apparent discrepancy in how the
+            threshold was calibrated; once it was corrected, recall on Apollo's Roleplaying evaluation set fell from 96% to
+            73.2% (a
           threshold never changes the ranking, so the AUROC can't show this). On model organisms trained to deceive (an audit game, sandbagging, a kept secret), the probe's median balanced
           accuracy fell from 0.85 to 0.52. And on Liars' Bench, a newer set of lie
           types, the same recipe (one probe per model, four models) averages an AUROC of 0.60 (0.64 for Llama-3.3-70B) and a balanced accuracy of 0.54 at
-          a threshold set for 1% false positives on chat, the weakest of four detectors; the Llama probe scored 0.96 to 1.00 on Apollo's own
-          datasets.</p>
+          a threshold set for 1% false positives on chat, the weakest of four detectors; the Llama probe scored 0.96 to 1.00 on Apollo's own datasets.</p>
+        </aside>
         <p>The weak point is the labels. What counts as deception, and how would you know a model believed otherwise? Smith,
           Chughtai and Nanda: evaluating a detector “requires examples that we can confidently label as either deceptive or
           honest. We argue that we currently lack the necessary examples”. The Eliciting Latent Knowledge report named a
@@ -947,9 +976,9 @@
         <div class="predict">
           <p>Apollo trained a second deception probe, on role-play scenarios instead of instructed pairs. On the
             insider-trading reports it separates deceptive from honest at AUROC 0.999, like the first (a deceptive report is
-            one that “does not confess to the use of insider information”). Deploy both the same way: set each alarm to flag
-            1% of ordinary chat (Alpaca, “a dataset of 1000 benign instructions”). The instructed-pairs probe then catches
-            every lie. What share does the role-play probe catch?</p>
+            one that “does not confess to the use of insider information”). Deploy both the same way: set each alarm to flag 1% of ordinary chat (Alpaca, “a dataset of 1000 benign
+            instructions”). The instructed-pairs probe (A) then catches every lie. What share does the role-play probe (B)
+            catch?</p>
           <div class="guess" data-q="p5">
             <button data-a="99">≈ 99%, like the first: the same AUROC and the same rule</button>
             <button data-a="50">≈ 50%: role-play fits insider trading less well</button>
@@ -963,13 +992,12 @@
         <div class="guessed" data-echo="p5"></div>
         <p>Parrack, Attubato and Heimersheim evaluated both of Apollo's probes on the same insider-trading responses: the one
           trained on instructed pairs (A) and the one on role-play (B). Both separate deceptive from honest at AUROC 0.999.
-          With the threshold at 1% of Alpaca, A catches 100% of the lies and B 0.9%. The figure puts both on one axis, each
-          probe's scores standardized so that ordinary chat looks the same, with the same rule for the threshold: 1% of
+          With the threshold at 1% of Alpaca, A catches 100% of the lies and B 0.9%. The figure opens on B (toggle to A), each probe's scores standardized so that ordinary chat looks the same, with the same rule for the threshold: 1% of
           chat.</p>
         <div class="toggles" data-for="dial">
           <span>probe</span>
-          <button data-k="probe" data-v="A" class="on">A: instructed pairs</button>
-          <button data-k="probe" data-v="B">B: role-play</button>
+          <button data-k="probe" data-v="A">A: instructed pairs</button>
+          <button data-k="probe" data-v="B" class="on">B: role-play</button>
           <span>traffic</span>
           <button data-k="traffic" data-v="it" class="on">insider trading</button>
           <button data-k="traffic" data-v="bd">backdoors (probe A)</button>
@@ -1033,8 +1061,8 @@
           <button data-k="scored" data-v="organism">a silent organism</button>
         </div>
         <div class="check" data-q="q-organism">
-          <p class="q">Now fine-tune a model to sandbag without being asked, so that nothing in the transcript says so. In the prompted setting a sandbagging probe read AUROC 0.94. Retrained on
-            this model from contrastive pairs, what does it read here?</p>
+          <p class="q">Now fine-tune a model to sandbag without being asked, so that nothing in the transcript says so. In the prompted setting of this comparison a sandbagging probe read AUROC 0.94
+            (a separate measurement from the 0.95 above). Retrained on this model from contrastive pairs, what does it read here?</p>
           <div class="opts"><button data-a="90">≈ 0.9: the behaviour is in the activations either way</button><button data-a="70">≈ 0.7: weaker without the prompt</button><button data-a="50" data-correct>≈ 0.5: nothing left to read</button></div>
           <p class="a">0.50, chance, in the paper's results (its abstract gives 0.57). For natural sycophancy, a model that
             is sycophantic without being asked, the same comparison goes from 0.99 to 0.51. When the text stops saying it,
@@ -1072,7 +1100,7 @@
             answer's tokens, then averages). Which one does the model learn to evade?</p>
           <div class="guess" data-q="p6">
             <button data-a="mean" data-correct>the mean over tokens: loud tokens can be averaged away</button>
-            <button data-a="max">the maximum over tokens: the model only has to tame its loudest token</button>
+            <button data-a="max">the maximum over tokens: it hangs on a single token, an easy target to find</button>
             <button data-a="attn">the attention probe: it can be steered to look elsewhere</button>
             <button data-a="none">none: a frozen probe can't be learned around without its gradients</button>
           </div>
@@ -1087,15 +1115,20 @@
           and punctuations, with a relatively high frequency and a low probe score”. In their analysis of a Llama 2 7B run,
           “the change in policy contributes to approximately 70% of the drop in recall”, the rest coming from changed
           activations. A study of RL with deception detectors in the reward, the Obfuscation Atlas, found a “filler” strategy of the same kind against mean-pooled probes (bland code descriptions rather than tags).</p>
-        <p>The survivors pay elsewhere, as chapter I's pooling trade-off predicts. On long inputs, Google DeepMind's probes
-          trained with a hard maximum over single tokens caught nearly every long attack (missing 0.0–0.4%) while
+        <p>The poolings that survive pay elsewhere, as chapter I's pooling trade-off predicts, and so do the evaders (side
+          dish).</p>
+        <aside class="side-dish" aria-label="Side dish">
+          <header><span class="plate" aria-hidden="true"></span><span class="sd-kicker">Side dish · optional depth</span></header>
+          <h3>What the survivors pay</h3>
+          <p>On long inputs, Google DeepMind's probes trained with a hard maximum over single tokens caught nearly every long attack (missing 0.0–0.4%) while
           false-alarming on 7.8% to 82% of long benign inputs; taking the maximum over smoothed windows cut those false
-          alarms (1.9% and 6.5% in two variants), and their plain attention probe paid the other way, missing 88% of long
-          attacks. Evaders pay too: on Llama 2 7B the max-pooled probe was evaded completely, but with answers graded 1.0 out
-          of 5, and the authors don't count a model scoring below 2.5 as having evaded.</p>
+          alarms (1.9% and 6.5% in two variants), and Google DeepMind's plain attention probe (not Gupta and Jenner's) paid the other way, missing 88% of
+            long attacks. Evaders pay too: on Llama 2 7B the max-pooled probe was evaded completely, but with answers graded
+            1.0 out of 5, and the authors don't count a model scoring below 2.5 as having evaded.</p>
+        </aside>
         <p>Other pressures work differently: a user optimizing inputs with white-box access, a model trained on purpose to
-          hide, a lie detector in a preference-learning reward (side dish). Where practitioners agree: no gradients through
-          the probe.</p>
+          hide, a lie detector in a preference-learning reward (side dish). What practitioners agree on is narrow: never pass
+          gradients through the probe. A frozen probe in the reward, as here, can still be evaded.</p>
         <aside class="side-dish" aria-label="Side dish">
           <header><span class="plate" aria-hidden="true"></span><span class="sd-kicker">Side dish · optional depth</span></header>
           <h3>Other pressures, and training against a probe</h3>
@@ -1137,12 +1170,12 @@
           often (10–40% of answers before RL, 45–65% after). Hard-coding no longer lies along the deception direction, while
           general deception data barely changed, “so a retrained detector learns the same uninformative direction as
           the original”. Question 2 again, now over time.</p>
-        <div class="toggles" data-for="drift">
+        <div class="toggles" data-for="drift" data-after="q-drift">
           <span>show</span>
-          <button data-k="which" data-v="moves" class="on">the hacks move</button>
+          <button data-k="which" data-v="moves" class="on">after RL</button>
           <button data-k="which" data-v="told">told, not trained</button>
         </div>
-        <p>Nothing even has to be trained. Das and colleagues showed colluding agents (GPT-OSS-20B) the monitor's scores and
+        <p data-after="q-drift">Nothing even has to be trained. Das and colleagues showed colluding agents (GPT-OSS-20B) the monitor's scores and
           kept everything else fixed: “We keep the models, probes, and thresholds fixed and change only what the agents are
           told”. Their monitor scores each round by the highest of the four agents' scores. Told only that a monitor was
           watching, the collusion runs ranked above the controls at AUROC 0.975, and 95% of them crossed the threshold. Also
@@ -1150,16 +1183,20 @@
           threshold: “a calibration problem even if the underlying representation remains separable”. That is one cell, a logistic probe on GPT-OSS agents; the paper's best probes,
           difference of means and a small MLP, stayed strong there and near perfect with its other agents. The dial again, with nothing
           retrained.</p>
-        <p>And asked not to think about a concept while copying a sentence, nine models tested by Kowalski and colleagues
-          dropped linear-probe detection of that concept to 5–21% at 1% FPR. The concepts were “simple and safe” (bread, not
-          deception), and the instruction is in plain view in the transcript.</p>
-        <p><strong>Our synthesis:</strong> re-validate a monitor after any training of the model it reads, keep one monitor
+        <p data-after="q-drift"><strong>Our synthesis:</strong> re-validate a monitor after any training of the model it reads, keep one monitor
           that training never met, and read the ranking and the operating point separately.</p>
-        <p class="caveat"><strong>What is drawn</strong> The moving clouds are illustrative: a drawn mechanism, not measured
+        <p class="caveat" data-after="q-drift"><strong>What is drawn</strong> The moving clouds are illustrative: a drawn mechanism, not measured
           states. The drawing shows plain overlap after RL; the real AUCs straddle chance (0.376 and 0.655 on average, with a
           wide spread across the four models). The histograms of “told, not trained” are illustrative shapes whose drawn samples reproduce Das and
           colleagues' four numbers at their threshold; where the control runs sit relative to it is not data, and their cloud's move between the two conditions follows
           from fitting those four numbers with same-width shapes, not from a measurement.</p>
+        <aside class="side-dish" aria-label="Side dish" data-after="q-drift">
+          <header><span class="plate" aria-hidden="true"></span><span class="sd-kicker">Side dish · optional depth</span></header>
+          <h3>Asked not to think about it</h3>
+          <p>Asked not to think about a concept while copying a sentence, nine models tested by Kowalski and colleagues
+            dropped linear-probe detection of that concept to 5–21% at 1% FPR. The concepts were “simple and safe” (bread, not
+            deception), and the instruction is in plain view in the transcript.</p>
+        </aside>
         <div class="ledger" data-qn="6b" data-after="q-drift"></div>
       </section>
 
@@ -1194,7 +1231,12 @@
           <li><strong>Not covered:</strong> information-theoretic probing (minimum description length), structural probes,
             concept erasure (LEACE, INLP), and sparse-autoencoder probes against linear ones.</li>
         </ul>
-        <p><strong>Back to the three readers of the prologue</strong> (our reading, question by question). Anthropic's probe screens all traffic and hands what it flags to further
+        <div class="toggles" data-for="limits">
+          <span>show</span>
+          <button data-k="show" data-v="six" class="on">the six answers</button>
+          <button data-k="show" data-v="readers">the three readers</button>
+        </div>
+        <p><strong>Back to the three readers of the prologue</strong> (our reading, question by question; the figure's second view draws it). Anthropic's probe screens all traffic and hands what it flags to further
           classifiers; the numbers reported describe whole systems, and only the shadow deployment of an earlier Anthropic
           cascade (Constitutional Classifiers++) gives a probe's own stage (about 5.5% of traffic escalated), so question 5
           is answered for the cascade more than for the probe. Google DeepMind's probes are built for long inputs, where the pooling decides what they see and what they cost, and jailbreaks still get through on at least 1% of queries for every technique
@@ -1240,9 +1282,10 @@
               too. At each method's best strength other groups still find probe directions steer worse, and why is not
               settled (one reading: for unevenly spread states the best-separating direction isn't the class-mean one). Chapter IV asks it the other way round: whether a good handle is a good reader is a separate check.</p></details></li>
           <li><p><strong>Transfer.</strong> A probe flags reward hacking at AUROC 0.98 on model A. A lab wants it on model B, a
-            version of A that reasons in a loop over its own latents. Walk the six questions: what do you check, and in what
-            order?</p>
-            <details><summary>A model answer</summary><ol class="cy-steps">
+            version of A that reasons in a loop over its own latents. Walk the six questions: what do you check, and in what order?</p>
+          <details><summary>A model answer</summary><p class="cy-order">An order, and why: make the probe exist on B first (1),
+            then the two the loop threatens most (3, the text the probe may have leaned on; then 2, what its labels
+            separated), then deployment (5) and pressure (6); 4 is optional for a monitor. By question:</p><ol class="cy-steps">
               <li><b>Representation or probe?</b> Nothing transfers by assumption: a probe belongs to a model, a layer and a
                 position, and a looped model changes what “layer ℓ at position <i>t</i>” is. Decide which iteration and token
                 you read, refit on B with B's own hacks and non-hacks, and check held-out accuracy (on hacks from other
@@ -1281,6 +1324,7 @@
         <div class="readouts" id="readouts"></div>
         <div class="six" id="six" aria-label="What accuracy alone doesn't tell you">
           <span class="six-title">What accuracy doesn't tell you</span>
+          <span class="six-key" aria-hidden="true"><i class="k-now"></i>this step <i class="k-done"></i>answered</span>
           <ol>
             <li data-q="1"><i></i>representation or probe?</li>
             <li data-q="2"><i></i>concept or dataset?</li>

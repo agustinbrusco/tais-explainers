@@ -6,6 +6,43 @@ Newest first. Each entry: what was reviewed, by whom, what was found, what was d
 
 
 
+## Learner-sim on the new arc (2026-09-28; Opus) and what changed
+
+It found spoilers down from 7 of 8 checks to 3 clearly spoiled, plus a new path: every six-question chip carried its
+answer as a desktop tooltip from page load. The push step's geometry landed; "which direction the model uses" didn't.
+A careful pass takes about two hours; chapter V's density, not the step count, is the problem.
+
+**Fixed**
+- *Spoilers*: chip tooltips show an answer only once its ledger is reached and released; q-drift holds its toggles
+  (renamed "after RL"), the hard-coding probe's readout, the Das and synthesis paragraphs and the caveat; q-organism holds
+  the organism's bars, mean and gap ("scores: ?"), and its readout reads "0.94 → ?" instead of the "10–30" that anchored
+  0.7; q-control's heading is neutral ("Steering away evaluation awareness"); q-cols asks "imagine" and holds the swap;
+  q-in's setup no longer states the answer; q-conf holds ‖w‖ and the two paragraphs that give it; the layer flipbook starts
+  at layer 1 until q-l0 is answered (the slider's floor too); q-max holds the "one the maximum misreads" toggle; q-country
+  is re-posed as the spelling classifier (64%: the genuine surprise), with the country's name given as a premise;
+  q-banana's distractors are plausible; q-angle says the figure is in true proportions.
+- *Push → handle as one belief*: P4's correct option now gives the right reason (the rule sends the Δμ push the whole way
+  from the false mean to the true one); step 19 keeps the experiment, the geometry and the matched comparison, and ends
+  "at this strength the answer tracks how far a push moves the state along Δμ; out of distribution, and at larger
+  strengths, the rest matters too"; saturation, the 2× numbers, ITI/AxBench and our reading moved to a side dish; the six
+  answers' line 4 rewritten; q-handle states the r = .95 caveat up front; the AxBench readouts are one readout.
+- *Density*: chapter V's walls of results moved into side dishes (the three extra checks of Apollo's probe; what the
+  survivors pay; the contested exchange in their words; Kowalski's "don't think about it"); a pause note after chapter
+  III; the dial's reveal opens on probe B.
+- *Closing*: "Back to the three readers" is now also a picture: a toggle in the limits step draws the six questions
+  against the three labs (half-filled where a public report partly answers, notes a–f), our reading (C-VI-6).
+- Smaller: "Hover (or tap)"; Δμ glossed where first used; the 256 key/value directions explained; why 97.9% and 98.5%
+  differ; CCS glossed; "Fig. 18" instead of "the last figure"; the push's length against a state's; "unknown" for the
+  monitor's right flags; AUROC 0.993 (not 99.3%); Apollo's Roleplaying *evaluation* set; A and B named in P5; the max
+  distractor's rationale; Google DeepMind's attention probe named as theirs; a key for the chips; phone readout labels
+  from .58 to .68 rem; the split by city taught where it happens; TruthfulQA glossed; Q5's model answer gives its order and
+  why.
+
+**Not changed**: P1's figure (reasoning from the unlabelled cloud is the exercise, not a tell); "cosine 0.51 at 512" in the
+trainer step (a different quantity from q-angle's answer); a filler-token knob on our own model's scores for step 28 and
+a base-rate knob on our probe in step 22 (worth doing, but they need new per-token runs with filler text; noted for the
+learner).
+
 ## Re-review of the revision (2026-09-28; technical and rigor on Fable 5.1)
 
 Both re-reviews confirmed every resolution of the previous round (numbers re-derived from the data files, quotes found

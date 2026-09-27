@@ -256,11 +256,11 @@ check((await ro()).includes("0.696") && await page.evaluate(() => document.query
 await go(S.dial);
 const dialRO = async () => (await ro()).replace(/\s+/g, " ");
 {
-  const r = await dialRO();
-  check(r.includes("0.999") && r.includes("1.0%") && r.includes("100.0%"), "probe A: AUROC 0.999, 1% of chat, recall 100%", r.slice(0, 120));
-  await page.click('.toggles[data-for="dial"] button[data-v="B"]'); await page.waitForTimeout(600);
   const rB = await dialRO();
-  check(rB.includes("0.999") && rB.includes("1.0%") && rB.includes("0.9%"), "probe B: the same AUROC and threshold, recall 0.9%", rB.slice(0, 120));
+  check(rB.includes("0.999") && rB.includes("1.0%") && rB.includes("0.9%"), "the reveal opens on probe B: AUROC 0.999, 1% of chat, recall 0.9%", rB.slice(0, 120));
+  await page.click('.toggles[data-for="dial"] button[data-v="A"]'); await page.waitForTimeout(600);
+  const r = await dialRO();
+  check(r.includes("0.999") && r.includes("1.0%") && r.includes("100.0%"), "probe A: the same AUROC and threshold, recall 100%", r.slice(0, 120));
   await page.click('.toggles[data-for="dial"] button[data-v="bd"]'); await page.waitForTimeout(600);
   const rD = await dialRO();
   check(rD.includes("0.844") && rD.includes("100.0%"), "Backdoors: AUROC 0.844, recall 100%", rD.slice(0, 120));
@@ -268,7 +268,7 @@ const dialRO = async () => (await ro()).replace(/\s+/g, " ");
   await page.waitForTimeout(600);
   check(!(await dialRO()).includes("the published threshold") && (await dialRO()).includes("0.844"), "moving the threshold changes the operating point, not the ranking");
   await page.evaluate(() => { const t = document.getElementById("tick-t"); t.value = "50"; t.dispatchEvent(new Event("input")); });
-  await page.click('.toggles[data-for="dial"] button[data-v="A"]'); await page.click('.toggles[data-for="dial"] button[data-v="it"]');
+  await page.click('.toggles[data-for="dial"] button[data-v="B"]'); await page.click('.toggles[data-for="dial"] button[data-v="it"]');
   check(Math.abs(MON.meta.tick - 2.3268) < 1e-3, "the published threshold: 1% of the 1,000 drawn chat samples above it");
 }
 // 14. The held-back numbers of chapters IV–V
@@ -290,6 +290,11 @@ await go(S.contested);
 check(await page.evaluate(() => document.querySelectorAll(".m-crate.held").length === 1), "the GLM-5 control bar waits for its check");
 await page.click('.check[data-q="q-control"] button[data-correct]'); await page.waitForTimeout(800);
 check(await page.evaluate(() => document.querySelectorAll(".m-crate.held").length === 0) && (await ro()).includes("80%"), "answered: up to 80%");
+await go(S.limits);
+await page.click('.toggles[data-for="limits"] button[data-v="readers"]'); await page.waitForTimeout(800);
+check(await page.evaluate(() => document.querySelectorAll(".rd-chip").length === 18 && document.querySelectorAll(".rd-chip.part").length === 6),
+  "back to the three readers: 18 chips, 6 partly answered");
+await page.click('.toggles[data-for="limits"] button[data-v="six"]'); await page.waitForTimeout(400);
 await go(S.check);
 check(await page.evaluate(() => document.querySelectorAll(".cy details").length) === 5, "five check-yourself questions, each with a held-back answer");
 

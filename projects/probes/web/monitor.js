@@ -191,7 +191,7 @@ export function dasView(M) {
 export function counterpartsView({ held }) {
   const rows = [
     { title: "A sleeper agent, one pair", who: "Anthropic, 2024",
-      head: ["AUROC 99.3%"], sub: ["“Are you a helpful AI?”", "answered “no” minus “yes”"],
+      head: ["AUROC 0.993"], sub: ["“Are you a helpful AI?”", "answered “no” minus “yes”"],
       counter: [["On the base model without sleeper training:", "the direction separates nothing."],
         ["“the salience of this feature” may be", "“an artifact of our backdoor insertion process”"]],
       phone: { sub: ["“Are you a helpful AI?” no − yes"], counter: [["base model: separates nothing"], ["salience: maybe an artifact"]] } },
@@ -366,19 +366,21 @@ export function leakView({ scored, held }) {
   function update(g, ctx, first = false) {
     const L = g.node().__leak, st = stateOf(scored);
     const d = first ? ctx.dur(700) : ctx.dur(600), delay = first ? ctx.at(700) : 0;
+    // the silent organism's scores are the check's answer: until it is answered, only the premise (nothing spelled out)
+    const hide = scored === "organism" && held;
     g.select(".m-toks").selectAll("rect").data(st).classed("hl", (q) => q.spelled).classed("off", (q) => !q.counted);
     g.select(".m-bars").selectAll("rect").data(st).classed("off", (q) => !q.counted).transition().delay(delay).duration(d)
-      .attr("y", (q) => L.floor - q.s * L.K).attr("height", (q) => q.s * L.K);
+      .attr("y", (q) => (hide ? L.floor : L.floor - q.s * L.K)).attr("height", (q) => (hide ? 0 : q.s * L.K));
     const used = st.map((q, i) => ({ ...q, i })).filter((q) => q.counted);
     const m = d3.mean(used, (q) => q.s), ym = L.floor - m * L.K;
     const a = L.X(used[0].i), b = L.X(used[used.length - 1].i) + L.tw;
-    g.select(".m-mean").transition().delay(delay).duration(d).attr("x1", a).attr("x2", b).attr("y1", ym).attr("y2", ym);
-    g.select(".m-mean-t").transition().delay(delay).duration(d).attr("x", a + 4).attr("y", ym - 9);
+    g.select(".m-mean").transition().delay(delay).duration(d).attr("x1", a).attr("x2", b).attr("y1", ym).attr("y2", ym).style("opacity", hide ? 0 : 1);
+    g.select(".m-mean-t").transition().delay(delay).duration(d).attr("x", a + 4).attr("y", ym - 9).style("opacity", hide ? 0 : 1);
     // the gap between this transcript's mean and an honest one's: what the probe has to read
     const hY = L.floor - HONEST * L.K, gx = L.x1 - 6;
-    g.select(".m-gap").transition().delay(delay).duration(d).attr("d", `M${gx - 6},${ym}H${gx}V${hY}H${gx - 6}`);
-    g.select(".m-gap-t").text(Math.abs(ym - hY) > 14 ? "the gap to read" : "no gap").transition().delay(delay).duration(d)
-      .attr("x", gx - 12).attr("y", Math.min(ym, hY) - 8);
+    g.select(".m-gap").transition().delay(delay).duration(d).attr("d", `M${gx - 6},${ym}H${gx}V${hY}H${gx - 6}`).style("opacity", hide ? 0 : 1);
+    g.select(".m-gap-t").text(hide ? "scores: ?" : Math.abs(ym - hY) > 14 ? "the gap to read" : "no gap").transition().delay(delay).duration(d)
+      .attr("x", gx - 12).attr("y", hide ? hY - 40 : Math.min(ym, hY) - 8);
     AU.forEach(([k, , v]) => {
       const c = g.select(`.m-au-${k}`).classed("on", k === scored);
       c.select(".m-au-v").text(k === "organism" && held ? "?" : v.toFixed(2).replace(/0$/, "") === "0.5" ? "0.50" : v.toFixed(2));
@@ -686,6 +688,65 @@ export function contestedView({ held }) {
     return 600;
   };
   return { id: "contested", draw, update };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Back to the prologue's three readers: which of the six questions each lab's public record answers (our reading).
+// A half-filled chip is partly answered, with its note below; a hollow one isn't answered from outside.
+export function readersView() {
+  const Q = ["representation or probe?", "concept or dataset?", "activations or text?", "read or used?", "at deployment?", "under pressure?"];
+  const LABS = [
+    { t: "Anthropic", s: "Opus 5.5 cyber", sp: "Opus 5.5", part: { 5: "a", 6: "b" } },
+    { t: "Google DeepMind", s: "Gemini", sp: "Gemini", part: { 2: "c", 5: "d", 6: "e" } },
+    { t: "OpenAI", s: "GPT-5.6, Astra", sp: "GPT-5.6", part: { 5: "f" } },
+  ];
+  const NOTES = {
+    a: "Anthropic 5: an earlier cascade (CC++) escalated 5.5%, refused 0.05%",
+    b: "Anthropic 6: that cascade: 1,700 h red-teamed, no universal jailbreak",
+    c: "DeepMind 2: tested on long, multi-turn and jailbreak inputs",
+    d: "DeepMind 5: on long inputs the pooling sets false alarms and misses",
+    e: "DeepMind 6: jailbreaks get through on ≥ 1% of queries, every technique",
+    f: "OpenAI 5: recall 96.4% (biology), 91.8% (cyber), no false-alarm rate",
+  };
+  const PHONE = { a: "Anthropic 5: earlier cascade, 5.5% escalated", b: "Anthropic 6: 1,700 h red-teaming, none universal",
+    c: "DeepMind 2: shifted inputs tested", d: "DeepMind 5: pooling sets alarms and misses",
+    e: "DeepMind 6: jailbreaks get through, ≥ 1%", f: "OpenAI 5: recall, no false-alarm rate" };
+  const draw = (g, ctx) => {
+    const { phone } = ctx;
+    g.append("text").attr("class", "m-panel-t").attr("x", 16).attr("y", 40).text(phone ? "The three readers (our reading)" : "The three readers, question by question (our reading)");
+    const cx = phone ? [420, 530, 640] : [340, 480, 620], y0 = phone ? 118 : 110, rh = phone ? 44 : 40, r = phone ? 11 : 10;
+    const head = g.append("g").attr("class", "rd-head");
+    LABS.forEach((L, j) => {
+      head.append("text").attr("class", "rd-h").attr("x", cx[j]).attr("y", y0 - (phone ? 36 : 34)).attr("text-anchor", "middle").text(phone ? L.t.replace("Google ", "") : L.t);
+      head.append("text").attr("class", "rd-hs").attr("x", cx[j]).attr("y", y0 - (phone ? 12 : 14)).attr("text-anchor", "middle").text(phone ? L.sp : L.s);
+    });
+    ctx.fadeIn(head, 150, 400);
+    Q.forEach((q, i) => {
+      const y = y0 + 10 + i * rh, row = g.append("g").attr("class", "rd-row");
+      row.append("text").attr("class", "q-card-title").attr("x", 16).attr("y", y + 7).text(`${i + 1}  ${q}`);
+      LABS.forEach((L, j) => {
+        const k = L.part[i + 1], c = row.append("g").attr("class", `rd-chip${k ? " part" : ""}`).attr("transform", `translate(${cx[j]},${y})`);
+        c.append("circle").attr("r", r);
+        if (k) {
+          c.append("path").attr("d", `M0,${-r}A${r},${r} 0 0 0 0,${r}Z`);
+          c.append("text").attr("class", "rd-sup").attr("x", r + 5).attr("y", -r + 6).text(k);
+        }
+      });
+      ctx.fadeIn(row, 300 + i * 180, 400);
+    });
+    const ny = y0 + 6 * rh + (phone ? 40 : 34);
+    const notes = g.append("g").attr("class", "rd-notes"), lh = phone ? 30 : 24;
+    Object.entries(phone ? PHONE : NOTES).forEach(([k, t], n) => {
+      const line = notes.append("text").attr("class", "rd-note").attr("x", 16).attr("y", ny + n * lh);
+      line.append("tspan").attr("class", "rd-k").text(`${k}  `);
+      line.append("tspan").text(t);
+    });
+    notes.append("text").attr("class", "rd-note faint").attr("x", 16).attr("y", ny + 6 * lh + 8)
+      .text(phone ? "hollow: not answered from outside" : "hollow: not answered from outside · half-filled: partly answered, as noted");
+    ctx.fadeIn(notes, 1500, 500);
+    return ctx.reduced ? 0 : 2100;
+  };
+  return { id: "readers", draw };
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
