@@ -1,7 +1,11 @@
 # TAIS Explainers
 
-Animated, interactive and rigorously sourced explainers for Technical AI Safety research, built by a
-learner working with Claude.
+Animated, interactive explainers for Technical AI Safety research, made mostly by Claude. It's partly an experiment in
+how well an agentic system handles a teaching task, and partly because I (Agustin) wanted good visualizations of these
+topics to exist. Browse them at **https://agustinbrusco.github.io/tais-explainers/**.
+
+> **Heads-up:** unless a piece is marked as checked by me, I haven't verified its facts myself. The reviews described
+> below are done by other Claude models, not by people. If you find a mistake, please open an issue.
 
 The aim is a *visceral* understanding: you drag a lens across the layers of a model and watch what it decodes,
 and you watch a chain-of-thought monitor lose its grip as reasoning moves into latent space. That understanding

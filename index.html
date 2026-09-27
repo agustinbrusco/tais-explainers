@@ -4,71 +4,93 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAIS Explainers</title>
-  <meta name="description" content="Animated, sourced explainers on technical AI safety: interactive web pieces, every claim tied to a paper.">
+  <meta name="description" content="Visual explainers on technical AI safety, made mostly by Claude as an experiment. Not personally fact-checked unless marked.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
   <link rel="stylesheet" href="kit/web/tokens.css">
   <link rel="stylesheet" href="kit/web/base.css">
   <style>
-    main { max-width: 52rem; margin: 0 auto; padding: 4.5rem 1.5rem 5rem; }
-    .eyebrow { font: 500 .74rem/1.55 var(--font-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--overseer-ink); margin: 0 0 1.2rem; }
-    h1 { font: 400 clamp(2.6rem, 7vw, 4.2rem)/1 var(--font-display); letter-spacing: -0.025em; margin: 0 0 1.2rem; }
-    h1 em { color: var(--residual-ink); }
-    .lede { color: var(--ink2); font-size: 1.22rem; max-width: 38rem; margin: 0 0 3.2rem; }
+    main { max-width: 46rem; margin: 0 auto; padding: 4.5rem 1.5rem 5rem; }
+    h1 { font: 400 clamp(2.4rem, 6vw, 3.4rem)/1.05 var(--font-display); letter-spacing: -0.022em; margin: 0 0 1.4rem; }
+    p { margin: 0 0 1.1rem; }
+    .intro p { font-size: 1.2rem; }
+    .heads-up { margin: 2.2rem 0 3rem; padding: 1.1rem 1.3rem .3rem; border-left: 2px solid var(--overseer-ink);
+      background: rgba(218, 210, 195, .3); border-radius: 0 10px 10px 0; font: 400 .98rem/1.6 var(--font-sans); color: var(--ink); }
+    .heads-up b { font-weight: 600; }
     h2 { font: 500 .72rem/1 var(--font-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--ink3);
       margin: 0 0 1rem; padding-top: 1.4rem; border-top: 1px solid var(--ink); }
-    .pieces { list-style: none; padding: 0; margin: 0 0 3.5rem; display: grid; gap: 1rem; }
-    .piece { display: block; padding: 1.4rem 1.5rem 1.3rem; background: var(--card); border: 1px solid var(--rule); border-radius: 14px;
-      color: inherit; text-decoration: none; box-shadow: 0 1px 2px rgba(60, 45, 20, .08);
-      transition: box-shadow var(--t-quick), transform var(--t-quick); }
-    a.piece:hover { box-shadow: 0 14px 30px -18px rgba(40, 30, 15, .45); transform: translateY(-1px); }
-    .piece h3 { font: 500 1.6rem/1.15 var(--font-display); letter-spacing: -0.012em; margin: 0 0 .5rem; }
-    a.piece h3 { color: var(--ink); }
-    .piece p { margin: 0 0 .8rem; color: var(--ink2); }
-    .meta { display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; font: 400 .74rem/1.5 var(--font-mono); color: var(--ink3); }
-    .meta .go { color: var(--residual-ink); margin-left: auto; }
+    .pieces { list-style: none; padding: 0; margin: 0 0 1.2rem; display: grid; gap: 1rem; }
+    .piece { display: block; padding: 1.3rem 1.4rem 1.2rem; background: var(--card); border: 1px solid var(--rule); border-radius: 14px;
+      color: inherit; text-decoration: none; box-shadow: 0 1px 2px rgba(60, 45, 20, .08); transition: box-shadow var(--t-quick); }
+    a.piece:hover { box-shadow: 0 12px 26px -16px rgba(40, 30, 15, .45); }
+    .piece h3 { font: 500 1.5rem/1.15 var(--font-display); letter-spacing: -0.012em; margin: .7rem 0 .45rem; color: var(--ink); }
+    .piece p { margin: 0 0 .7rem; color: var(--ink2); }
+    .piece .go { font: 400 .78rem var(--font-mono); color: var(--residual-ink); }
     .piece.soon { background: transparent; border-style: dashed; box-shadow: none; }
     .piece.soon h3 { color: var(--ink2); }
-    .about p { max-width: 40rem; color: var(--ink2); margin: 0 0 1rem; }
+    /* verification pills: add class "checked" to a piece's pill only once Agustin has checked the piece's facts against its sources */
+    .pill { display: inline-block; padding: .22rem .65rem; border-radius: 999px; font: 500 .7rem/1.3 var(--font-mono);
+      letter-spacing: .03em; border: 1px solid var(--rule); color: var(--ink2); background: var(--sheet); }
+    .pill.checked { color: var(--safe-ink); border-color: var(--safe-ink); background: rgba(111, 208, 140, .18); }
+    .pill.checked::before { content: "✓ "; }
+    .pills { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .legend { font: 400 .88rem/1.7 var(--font-sans); color: var(--ink2); margin: 0 0 3rem; }
+    .legend .pill { margin-right: .3rem; }
+    .about p { color: var(--ink2); }
     footer { margin-top: 3rem; font: 400 .78rem/1.6 var(--font-mono); color: var(--ink3); display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; }
     footer b { color: var(--ink); font-weight: 500; }
-    @media (max-width: 560px) { main { padding: 3rem 1rem 4rem; } .meta .go { margin-left: 0; } }
+    @media (max-width: 560px) { main { padding: 3rem 1rem 4rem; } }
   </style>
 </head>
 <body>
   <main>
-    <p class="eyebrow">Technical AI safety · interactive explainers</p>
-    <h1>Reading minds, and checking we <em>read them right</em></h1>
-    <p class="lede">Animated explorables on how we try to see what a model is doing inside, and where those readings
-      fail. Every factual claim is tied to a specific place in a source, and every figure says whether it shows real
-      activations, published results, or a schematic.</p>
+    <h1>Technical AI safety explainers, made with Claude</h1>
+
+    <section class="intro">
+      <p>Hi! I'm Agustin. For a while I've wanted good visual explainers for the technical AI safety ideas I keep
+        reading about, like chain-of-thought monitoring, probes, sparse autoencoders and model organisms. Agentic coding
+        tools finally seem up to that kind of job, so I'm trying it.</p>
+      <p>This is part experiment, to see how well Claude does at a teaching task like this, and part me wanting these
+        visualizations to exist. I pick the topics, go through the pieces, and say what worked for me and what
+        didn't. Claude does almost everything else: the research, the scripts, the code and the visuals.</p>
+    </section>
+
+    <div class="heads-up">
+      <p><b>Unless a piece is marked otherwise, I haven't checked its facts myself.</b> Claude does check its own
+        work: it ties every claim to a passage in a paper, and other Claude models review each piece, one for whether
+        the explanation is technically right and one for whether each statement matches its source. Those reviewers are
+        also AI, not people. It catches a lot of mistakes, but it's not expert review. So read these as careful drafts,
+        and go to the linked papers before relying on anything.</p>
+    </div>
 
     <h2>Pieces</h2>
     <ul class="pieces">
       <li>
         <a class="piece" href="projects/cot-monitorability/web/">
+          <div class="pills"><span class="pill">not checked by me</span></div>
           <h3>How Many Steps Fit in the Dark?</h3>
-          <p>An explorable on chain-of-thought monitoring, opaque serial depth, and the architectures that could end it.</p>
-          <div class="meta"><span>web explorable</span><span>real states of gelu-4l</span><span class="go">open →</span></div>
+          <p>Chain-of-thought monitoring, opaque serial depth, and the architectures that could end it.</p>
+          <span class="go">open →</span>
         </a>
       </li>
       <li>
         <div class="piece soon">
+          <div class="pills"><span class="pill">in progress</span></div>
           <h3>What a Probe Reads</h3>
           <p>Linear probes on real activations: what a direction and a threshold actually read, and what happens when
-            you deploy one as a monitor.</p>
-          <div class="meta"><span>web explorable</span><span>in progress</span></div>
+            you use one as a monitor.</p>
         </div>
       </li>
     </ul>
+    <p class="legend"><span class="pill checked">checked by Agustin</span> means I've gone through the piece's claims
+      against its sources myself. None has it yet.</p>
 
     <section class="about">
-      <h2>How these are made</h2>
-      <p>Each piece has a claims ledger, a script checked by an independent technical reviewer before anything is built,
-        and a closing section on its limits: what it doesn't show, what's contested, what's unknown.</p>
-      <p>The sources, claims, scripts and code live in the
-        <a href="https://github.com/agustinbrusco/tais-explainers">repository</a>.</p>
+      <h2>If you find a mistake</h2>
+      <p>Please <a href="https://github.com/agustinbrusco/tais-explainers/issues">open an issue</a>. Everything is in the
+        <a href="https://github.com/agustinbrusco/tais-explainers">repository</a>: each piece's sources, its list of
+        claims with where each comes from, its script, and the reviews.</p>
     </section>
 
     <footer><span><b>Made with Claude</b></span><span>Agustin Brusco</span></footer>
