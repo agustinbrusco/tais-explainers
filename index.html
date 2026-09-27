@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAIS Explainers</title>
+  <meta name="description" content="Animated, sourced explainers on technical AI safety: interactive web pieces, every claim tied to a paper.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+  <link rel="stylesheet" href="kit/web/tokens.css">
+  <link rel="stylesheet" href="kit/web/base.css">
+  <style>
+    main { max-width: 52rem; margin: 0 auto; padding: 4.5rem 1.5rem 5rem; }
+    .eyebrow { font: 500 .74rem/1.55 var(--font-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--overseer-ink); margin: 0 0 1.2rem; }
+    h1 { font: 400 clamp(2.6rem, 7vw, 4.2rem)/1 var(--font-display); letter-spacing: -0.025em; margin: 0 0 1.2rem; }
+    h1 em { color: var(--residual-ink); }
+    .lede { color: var(--ink2); font-size: 1.22rem; max-width: 38rem; margin: 0 0 3.2rem; }
+    h2 { font: 500 .72rem/1 var(--font-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--ink3);
+      margin: 0 0 1rem; padding-top: 1.4rem; border-top: 1px solid var(--ink); }
+    .pieces { list-style: none; padding: 0; margin: 0 0 3.5rem; display: grid; gap: 1rem; }
+    .piece { display: block; padding: 1.4rem 1.5rem 1.3rem; background: var(--card); border: 1px solid var(--rule); border-radius: 14px;
+      color: inherit; text-decoration: none; box-shadow: 0 1px 2px rgba(60, 45, 20, .08);
+      transition: box-shadow var(--t-quick), transform var(--t-quick); }
+    a.piece:hover { box-shadow: 0 14px 30px -18px rgba(40, 30, 15, .45); transform: translateY(-1px); }
+    .piece h3 { font: 500 1.6rem/1.15 var(--font-display); letter-spacing: -0.012em; margin: 0 0 .5rem; }
+    a.piece h3 { color: var(--ink); }
+    .piece p { margin: 0 0 .8rem; color: var(--ink2); }
+    .meta { display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; font: 400 .74rem/1.5 var(--font-mono); color: var(--ink3); }
+    .meta .go { color: var(--residual-ink); margin-left: auto; }
+    .piece.soon { background: transparent; border-style: dashed; box-shadow: none; }
+    .piece.soon h3 { color: var(--ink2); }
+    .about p { max-width: 40rem; color: var(--ink2); margin: 0 0 1rem; }
+    footer { margin-top: 3rem; font: 400 .78rem/1.6 var(--font-mono); color: var(--ink3); display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; }
+    footer b { color: var(--ink); font-weight: 500; }
+    @media (max-width: 560px) { main { padding: 3rem 1rem 4rem; } .meta .go { margin-left: 0; } }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Technical AI safety · interactive explainers</p>
+    <h1>Reading minds, and checking we <em>read them right</em></h1>
+    <p class="lede">Animated explorables on how we try to see what a model is doing inside, and where those readings
+      fail. Every factual claim is tied to a specific place in a source, and every figure says whether it shows real
+      activations, published results, or a schematic.</p>
+
+    <h2>Pieces</h2>
+    <ul class="pieces">
+      <li>
+        <a class="piece" href="projects/cot-monitorability/web/">
+          <h3>How Many Steps Fit in the Dark?</h3>
+          <p>An explorable on chain-of-thought monitoring, opaque serial depth, and the architectures that could end it.</p>
+          <div class="meta"><span>web explorable</span><span>real states of gelu-4l</span><span class="go">open →</span></div>
+        </a>
+      </li>
+      <li>
+        <div class="piece soon">
+          <h3>What a Probe Reads</h3>
+          <p>Linear probes on real activations: what a direction and a threshold actually read, and what happens when
+            you deploy one as a monitor.</p>
+          <div class="meta"><span>web explorable</span><span>in progress</span></div>
+        </div>
+      </li>
+    </ul>
+
+    <section class="about">
+      <h2>How these are made</h2>
+      <p>Each piece has a claims ledger, a script checked by an independent technical reviewer before anything is built,
+        and a closing section on its limits: what it doesn't show, what's contested, what's unknown.</p>
+      <p>The sources, claims, scripts and code live in the
+        <a href="https://github.com/agustinbrusco/tais-explainers">repository</a>.</p>
+    </section>
+
+    <footer><span><b>Made with Claude</b></span><span>Agustin Brusco</span></footer>
+  </main>
+</body>
+</html>
