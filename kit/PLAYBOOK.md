@@ -217,6 +217,13 @@ The whole argument in one cinematic shot, before any words:
     before the check (give it a held state); a figure title that names the answer (titles change on answering, so
     the check handler must re-set them); the correct option as the only one without a rationale (all or none); the next
     step's heading legible under the options; a chapter subtitle stating the lesson five steps early.
+  - More tells, from the second pass: a tooltip that carries the answer (the six chips had their ledgers as `title`
+    from page load; gate them on reached, released ledgers); an auto-play that passes through the answer (the layer
+    flipbook showed layer 0 before its check: start it at 1 and floor the slider until answered); a toggle whose
+    label or result is the answer ("the hacks move", "one the maximum misreads", the silent organism's flat bars); a
+    permanent readout that anchors a wrong guess ("10–30 points lost" beside a question whose answer is chance); a
+    heading that frames the outcome ("Contested: …" before asking whether the control moved behaviour); a premise the
+    answer later retracts (state caveats like r = .95 in the question, not after it).
   - A predict must be fair for the case it names. "Apollo's probe, AUROC 0.999, what share at 1%?" had a literal answer
     (probe A: 100%) that the intended lesson marked wrong; ask about the case that carries the surprise (probe B: 0.9%).
 - **Ask the surprising question, not the one a data scientist answers instantly.** "Training accuracy on coin flips?" is

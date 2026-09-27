@@ -335,3 +335,10 @@ fixed with a regression test. The prose test now also checks the static HTML.
    axis and units, and a normalized histogram beats a saturating dot pile); move `figure.js`/`lin.js`
    patterns that generalize into `kit/web/`.
 4. Questions for the learner (open): is 32 steps too long for one sitting, and did the push step's new conclusion land?
+5. **Bug reported by the learner (2026-09-28), affects this piece and cot-monitorability:** on load the page shows the
+   hero, but the step counter already reads 1 / N (`kit/web/steps.js` calls `goto(0)` at mount), so pressing → jumps to
+   step 2 and skips step 1. Fix in `kit/web/steps.js`: while the first step isn't on screen (the hero is), treat the
+   position as "before step 1" (→ scrolls to step 1; the counter shows the hero state), and add a test to both pieces.
+6. **Performance review (Opus, measure-only, 2026-09-28):** its report is `build/perf/REPORT.md` (gitignored, local), its
+   scripts and outputs in `build/perf/`. Apply its same-pixel fixes in a worktree with pixel diffs (the agent's brief),
+   together with item 5; summarize the result in `review.md`.
