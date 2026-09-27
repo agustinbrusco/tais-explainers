@@ -345,6 +345,10 @@ The whole argument in one cinematic shot, before any words:
   transition flags when an object comes back, give leaving objects the frame they are leaving, and test it: load, smooth-
   scroll from the top to a late step and back, then check every point is drawn and the console is clean. Sequential
   step-by-step tests never hit this.
+- **Pixel diffs are a guardrail for performance work, not the target** (the learner, 2026-09-28): identical stills need
+  no review; any stills that differ get a diff heatmap and a side-by-side look, and a change that looks just as good and
+  keeps the data (a canvas's antialiasing, rounded coordinates) is fine. Insisting on identical pixels would rule out the
+  biggest wins, such as drawing thousands of points on a canvas.
 - **Static placeholders go stale behind the JavaScript that fills them**, and a test that reads the DOM after the fill
   can't see it. Also compare the HTML as served (`fetch(location.href)`) with the computed numbers; it caught four.
 - **Headless WebGL, for a future Three.js piece (untested here):** without a GPU, headless Chrome may give no WebGL

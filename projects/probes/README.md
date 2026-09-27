@@ -340,5 +340,6 @@ fixed with a regression test. The prose test now also checks the static HTML.
    step 2 and skips step 1. Fix in `kit/web/steps.js`: while the first step isn't on screen (the hero is), treat the
    position as "before step 1" (→ scrolls to step 1; the counter shows the hero state), and add a test to both pieces.
 6. **Performance review (Opus, measure-only, 2026-09-28):** its report is `build/perf/REPORT.md` (gitignored, local), its
-   scripts and outputs in `build/perf/`. Apply its same-pixel fixes in a worktree with pixel diffs (the agent's brief),
+   scripts and outputs in `build/perf/`. Apply its fixes in a worktree (the agent's brief): pixel diffs are a guardrail, not the goal; a change that
+   looks just as good and keeps the data is fine after a side-by-side look (the learner, 2026-09-28),
    together with item 5; summarize the result in `review.md`.
