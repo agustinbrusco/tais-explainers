@@ -88,7 +88,7 @@ export function dialView(M, state, onTick) {
       ax.append("text").attr("x", X(t)).attr("y", S.floor + 30).attr("text-anchor", "middle").text(t > 0 ? `+${t}` : t);
     }
     ax.append("text").attr("class", "d-axis-title").attr("x", (S.x0 + S.x1) / 2).attr("y", S.floor + 58).attr("text-anchor", "middle")
-      .text(das ? "the probe's peak score over a run (illustrative scale)" : "the probe's score: its mean over a response's tokens (illustrative scale)");
+      .text(das ? "each round's score: its highest agent's (illustrative scale)" : "the probe's score: its mean over a response's tokens (illustrative scale)");
     g.append("path").attr("class", "d-h chat");
     g.append("path").attr("class", "d-h honest");
     g.append("path").attr("class", "d-h deceptive");
@@ -154,7 +154,7 @@ export function dialView(M, state, onTick) {
     g.select(".d-tick-label").text(cur.chat ? `flags ${(100 * shareAbove(cur.chat, tick)).toFixed(1)}% of chat`
       : `catches ${Math.round(100 * shareAbove(cur.deceptive, tick))}% of collusion runs`);
     // what the threshold costs: false alarms at a million ordinary requests a day (arithmetic on the drawn chat samples)
-    g.select(".d-base").text(cur.chat ? `at a million ordinary requests a day: ${Math.round(1e6 * shareAbove(cur.chat, tick)).toLocaleString("en-US")} false alarms` : "");
+    g.select(".d-base").text(cur.chat ? `${ctx.phone ? "a million requests a day" : "at a million ordinary requests a day"}: ${Math.round(1e6 * shareAbove(cur.chat, tick)).toLocaleString("en-US")} false alarms` : "");
     if (ctx.reduced || dur === 0) { g.node().__dial = { ...frame(1) }; onTick?.(); return 0; }
     const t0 = performance.now();
     // the state reached so far is kept at every frame, so an update mid-morph continues from where the picture is
@@ -203,9 +203,9 @@ export function counterpartsView({ held }) {
         ["probing two layers later:", "recall near 0 on Insider Trading"]],
       phone: { sub: ["at 1% false alarms on chat"], counter: [[held ? "Claude Haiku 3.5: AUROC ?" : "Claude Haiku 3.5: 0.696"], ["calibration fixed: 96% → 73%"], ["trained liars: 0.85 → 0.52"], ["two layers on: recall ≈ 0"]] } },
     { title: "New lie types", who: "Liars' Bench, 2025",
-      head: ["AUROC 0.60"], sub: ["the same probe, averaged;", "balanced accuracy 0.54"],
-      counter: [["on Apollo's own datasets:", "AUROC 0.96–1.00"]],
-      phone: { sub: ["averaged; balanced acc. 0.54"], counter: [["Apollo's own sets: 0.96–1.00"]] } },
+      head: ["AUROC 0.60"], sub: ["one probe per model, averaged;", "balanced accuracy 0.54"],
+      counter: [["the Llama probe on Apollo's own datasets:", "AUROC 0.96–1.00"]],
+      phone: { sub: ["4 models; balanced acc. 0.54"], counter: [["Llama on Apollo's sets: 0.96–1.00"]] } },
   ];
   const draw = (g, ctx) => {
     const { phone } = ctx;
@@ -276,6 +276,7 @@ function legendRow(g, items, ctx, y = 35) {
     else if (it.k === "bar") lg.append("rect").attr("x", x - 4).attr("y", y - 18).attr("width", 8).attr("height", 20).attr("class", "m-lg-bar");
     else if (it.k === "mean") lg.append("line").attr("x1", x - 10).attr("x2", x + 10).attr("y1", y - 6).attr("y2", y - 6).attr("class", "m-lg-mean");
     else if (it.k === "tick") lg.append("line").attr("x1", x - 10).attr("x2", x + 10).attr("y1", y - 6).attr("y2", y - 6).attr("class", "m-lg-tick");
+    else if (it.k === "honest") lg.append("line").attr("x1", x - 10).attr("x2", x + 10).attr("y1", y - 6).attr("y2", y - 6).attr("class", "m-lg-honest");
     else if (it.k === "true" || it.k === "false") lg.append("circle").attr("cx", x).attr("cy", y - 6).attr("r", 6).attr("class", `m-lg-pt ${it.k}`);
     else if (it.k === "mag") lg.append("rect").attr("x", x - 9).attr("y", y - 13).attr("width", 18).attr("height", 12).attr("rx", 3).attr("class", "m-lg-mag");
     const t = lg.append("text").attr("class", "lg-text").attr("x", x + 14).attr("y", y).text(it.t);
@@ -298,7 +299,8 @@ export function leakView({ scored, held }) {
   const toks = [];
   const rnd = lcg(11);
   SP.forEach((sp) => { for (let i = 0; i < sp.n; i++) toks.push({ span: sp.k, i, j: rnd(), j2: rnd() }); });
-  const base = { prompt: 2.0, reason: 1.8, answer: 0.45 };
+  const base = { prompt: 2.0, reason: 1.8, answer: 0.8 };
+  const HONEST = 0.4;                                     // where an honest transcript's mean score would sit (schematic)
   function stateOf(k) {
     // per token: score, counted?, spelled out in the text?
     return toks.map((t) => {
@@ -306,15 +308,15 @@ export function leakView({ scored, held }) {
       if (k === "answer" && t.span !== "answer") counted = false;
       if (k === "benign" && t.span === "prompt") { s = 0.3; spelled = false; }
       if (k === "benign" && t.span === "reason") s = 1.0;
-      if (k === "organism") { s = t.span === "answer" ? 0.45 : 0.35; spelled = false; }
+      if (k === "organism") { s = t.span === "answer" ? 0.45 : 0.4; spelled = false; }
       const v = Math.max(0.05, s + (t.j - 0.5) * (t.span === "answer" ? 0.5 : 0.9));
       return { s: v, counted, spelled };
     });
   }
   const draw = (g, ctx) => {
     const { phone } = ctx;
-    legendRow(g, phone ? [{ k: "hl", t: "spelled out" }, { k: "bar", t: "score per token" }, { k: "mean", t: "mean" }, { k: "tick", t: "threshold" }]
-      : [{ k: "hl", t: "spelled out in the text" }, { k: "bar", t: "the probe's score per token" }, { k: "mean", t: "their mean" }, { k: "tick", t: "the threshold" }], ctx);
+    legendRow(g, phone ? [{ k: "hl", t: "spelled out" }, { k: "bar", t: "score per token" }, { k: "mean", t: "mean" }, { k: "honest", t: "honest mean" }]
+      : [{ k: "hl", t: "spelled out in the text" }, { k: "bar", t: "the probe's score per token" }, { k: "mean", t: "their mean" }, { k: "honest", t: "an honest transcript's mean" }], ctx);
     const x0 = 30, x1 = 700, n = toks.length, step = (x1 - x0) / n, tw = step * 0.78;
     const yTok = 104, hTok = phone ? 34 : 30, floor = phone ? 356 : 330, K = phone ? 62 : 64;
     const X = (i) => x0 + i * step;
@@ -336,15 +338,16 @@ export function leakView({ scored, held }) {
     g.append("text").attr("class", "m-axis-t").attr("x", x0 - 8).attr("y", floor + (phone ? 30 : 26)).text("the probe's score on each token (schematic)");
     g.append("g").attr("class", "m-bars").selectAll("rect").data(toks).join("rect").attr("class", "m-bar").attr("x", (_, i) => X(i)).attr("width", tw)
       .attr("y", floor).attr("height", 0);
-    const thrY = floor - 1.1 * K;
-    g.append("line").attr("class", "m-thr").attr("x1", x0 - 8).attr("x2", x1 + 4).attr("y1", thrY).attr("y2", thrY);
-    g.append("text").attr("class", "m-thr-t").attr("x", x1 + 4).attr("y", thrY - 8).attr("text-anchor", "end").text("threshold");
+    const hY = floor - HONEST * K;
+    g.append("line").attr("class", "m-honest").attr("x1", x0 - 8).attr("x2", x1 + 4).attr("y1", hY).attr("y2", hY);
+    g.append("path").attr("class", "m-gap");
+    g.append("text").attr("class", "m-gap-t").attr("text-anchor", "end");
     {
       const st0 = stateOf(scored), used = st0.map((q, i) => ({ ...q, i })).filter((q) => q.counted);
       const m = d3.mean(used, (q) => q.s), ym = floor - m * K, a = X(used[0].i), b = X(used[used.length - 1].i) + tw;
       const mk = g.append("g");
       mk.append("line").attr("class", "m-mean").attr("x1", a).attr("x2", b).attr("y1", ym).attr("y2", ym);
-      mk.append("text").attr("class", "m-mean-t").attr("text-anchor", "start").attr("x", a + 4).attr("y", ym - 9);
+      mk.append("text").attr("class", "m-mean-t").attr("text-anchor", "start").attr("x", a + 4).attr("y", ym - 9).text("mean");
       ctx.fadeIn(mk, 1300, 400);
     }
     // the four AUROCs (Boxo et al.)
@@ -370,7 +373,12 @@ export function leakView({ scored, held }) {
     const m = d3.mean(used, (q) => q.s), ym = L.floor - m * L.K;
     const a = L.X(used[0].i), b = L.X(used[used.length - 1].i) + L.tw;
     g.select(".m-mean").transition().delay(delay).duration(d).attr("x1", a).attr("x2", b).attr("y1", ym).attr("y2", ym);
-    g.select(".m-mean-t").text(m > 1.1 ? "mean: flagged" : "mean: not flagged").transition().delay(delay).duration(d).attr("x", a + 4).attr("y", ym - 9);
+    g.select(".m-mean-t").transition().delay(delay).duration(d).attr("x", a + 4).attr("y", ym - 9);
+    // the gap between this transcript's mean and an honest one's: what the probe has to read
+    const hY = L.floor - HONEST * L.K, gx = L.x1 - 6;
+    g.select(".m-gap").transition().delay(delay).duration(d).attr("d", `M${gx - 6},${ym}H${gx}V${hY}H${gx - 6}`);
+    g.select(".m-gap-t").text(Math.abs(ym - hY) > 14 ? "the gap to read" : "no gap").transition().delay(delay).duration(d)
+      .attr("x", gx - 12).attr("y", Math.min(ym, hY) - 8);
     AU.forEach(([k, , v]) => {
       const c = g.select(`.m-au-${k}`).classed("on", k === scored);
       c.select(".m-au-v").text(k === "organism" && held ? "?" : v.toFixed(2).replace(/0$/, "") === "0.5" ? "0.50" : v.toFixed(2));
@@ -403,7 +411,7 @@ export function rlLoopView() {
     const drop = g.append("path").attr("class", "q-drop").attr("d", `M${x0 + 12 * step},${G.y1 - 2}V${ty - 32}`);
     ctx.fadeIn(drop, 300, 300);
     // three poolings of the same per-token scores
-    const rows = [["mean over tokens", "mean"], ["maximum over tokens", "max"], ["learned attention", "attn"]];
+    const rows = [["mean over tokens", "mean"], ["maximum over tokens", "max"], ["attention probe", "attn"]];
     const ry0 = ty + 64, rh = phone ? 84 : 76, bw = 10, K = 22;
     const pools = g.append("g");
     rows.forEach(([label, k], r) => {
@@ -422,7 +430,8 @@ export function rlLoopView() {
     // the reward loops back into the model
     const lx = 704, top = G.y0 + 70;
     const loop = g.append("g").attr("class", "m-loop");
-    loop.append("path").attr("class", "m-loop-path").attr("d", `M${702},${ry0 + rh + 2} C${722},${ry0 + rh} ${722},${top + 40} ${lx - 40},${top}`).attr("marker-end", ctx.arrow("mag"));
+    loop.append("path").attr("class", "m-loop-bracket").attr("d", `M${702},${ry0 - 14}H${708}V${ry0 + 2 * rh + 14}H${702}`);
+    loop.append("path").attr("class", "m-loop-path").attr("d", `M${708},${ry0 + rh} C${724},${ry0 + rh} ${724},${top + 40} ${lx - 40},${top}`).attr("marker-end", ctx.arrow("mag"));
     const lt = loop.append("text").attr("class", "m-loop-t").attr("x", 560).attr("y", ry0 + 3 * rh + (phone ? 10 : 6)).attr("text-anchor", "end");
     ctx.lines(lt, phone ? ["reward: harmful, and not flagged", "no gradients through the probe"] : ["reward: a harmful answer the probe doesn't flag", "no gradients pass through the probe"], 700 - 4, 1.25);
     lt.attr("text-anchor", "end");
@@ -437,7 +446,7 @@ export function rlLoopView() {
 // sketch: filler tokens with low scores land between the answer's tokens, and the mean sinks under the threshold while
 // the maximum stays.
 export function pressureView() {
-  const RATES = [["mean over tokens", 0.82], ["maximum over tokens", 0.044], ["learned attention", 0.018]];
+  const RATES = [["mean over tokens", 0.82], ["maximum over tokens", 0.044], ["attention probe", 0.018]];
   const draw = (g, ctx) => {
     const { phone } = ctx;
     const x0 = 16, lw = phone ? 280 : 250, bx = x0 + lw, bmax = 700 - bx - 90;
@@ -511,10 +520,11 @@ export function pressureView() {
 // ones) read by a general deception probe (gold level sets, and its paper histogram). After ordinary RL on coding (a
 // magenta band), the hard-coded cloud turns: along the old direction the two overlap; an on-domain probe separates them
 // again. Only the AUCs are the Obfuscation Atlas's (Table 4).
-export function movesView() {
+export function movesView({ held = false } = {}) {
   const draw = (g, ctx) => {
     const { phone } = ctx;
     const G = { x0: 10, y0: 56, x1: 710, y1: phone ? 330 : 318 };
+    legendRow(g, [{ k: "true", t: "hard-coded solutions" }, { k: "false", t: "honest solutions" }], ctx);
     ctx.glass(g, G);
     const cx = (G.x0 + G.x1) / 2, cy = (G.y0 + G.y1) / 2 + 10, R = phone ? 30 : 26;
     const rnd = lcg(21), nrm = () => { const u = Math.max(1e-9, rnd()), v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * v); };
@@ -533,8 +543,16 @@ export function movesView() {
     };
     const oldLv = lv.append("g"); drawLevels(oldLv, true, "q-lvlg");
     const newLv = lv.append("g").style("opacity", 0); drawLevels(newLv, false, "q-lvlg");
-    g.append("text").attr("class", "glass-label gold").attr("x", cx + 14).attr("y", G.y0 + 30).text("a general deception probe");
-    const newLab = g.append("text").attr("class", "glass-label gold").attr("x", G.x1 - 18).attr("y", sy(1.25) - 8).attr("text-anchor", "end").text("a probe for hard-coding").style("opacity", 0);
+    // labels on a dark tag, so the level lines don't run through them
+    const tag = (x, y, anchor, text) => {
+      const gg = g.append("g");
+      const t = gg.append("text").attr("class", "glass-label gold").attr("x", x).attr("y", y).attr("text-anchor", anchor).text(text);
+      const b = t.node().getBBox();
+      gg.insert("rect", "text").attr("class", "glass-tag").attr("x", b.x - 6).attr("y", b.y - 2).attr("width", b.width + 12).attr("height", b.height + 4).attr("rx", 4);
+      return gg;
+    };
+    tag(cx + 14, G.y0 + 30, "start", "a general deception probe");
+    const newLab = tag(G.x1 - 18, sy(1.25) - 8, "end", "a probe for hard-coding").style("opacity", 0);
     const pts = g.append("g");
     const H = pts.selectAll("circle.h").data(honest).join("circle").attr("class", "m-pt hollow").attr("r", phone ? 5.2 : 4.2).attr("cx", (d) => sx(d[0])).attr("cy", (d) => sy(d[1]));
     const K_ = pts.selectAll("circle.k").data(hack0).join("circle").attr("class", "m-pt filled").attr("r", phone ? 5.2 : 4.2).attr("cx", (d) => sx(d[0])).attr("cy", (d) => sy(d[1]));
@@ -551,11 +569,14 @@ export function movesView() {
     // the RL band
     const band = g.append("g").attr("class", "m-band");
     band.append("rect").attr("x", G.x0).attr("y", floor + (phone ? 48 : 42)).attr("width", G.x1 - G.x0).attr("height", 30).attr("rx", 6);
-    band.append("text").attr("x", (G.x0 + G.x1) / 2).attr("y", floor + (phone ? 70 : 63)).attr("text-anchor", "middle").text("ordinary RL on coding: no probe in the reward");
-    ctx.fadeIn(band, 1500, 400);
+    band.append("text").attr("x", (G.x0 + G.x1) / 2).attr("y", floor + (phone ? 70 : 63)).attr("text-anchor", "middle")
+      .text(held ? "then ordinary RL on coding, no probe in the reward: and after?" : "ordinary RL on coding: no probe in the reward");
+    ctx.fadeIn(band, held ? 600 : 1500, 400);
+    if (held) return ctx.reduced ? 0 : 1000;             // the answer (the hacks leaving the direction) waits for the check
     if (ctx.reduced) {
       K_.attr("cx", (d, i) => sx(hack1[i][0])).attr("cy", (d, i) => sy(hack1[i][1]));
-      pK.attr("d", path(hist(hack1))); oldLv.attr("class", "ghost"); newLv.style("opacity", 1); newLab.style("opacity", 1);
+      pK.attr("d", path(hist(hack1))); oldLv.style("opacity", 0.45).selectAll("line").classed("dash", true);
+      newLv.style("opacity", 1); newLab.style("opacity", 1);
       return 0;
     }
     K_.transition().delay(2100).duration(1400).ease(d3.easeCubicInOut).attr("cx", (d, i) => sx(hack1[i][0])).attr("cy", (d, i) => sy(hack1[i][1]));
@@ -565,7 +586,7 @@ export function movesView() {
     newLab.transition().delay(3900).duration(600).style("opacity", 1);
     return 4600;
   };
-  return { id: "moves", draw };
+  return { id: held ? "moves-held" : "moves", draw };
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -579,7 +600,7 @@ export function handleView() {
       { t: "read a stream", b: ["monitor personality shifts", "at deployment"], k: "read" },
       { t: "flag training data", b: ["project each sample before", "fine-tuning on it"], k: "read" },
       { t: "steer at inference", b: ["subtract it: the trait fades,", "at some cost to capabilities"], k: "write" },
-      { t: "steer while fine-tuning", b: ["add it during training: limits", "the drift, keeps capabilities"], k: "train" },
+      { t: "steer while fine-tuning", b: ["add it during training: limits", "the drift, spares capabilities more"], k: "train" },
     ];
     g.append("text").attr("class", "m-panel-t").attr("x", gx).attr("y", 40).text("one persona vector, four jobs (Chen et al., 2025)");
     uses.forEach((u, i) => {
@@ -613,12 +634,13 @@ export function handleView() {
 // Contested: the highest misaligned-action rate each steering vector reached, as its source reports it. Two panels,
 // two models and two scenarios, on one 0–100% scale. The control that settles most of it is held back until the check.
 export function contestedView({ held }) {
-  const A = [["unsteered", 0, ""], ["awareness vectors inhibited", 0.09, "up to 8–9% (most 1–5% or 0)"], ["10 random SAE vectors, same norm", 0, "0%"]];
-  const B = [["“fiction vs real” (Anthropic's)", 0.6, "up to 60%"], ["Hua et al.'s pairs", 0.4, "about 40%"], ["two other awareness pairs", 0, "no rise above baseline"],
+  const A = [["unsteered", 0, "0%"], ["awareness vectors inhibited", 0.09, "up to 8–9% (most 1–5% or 0)"], ["10 random SAE vectors, same norm", 0, "0%"]];
+  const B = [["“fiction vs real” (Anthropic's)", 0.6, "up to 60%"], ["Hua et al.'s pairs", 0.4, "about 40%"], ["two other awareness pairs", null, "no rise above the unsteered rate"],
     ["a control: book on top / bottom shelf", 0.8, "up to 80%"]];
   const draw = (g, ctx) => {
     const { phone } = ctx;
-    const x0 = 16, bx = phone ? 16 : 360, bmax = phone ? 560 : 320, rowH = phone ? 58 : 36;
+    const x0 = 16, bx = phone ? 16 : 360, bmax = phone ? 560 : 320, rowH = phone ? 52 : 36;
+    const xr = bx + 0.11 * bmax;                          // Claude Sonnet 4's unsteered rate, the reference on panel A
     const panel = (title, sub, rows, y0, tag, delay) => {
       const p = g.append("g").attr("class", "m-cpanel");
       p.append("text").attr("class", "m-panel-t").attr("x", x0).attr("y", y0).text(title);
@@ -628,9 +650,11 @@ export function contestedView({ held }) {
         const isHeld = held && tag === "B" && i === 3;
         p.append("text").attr("class", "m-row-t").attr("x", x0).attr("y", y + (phone ? 20 : 19)).text(t);
         const yb = phone ? y + 28 : y + 4;
-        p.append("rect").attr("class", `m-crate${tag === "B" && i === 3 ? " control" : ""}${isHeld ? " held" : ""}`).attr("x", bx).attr("y", yb).attr("height", phone ? 20 : 22)
+        if (v != null) p.append("rect").attr("class", `m-crate${tag === "B" && i === 3 ? " control" : ""}${isHeld ? " held" : ""}`).attr("x", bx).attr("y", yb).attr("height", phone ? 20 : 22)
           .attr("width", 0).transition().delay(ctx.at(delay + i * 300)).duration(ctx.dur(500)).attr("width", isHeld ? 0 : Math.max(2, v * bmax));
-        p.append("text").attr("class", "m-rate-v small").attr("x", bx + (isHeld ? 0 : Math.max(2, v * bmax)) + 10).attr("y", yb + 17).text(isHeld ? "?" : lab);
+        let lx = bx + (isHeld || v == null ? 0 : Math.max(2, v * bmax)) + (v == null ? 0 : 10);
+        if (tag === "A") lx = Math.max(lx, xr + 10);                       // clear of the dashed reference
+        p.append("text").attr("class", "m-rate-v small").attr("x", lx).attr("y", yb + 17).text(isHeld ? "?" : lab);
       });
       ctx.fadeIn(p, delay, 400);
       return y0 + (phone ? 44 : 38) + rows.length * rowH;
@@ -638,12 +662,13 @@ export function contestedView({ held }) {
     const yA = panel("Claude Sonnet 4.5 · Anthropic's system card", "synthetic scenarios · misaligned actions", A, 36, "A", 200);
     // Claude Sonnet 4's unsteered rate, as a dashed reference on panel A
     const ref = g.append("g").attr("class", "m-ref");
-    const xr = bx + 0.11 * bmax;
-    ref.append("line").attr("x1", xr).attr("x2", xr).attr("y1", 62).attr("y2", yA - 6);
-    ref.append("text").attr("x", xr + 6).attr("y", yA + 12).text("Claude Sonnet 4, unsteered: ≈ 11%");
+    // on phones the labels sit above the bars, so the reference is a tick on the inhibited row only
+    if (phone) { const yb = 36 + 44 + 1 * rowH + 28; ref.append("line").attr("x1", xr).attr("x2", xr).attr("y1", yb - 6).attr("y2", yb + 26); }
+    else ref.append("line").attr("x1", xr).attr("x2", xr).attr("y1", 62).attr("y2", yA - 6);
+    ref.append("text").attr("x", phone ? x0 : xr + 6).attr("y", yA + 12).text("dashed: Claude Sonnet 4, unsteered, ≈ 11%");
     ctx.fadeIn(ref, 1300, 400);
-    const yB0 = yA + (phone ? 44 : 40);
-    const yB = panel("GLM-5 · Read, Schoen, Aranguri and Bloom (2026)", phone ? "one blackmail scenario · highest rate reached" : "one blackmail scenario · misaligned actions, the highest rate reached", B, yB0, "B", 1700);
+    const yB0 = yA + (phone ? 52 : 40);
+    const yB = panel("GLM-5 · Read, Schoen, Aranguri and Bloom (2026)", phone ? "blackmail scenario · highest rate · unsteered not drawn" : "one blackmail scenario · the highest rate reached · the unsteered rate isn't drawn", B, yB0, "B", 1700);
     // the shared scale
     const ax = g.append("g").attr("class", "d-axis");
     [0, 0.25, 0.5, 0.75, 1].forEach((v) => { ax.append("line").attr("x1", bx + v * bmax).attr("x2", bx + v * bmax).attr("y1", yB + 4).attr("y2", yB + 11);
@@ -670,13 +695,13 @@ export function sixView({ answers, mode }) {
   const draw = (g, ctx) => {
     const { phone } = ctx;
     g.append("text").attr("class", "m-panel-t").attr("x", 16).attr("y", 40).text(mode === "limits" ? "What accuracy doesn't tell you, answered" : "Six questions to ask of any probe");
-    const rh = phone ? 88 : 84;
+    const rh = answers ? (phone ? 88 : 84) : (phone ? 62 : 56);
     Q.forEach((q, i) => {
       const y = 62 + i * rh, c = g.append("g").attr("class", "m-six");
       c.append("circle").attr("class", "m-six-dot").attr("cx", 30).attr("cy", y + 18).attr("r", 12);
       c.append("text").attr("class", "m-six-n").attr("x", 30).attr("y", y + 24).attr("text-anchor", "middle").text(i + 1);
       c.append("text").attr("class", "q-card-title").attr("x", 56).attr("y", y + 25).text(q);
-      ctx.lines(c.append("text").attr("class", "q-card-body").attr("x", 56).attr("y", y + (phone ? 54 : 50)), answers[i], 56, 1.2);
+      if (answers) ctx.lines(c.append("text").attr("class", "q-card-body").attr("x", 56).attr("y", y + (phone ? 54 : 50)), answers[i], 56, 1.2);
       ctx.fadeIn(c, 200 + i * 250, 400);
     });
     return ctx.reduced ? 0 : 200 + 6 * 250 + 400;

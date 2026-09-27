@@ -222,8 +222,10 @@ export class Figure {
     const next = new Map();
     for (const p of view.pts) {
       const old = this.pts.get(p.key);
-      const s = old ? { ...old } : { key: p.key, c0: p.c, c: p.c, op0: 0, op: 0, fill0: p.truth, m0: p.shape === "s" ? 1 : 0, ring0: 0, el: null };
-      s.c0 = old ? old.c : p.c;
+      // a point still fading out from an interrupted transition comes back as itself, no longer leaving
+      const s = old ? { ...old, leaving: false, oldSpace: false, leaveState: null }
+        : { key: p.key, c0: p.c, c: p.c, op0: 0, op: 0, fill0: p.truth, m0: p.shape === "s" ? 1 : 0, ring0: 0, el: null };
+      s.c0 = old && old.c?.length === p.c.length ? old.c : p.c;
       s.c1 = p.c;
       s.op0 = old ? old.op : 0;
       s.fill0 = old ? old.fillNow : p.truth;
@@ -232,11 +234,11 @@ export class Figure {
       s.m1 = p.shape === "s" ? 1 : 0;
       s.ring0 = old ? old.ringNow : 0;
       s.ring1 = p.ring ? 1 : 0;
-      s.text = p.text; s.truth = p.truth; s.shape = p.shape; s.set = p.set; s.isNew = !old; s.noPaper = !!p.noPaper;
+      s.text = p.text; s.truth = p.truth; s.shape = p.shape; s.set = p.set; s.isNew = !old || !!old.leaving; s.noPaper = !!p.noPaper;
       next.set(p.key, s);
     }
     const leaving = [...this.pts.values()].filter((s) => !next.has(s.key));
-    for (const s of leaving) { s.c0 = s.c; s.c1 = s.c; s.op0 = s.op; s.leaving = true; }
+    for (const s of leaving) { s.wasLeaving = !!s.leaving; s.c0 = s.c; s.c1 = s.c; s.op0 = s.op; s.leaving = true; }
 
     // --- scores, and the paper's histogram at the target ---
     // The paper is the glass's projection: a point's shadow lands at its own screen x. Each class is normalized to sum
@@ -278,8 +280,13 @@ export class Figure {
     const sameSpace = !!prev && prev.space === view.space;
     const st0 = sameSpace ? prev : { frame: tgt.frame, lattice: tgt.lattice, sc: tgt.sc };
     const planeSame = sameSpace ? Math.abs(detPlane(prev.frame, tgt.frame)) > 0.999 : false;
-    this.prevState = prev && !sameSpace ? { frame: prev.frame, sc: prev.sc } : null;
-    for (const s of leaving) s.oldSpace = !sameSpace;
+    // leaving points are drawn in the space they lived in: the previous view's, or, for points still fading out of an
+    // older interrupted transition, the one they were already leaving (fast scrolling can stack several)
+    for (const s of leaving) {
+      if (s.wasLeaving && s.leaveState) continue;
+      s.oldSpace = !sameSpace;
+      s.leaveState = sameSpace ? null : { frame: prev.frame, sc: prev.sc };
+    }
     this.pts = new Map([...next, ...leaving.map((s) => [s.key, s])]);
     // what doesn't change stays put: the same probe keeps its level sets
     const sameProbe = sameSpace && !!prev.probe && !!view.probe && prev.probe.thr === view.probe.thr &&
@@ -535,7 +542,7 @@ export class Figure {
       const c = s.fill0 === s.fill1 && s.m0 === s.m1 ? null : fillP;
       const cNow = T.phase("travel", elapsed) >= 0 ? lerpVec(s.c0, s.c1, ease(T.phase("travel", elapsed))) : s.c0;
       s.c = cNow;
-      const [X, Y] = s.oldSpace && this.prevState ? this.toScreen(cNow, this.prevState) : this.toScreen(cNow, st);
+      const [X, Y] = s.oldSpace && s.leaveState ? this.toScreen(cNow, s.leaveState) : this.toScreen(cNow, st);
       s.X = X; s.Y = Y;
       s.op = s.leaving ? s.op0 * (1 - pd) : s.isNew ? pd : 1;
       s.fillNow = c == null ? s.fill1 : c < 0.5 ? s.fill0 : s.fill1;

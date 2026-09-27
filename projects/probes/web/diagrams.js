@@ -237,7 +237,10 @@ export function whyLinearView({ kind, cfg }) {
     const fx = G.x0 + 6, fx2 = phone ? 250 : 240;
     const f = g.append("g").attr("class", "q-formulas");
     f.append("text").attr("class", "q-f-label").attr("x", fx).attr("y", py).text("a unit of the block");
-    f.append("text").attr("class", "q-f mlp").attr("x", fx2).attr("y", py).text("silu(g · norm(h)) × (u · norm(h))");
+    const unit = f.append("text").attr("class", "q-f mlp").attr("x", fx2).attr("y", py).text("silu(g · norm(h)) × (u · norm(h))");
+    // on phones the formula is wider than the room beside its label: squeeze it to fit rather than run off the card
+    const room = 710 - fx2, wNow = unit.node().getComputedTextLength?.() ?? 0;
+    if (wNow > room) unit.attr("textLength", room).attr("lengthAdjust", "spacingAndGlyphs");
     const fLin = f.append("g").attr("class", "q-f-lin");
     fLin.append("text").attr("class", "q-f-label").attr("x", fx).attr("y", py + fs * 1.9).text("a linear probe");
     fLin.append("text").attr("class", "q-f gold").attr("x", fx2).attr("y", py + fs * 1.9).text("w · h + b");
@@ -353,7 +356,7 @@ export function othelloPredictView({ acc }) {
       const yb0 = by + 50, yb1 = by + 50 + (phone ? 110 : 100) + 14;
       bl.append("line").attr("x1", x(acc.base)).attr("x2", x(acc.base)).attr("y1", yb0 - 4).attr("y2", yb1 + 4);
       bl.append("text").attr("class", "q-note faint").attr("x", rx).attr("y", yb1 + (phone ? 36 : 32))
-        .text(`dashed: always the likeliest state, ${(100 * acc.base).toFixed(1)}%`);
+        .text(phone ? `dashed: likeliest state, ${(100 * acc.base).toFixed(1)}%` : `dashed: always the likeliest state, ${(100 * acc.base).toFixed(1)}%`);
       ctx.fadeIn(bl, 2600, 400);
       return ctx.reduced ? 0 : 3100;
     },

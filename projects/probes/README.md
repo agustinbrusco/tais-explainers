@@ -318,13 +318,20 @@ conclusion: in distribution the logistic push's gap is geometry; the old "ignore
 chapters IV–VI built from Fable's memo (the cascade step cut into the dial's paragraph). New: `web/monitor.js`,
 `data/export_monitor.py` → `web/data/monitor.json`. Details and every resolution in `review.md`.
 
+**Done since (2026-09-27/28, sixth part: the IV–VI reviews resolved):** the three reviews of the six-chapter draft
+(technical and rigor on Fable, learner-sim on Opus) and every resolution are in `review.md`. The arc is restructured
+(handle IV before monitor V; every held answer held until its check; P5 about probe B; a base-rate knob; the ending
+returns to the prologue's readers), the mis-scoped numbers and misquotes fixed, and a fast-scroll bug in `figure.js`
+fixed with a regression test. The prose test now also checks the static HTML.
+
 **Next actions, in order:**
 1. ~~Build the remaining steps~~ (done: 32 steps). Side dishes SD3–SD4 were not built (SD3's source is open; SD4 needs
    Saerens et al. read).
-2. Full review loop on chapters IV–VI: stills, films, `tests/functional.mjs`, then `technical-reviewer` and `rigor-reviewer` (Fable) and
-   `learner-sim` (Opus). Then, once the piece settles, `performance-reviewer` (Opus) on the deployed page: the likely
+2. ~~Full review loop on chapters IV–VI~~ (done; `review.md`). A short re-review of what changed (technical and rigor on
+   the rewritten steps, learner-sim on the new arc), then `performance-reviewer` (Opus) on the deployed page: the likely
    hot spots are the per-frame work on up to 1,026 SVG points (a 24-gon path string per point per frame in `drawPoints`),
    the drop-shadow filters on the boundary and the taps, and the layer flipbook's full re-render per frame.
 3. At the end: the lessons in `review.md` into `kit/PLAYBOOK.md` (with the learner's rule: a chart under a figure shares its
    axis and units, and a normalized histogram beats a saturating dot pile); move `figure.js`/`lin.js`
    patterns that generalize into `kit/web/`.
+4. Questions for the learner (open): is 32 steps too long for one sitting, and did the push step's new conclusion land?

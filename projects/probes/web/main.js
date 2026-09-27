@@ -173,7 +173,7 @@ window.probesFig = fig;
 
 // ---- views ----
 const ui = { push: { dir: "mm", which: "false", alpha: 1 }, oth: { labels: "my", angle: 0 }, pairs: { layer: "12" }, curve: 2, linear: { kind: "linear" }, collect: { which: "true" }, pos: { at: "period" }, pool: { how: "mean", which: "kras" }, layer: 12, fit: { labels: "coin", show: "held" }, reg: 8, flip: { layer: "12" },
-  fix: { layer: "12", set: "cities" }, gp: { layer: "16" }, job: { job: "monitor" }, dial: { probe: "A", traffic: "it" }, tick: 50, leak: { scored: "all" }, drift: { which: "moves" } };
+  fix: { layer: "12", set: "cities" }, gp: { layer: "16" }, job: { job: "monitor" }, dial: { probe: "A", traffic: "it" }, tick: 50, base: 2, leak: { scored: "all" }, drift: { which: "moves" } };
 const guesses = {};
 const revealed = {};                 // quick checks answered: their readouts are no longer held back
 const probeOf = (l, name) => ({ ...Ls(l).probes[name], kind: Ls(l).probes[name].norm ? "lr" : "dim" });
@@ -372,7 +372,7 @@ const V = {
   push: () => pushView(ui.push),
   // which layer
   layer: () => layerView(ui.layer),
-  // chapter IV: the same probe as a monitor
+  // chapter V: the same probe as a monitor
   job: () => jobView(ui.job.job),
   // a lie detector and its counterparts
   lies: () => ({
@@ -387,8 +387,8 @@ const V = {
   p5: () => ({
     scene: "paper", title: "An alarm set on ordinary chat",
     badge: badge("illustrative", "the chat distribution's shape is ours · Alpaca: 1,000 benign instructions"),
-    readouts: RO("0.999", "AUROC: deceptive vs honest insider-trading reports", "ink") + RO(fmt.pct1(dialRead({ probe: "A", traffic: "it", tick: MON.meta.tick }).fpr), "of ordinary chat flagged", "gold") +
-      RO("?", "of the lies flagged", "ink"),
+    readouts: RO("0.999 · 0.999", "AUROC, deceptive vs honest: probe A · probe B", "ink") + RO(fmt.pct1(dialRead({ probe: "A", traffic: "it", tick: MON.meta.tick }).fpr), "of ordinary chat flagged, for each", "ink") +
+      RO("100% · ?", "of the lies flagged: A · B", "ink"),
     paper: M4.dialView(MON, { probe: "A", traffic: "none", tick: MON.meta.tick }),
     six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "now" },
   }),
@@ -410,42 +410,42 @@ const V = {
   p6: () => ({
     scene: "paper", title: "A frozen probe in the reward",
     badge: badge("schematic", "Gupta and Jenner's set-up, as a sketch · Qwen 2.5 14B"),
-    readouts: RO("?", "evaded: mean over tokens", "ink") + RO("?", "maximum over tokens", "ink") + RO("?", "learned attention", "ink"),
+    readouts: RO("?", "evaded: mean over tokens", "ink") + RO("?", "maximum over tokens", "ink") + RO("?", "attention probe", "ink"),
     paper: M4.rlLoopView(),
     six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "done", 6: "now" },
   }),
   // under pressure
   pressure: () => ({
     scene: "paper", title: "Evaded through the text",
-    badge: badge("real", "re-plotted: Gupta and Jenner, Table 1 (Qwen 2.5 14B) · the strip: a sketch of their mechanism"),
-    readouts: RO("82%", "the mean-pooled probe, evaded at 1% FPR", "ink") + RO("≈ 70%", "of that recall drop came from what the text says", "ink") +
+    badge: badge("real", "re-plotted: Gupta and Jenner, Table 1 (Qwen 2.5 14B, probes at layer 20) · the strip: a sketch of their mechanism"),
+    readouts: RO("82%", "the mean-pooled probe, evaded at 1% FPR", "ink") + RO("≈ 70%", "of the recall drop from what the text says (their Llama 2 7B run)", "ink") +
       RO("4.4% · 1.8%", "the max-pooled probe · the attention probe", "ink"),
     paper: M4.pressureView(),
     six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "done", 6: "now" },
   }),
   // without an adversary
   drift: () => (ui.drift.which === "moves" ? {
-    scene: "paper", title: "The concept moves",
-    badge: badge("illustrative", "a drawn mechanism, not measured states · the AUCs: the Obfuscation Atlas, Table 4"),
-    readouts: RO(revealed["q-drift"] ? "0.991 → 0.376" : "0.991 → ?", "a fresh general deception probe on hard-coded solutions, before → after RL", "ink") +
+    scene: "paper", title: revealed["q-drift"] ? "Hard-coding leaves the deception direction" : "Before ordinary RL on coding",
+    badge: badge("illustrative", "a drawn mechanism, not measured states · the AUCs: the Obfuscation Atlas, Table 4 (four models: Llama-3 8B and 70B, Gemma-3 12B and 27B)"),
+    readouts: RO(revealed["q-drift"] ? "0.991 → 0.376 · 0.996 → 0.655" : "0.991 · 0.996 → ?", "AUROC of fresh general deception probes on hard-coding, before → after RL (two training sets; mean of four models, wide spread)", "ink") +
       RO("1.000 → 1.000", "a probe trained on hard-coding itself", "ink"),
-    paper: M4.movesView(),
+    paper: M4.movesView({ held: !revealed["q-drift"] }),
     six: { 1: "done", 2: "now", 3: "done", 4: "done", 5: "done", 6: "now" },
   } : {
     scene: "paper", title: "Told, not trained",
-    badge: badge("illustrative", "shapes ours · at the frozen threshold the readouts reproduce Das and colleagues (GPT-OSS-20B agents, logistic probe, peak score)"),
-    readouts: RO("0.975 → 0.912", "AUROC, collusion vs control runs", "ink") + RO("0.95 → 0.41", "recall at the frozen threshold", "gold"),
+    badge: badge("illustrative", "shapes ours · at the frozen threshold the readouts reproduce Das and colleagues (GPT-OSS-20B agents, logistic probe, each round scored by its highest agent)"),
+    readouts: RO("0.975 → 0.912", "AUROC, collusion vs control runs: told of the monitor → also shown its scores", "ink") + RO("0.95 → 0.41", "recall at the frozen threshold", "ink"),
     paper: M4.dasView(MON),
     six: { 1: "done", 2: "now", 3: "done", 4: "done", 5: "done", 6: "now" },
   }),
-  // chapter V: steering for free
+  // chapter IV: steering for free
   handle: () => ({
     scene: "paper", title: "One direction, many handles",
     badge: badge("real", "re-plotted: Chen and colleagues 2025 (persona vectors); Arditi and colleagues 2024 (refusal)"),
-    readouts: RO(revealed["q-handle"] ? "0.940 · 0.942" : "?", "AxBench detection: probe · difference of means", "ink") +
-      RO(revealed["q-handle"] ? "0.098 · 0.239" : "?", "AxBench steering: probe · difference of means", "ink") + RO("0.894", "steering by prompting, for comparison", "ink"),
+    readouts: RO(revealed["q-handle"] ? "0.70" : "?", "Marks and Tegmark's “likely” direction: false → true (LLaMA-2-13B)", "ink") +
+      RO("0.098 · 0.239", "AxBench steering, 0 to 2: probe · difference of means", "ink") + RO("0.894", "steering by prompting, for comparison", "ink"),
     paper: M4.handleView(),
-    six: { 1: "done", 2: "done", 3: "done", 4: "now", 5: "done", 6: "done" },
+    six: { 1: "done", 2: "done", 3: "done", 4: "now" },
   }),
   // contested: steering away evaluation awareness
   contested: () => ({
@@ -453,7 +453,7 @@ const V = {
     badge: badge("real", "re-plotted: Claude Sonnet 4.5 system card; Read, Schoen, Aranguri and Bloom 2026 (GLM-5)"),
     readouts: RO("8–9%", "Sonnet 4.5: the highest rate with awareness inhibited", "ink") + RO(revealed["q-control"] ? "80%" : "?", "GLM-5: the highest rate, from a control pair", "ink"),
     paper: M4.contestedView({ held: !revealed["q-control"] }),
-    six: { 1: "done", 2: "done", 3: "done", 4: "now", 5: "done", 6: "done" },
+    six: { 1: "done", 2: "done", 3: "done", 4: "now" },
   }),
   // chapter VI
   limits: () => ({
@@ -467,15 +467,15 @@ const V = {
     scene: "paper", title: "Six questions for any probe",
     badge: badge("schematic", "a checklist"),
     readouts: "",
-    paper: M4.sixView({ mode: "check", answers: SIX_ASK }),
+    paper: M4.sixView({ mode: "check", answers: null }),
     six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "done", 6: "done" },
   }),
 };
 const SIX_ANS = [
   ["held-out accuracy and controls, not a training fit;", "a probe with a hidden layer can compute what it reports"],
   ["whatever separated the training set, when it's in play;", "test on shifted data, and again after any training"],
-  ["ask what a reader of the text alone would get;", "the probe's value is the difference"],
-  ["the best reader isn't the best handle;", "only a push shows which direction the model uses"],
+  ["ask what a reader of the text alone would get: the difference", "is the probe's evidence beyond the text; the cost is the rest"],
+  ["the best reader isn't the best handle; only a causal test", "(a push, an ablation) shows which direction the model uses"],
   ["recall at a threshold set on the traffic it will see,", "and the false alarms that threshold buys"],
   ["optimized against, it's evaded through the text first;", "no gradients through it; one monitor training never sees"],
 ];
@@ -488,7 +488,7 @@ const SIX_ASK = [
   ["is its score in any reward? has the model been trained since?"],
 ];
 const ORDER = ["prologue", "collect", "probe", "linear", "position", "pooling", "layer", "p1", "curve", "fit", "reg", "pairs", "p2", "othello", "predict", "flip", "fix", "gp", "p4", "push",
-  "job", "lies", "p5", "dial", "leak", "p6", "pressure", "drift", "handle", "contested", "limits", "check"];
+  "handle", "contested", "job", "lies", "p5", "dial", "leak", "p6", "pressure", "drift", "limits", "check"];
 const views = ORDER.map((k) => V[k]);
 const STEP = Object.fromEntries(ORDER.map((k, i) => [k, i]));
 
@@ -715,7 +715,7 @@ function othelloView(labels, angle) {
     groups: angle ? [] : [
       { label: "black to move", test: (s_) => s_.c1[1] > 0 && s_.c1[0] > 0, corner: "tr" },
       { label: "white to move", test: (s_) => s_.c1[1] < 0 && s_.c1[0] > 0, corner: "br" }],
-    title: bw ? "Labelled black and white: an XOR" : "Labelled mine and yours: one direction",
+    title: bw ? "Black and white: an XOR" : "Mine and yours: one direction",
     badge: badge("schematic", "one square's states, as Nanda hypothesized them · the accuracies are Nanda et al.'s, Table 1"),
     readouts: RO("75.0%", "linear probe: black, white or empty", bw ? "gold" : "ink") + ARROW + RO(bw ? "?" : "99.6%", "linear probe: mine, yours or empty", bw ? "ink" : "gold"),
     six: { 1: "now" },
@@ -891,8 +891,8 @@ function dialStep() {
     title: bd ? "Probe A on a backdoor task" : `Probe ${st.probe}: ${st.probe === "A" ? "instructed pairs" : "role-play"}`,
     badge: badge("illustrative", "shapes ours · at the published threshold the readouts reproduce Parrack, Attubato and Heimersheim, Tables 3 and 7 (Llama-3.3-70B-Instruct, Apollo's probes)"),
     readouts: RO(r.auroc.toFixed(3), `AUROC, deceptive vs honest${bd ? " (Backdoors)" : ""}`, "ink") +
-      RO(fmt.pct1(r.fpr), pub ? "of chat flagged: the published threshold" : "of chat flagged", "gold") +
-      RO(fmt.pct1(r.recall), `of the lies flagged: recall${bd ? ` · honest flagged too: ${fmt.pct0(r.honestUp)}` : ""}`, "gold"),
+      RO(fmt.pct1(r.fpr), pub ? "of chat flagged: the published threshold" : "of chat flagged (illustrative away from 1%)", "ink") +
+      RO(fmt.pct1(r.recall), `of the lies flagged: recall${bd ? " · the average honest response scores above 99.9% of chat" : ""}`, "ink"),
     paper: M4.dialView(MON, st),
     six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "now" },
   };
@@ -1009,6 +1009,7 @@ async function render(i, prev) {
       await sleep(900);
     }
     setCurveOut(ui.curve);
+    d3.select("#fig-title").text(v.title);
     if (my !== token) return;
   }
   if (i === STEP.layer && prev !== STEP.layer && !reduced) {
@@ -1063,6 +1064,8 @@ document.querySelectorAll(".check").forEach((box) => {
     document.querySelectorAll(`[data-after="${box.dataset.q}"]`).forEach((el) => el.classList.add("shown"));
     const i = window.explainer.current, v = views[i]();
     token++;
+    d3.select("#fig-title").text(v.title);               // some titles name the answer, so they wait for it too
+    d3.select("#fig-badge").html(v.badge);
     if (v.scene === "pipe") { setReadouts(v.readouts); pipe.show({ ...v.pipe, choreo: "play" }); }
     else if (v.scene === "paper") { setReadouts(v.readouts); paper.show(v.paper); }
     else fig.show({ ...v, choreo: "move" });
@@ -1083,10 +1086,9 @@ const FEEDBACK = {
   75: "Not noise: the errors are systematic, as the ranking shows.",
   50: "That is what layer 16 scores, for a different reason (below).",
   30: `Right: ${fmt.pct1(E[12].w.neg.acc)}, and ranked almost perfectly upside down.`,
-  "p5:99": "What probe A did: 100% of the lies above the threshold.",
-  "p5:50": "What the slider shows when you drag the threshold into the lies.",
-  "p5:1": "What probe B did, at the same AUROC: 0.9%.",
-  "p5:any": "Right: the AUROC is the same 0.999 for both of Apollo's probes below, and their recalls are 100% and 0.9%.",
+  "p5:99": "That is probe A's result (100%). B has the same AUROC and catches 0.9%.",
+  "p5:50": "What the slider below shows when you drag the threshold down into B's lies.",
+  "p5:1": "Right: 0.9%. B ranks deceptive above honest almost perfectly, and both sit below the alarm.",
   "p6:mean": "Right: evaded on 82% of harmful answers, mostly by padding them with text the probe scores low.",
   "p6:max": "It held: evaded on 4.4%. One loud token is enough to flag the answer.",
   "p6:attn": "It held best: 1.8%.",
@@ -1112,17 +1114,17 @@ function echoGuesses() {
 }
 
 const LEDGER = {
-  3: ["Activations or text?", `Could a reader of the text alone get the label? One that knows geography could: the label is a fact about the words, and the model itself answers ${NUM.model_acc} of them when asked. Cheap cues in the text don't carry it: the country's name alone reads ${NUM.country_baseline} (by construction), the statement's spelling ${NUM.text_mlp}. Chapter IV meets monitors whose target is spelled out in the text itself.`],
+  3: ["Activations or text?", `Could a reader of the text alone get the label? One that knows geography could: the label is a fact about the words, and the model itself answers ${NUM.model_acc} of them when asked. Cheap cues in the text don't carry it: the country's name alone reads ${NUM.country_baseline} (by construction), the statement's spelling ${NUM.text_mlp}. Chapter V meets monitors whose target is spelled out in the text itself.`],
   4: ["Read or used?", `Reading well doesn't make a direction the best handle. By Marks and Tegmark's rule the difference of means moved false statements' answers ${NUM.nie_mm} of the way to true, the logistic direction ${NUM.nie_lr}, mostly because its push is short along Δμ. At each method's best strength, other groups still find probe directions steer worse.`],
   "1b": ["Representation or probe?", "A probe with a hidden layer can compute what it reports, and a linear probe can fail by asking in the wrong basis. Othello's board is linear in mine/yours; the non-linear probe may have recombined two directions (Nanda's speculation)."],
   1: ["Representation or probe?", "A perfect training fit is guaranteed whenever there are no more points than dimensions plus one (here 300 against 1,537). Held-out accuracy and controls are what separate a representation from a probe that memorized."],
   2: ["Concept or dataset?", "This probe partly read (our reading) a quirk of its training data, city–country match: it leans on p as much as on g. Test on shifted data, and read the ranking (AUROC), not only accuracy."],
   "2b": ["Concept or dataset?", "At deployment a probe reads the concept in play, whoever's it is: misalignment probes fired on 97.7% of role-played misaligned reasoning. What it flags is what its training set separated."],
   5: ["At deployment?", "A monitor is a threshold set on other data. Two probes with the same AUROC, 0.999, and the same rule catch 100% and 0.9% of the lies. Report recall at the deployed threshold, and the false alarms it costs."],
-  "3b": ["Activations or text?", "In monitoring the behaviour is often spelled out. Remove the tokens that say it and sandbagging probes lose 10 to 30 points of AUROC; on a model that never says it, the probe reads chance. The probe's value is the boost over a reader of the text."],
-  6: ["Under pressure?", "A frozen probe in an RL reward is evaded through the text first: the mean-pooled probe on 82% of harmful answers, the max-pooled one on 4.4%, and the survivors pay with false alarms on long inputs. No gradients through the probe; keep one monitor training never sees."],
-  "6b": ["Under pressure?", "And with no pressure at all: after ordinary RL a fresh deception probe fell from AUC 0.991 to 0.376, and agents shown the monitor's scores kept their ranking while recall at a frozen threshold fell from 0.95 to 0.41. Re-validate after any training."],
-  "4b": ["Read or used?", "A used direction is a handle: it can monitor, flag training data, steer, and prevent drift. A good handle isn't thereby a good reader, and a steering result is only as good as its control."],
+  "3b": ["Activations or text?", "In monitoring the behaviour is often spelled out. Remove the tokens that say it and these probes lose 10 to 30 points of AUROC; on models that never say it (sandbagging, sycophancy) they read chance. The probe's evidence beyond the text is its boost over a reader of the text; its cost is the rest of its value."],
+  6: ["Under pressure?", "A frozen probe in an RL reward is evaded through the text first: the mean-pooled probe on 82% of harmful answers, the max-pooled one on 4.4%. The pooling that survives pays on long inputs, in false alarms (a hard max) or misses (attention). No gradients through the probe; keep one monitor training never sees."],
+  "6b": ["Under pressure?", "And with no pressure at all: after ordinary RL, fresh deception probes read hard-coding at AUC 0.376 and 0.655 (0.991 and 0.996 before), and agents shown the monitor's scores kept their ranking while recall at a frozen threshold fell from 0.95 to 0.41. Re-validate after any training."],
+  "4b": ["Read or used?", "A used direction is a handle: it can monitor, flag training data, steer, and prevent drift. Reading well and steering well are separate checks, and a steering result is only as good as its control."],
 };
 document.querySelectorAll(".ledger").forEach((el) => {
   const [q, a] = LEDGER[el.dataset.qn];
@@ -1137,7 +1139,7 @@ document.querySelectorAll(".toggles").forEach((box) => {
     if (!b) return;
     ui[box.dataset.for][b.dataset.k] = b.dataset.v;
     box.querySelectorAll(`button[data-k="${b.dataset.k}"]`).forEach((o) => o.classList.toggle("on", o === b));
-    if (box.dataset.for === "dial") setTickOut();
+    if (box.dataset.for === "dial") { setTickOut(); setBaseOut(); }
     const i = window.explainer.current;
     token++;
     const v = views[i]();
@@ -1234,9 +1236,21 @@ function setTickOut() {
   if (tickOut) tickOut.innerHTML = `flags <b>${fmt.pct1(r.fpr)}</b> of chat · catches <b>${fmt.pct1(r.recall)}</b> of the lies` +
     ` · AUROC <b>${r.auroc.toFixed(3)}</b>${ui.tick === 50 ? " · the published threshold" : ""}`;
 }
+const BASE = [1, 10, 100, 1000, 10000];
+const baseIn = document.getElementById("base-p");
+const baseOut = document.getElementById("base-out");
+function setBaseOut() {
+  const st = { probe: ui.dial.probe, traffic: ui.dial.traffic, tick: tickOf(ui.tick) }, r = dialRead(st);
+  const real = BASE[ui.base], fa = r.fpr * (1e6 - real), caught = r.recall * real;
+  const oneIn = caught > 0 ? (fa + caught) / caught : Infinity;
+  if (baseOut) baseOut.innerHTML = `a million requests a day, <b>${real.toLocaleString("en-US")}</b> real: <b>${Math.round(fa).toLocaleString("en-US")}</b> false alarms · ` +
+    `<b>${caught < 10 ? caught.toFixed(1) : Math.round(caught).toLocaleString("en-US")}</b> caught · ${Number.isFinite(oneIn) ? `1 flag in <b>${oneIn < 10 ? oneIn.toFixed(1) : Math.round(oneIn).toLocaleString("en-US")}</b> is real` : "no real case flagged"}`;
+}
+baseIn?.addEventListener("input", () => { ui.base = Number(baseIn.value); setBaseOut(); });
 tickIn?.addEventListener("input", () => {
   ui.tick = Number(tickIn.value);
   setTickOut();
+  setBaseOut();
   if (window.explainer.current !== STEP.dial) return;
   token++;
   const v = V.dial();
@@ -1245,6 +1259,7 @@ tickIn?.addEventListener("input", () => {
   paper.show(v.paper);
 });
 setTickOut();
+setBaseOut();
 
 // ---- side dish: Cover's function-counting curve, for d = 5, 50 and 1,536 ----
 (function coverCurve() {

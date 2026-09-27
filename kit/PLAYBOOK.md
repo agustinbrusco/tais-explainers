@@ -212,6 +212,13 @@ The whole argument in one cinematic shot, before any words:
     it (`data-after="q-…"`, hidden until answered); answering re-renders the figure with the answer.
   - A reveal's heading must not give its predict away ("Upside down" did). At the reveal, show every option's feedback,
     the reader's own marked: the best explanation often sits under an option they didn't pick.
+  - Tells a reader learns within three checks (the learner-sim found 7 of 8 checks answerable in one chapter): a summary
+    ledger in the same step printing the answer (hold it with `data-after` too); a figure that animates the answer
+    before the check (give it a held state); a figure title that names the answer (titles change on answering, so
+    the check handler must re-set them); the correct option as the only one without a rationale (all or none); the next
+    step's heading legible under the options; a chapter subtitle stating the lesson five steps early.
+  - A predict must be fair for the case it names. "Apollo's probe, AUROC 0.999, what share at 1%?" had a literal answer
+    (probe A: 100%) that the intended lesson marked wrong; ask about the case that carries the surprise (probe B: 0.9%).
 - **Ask the surprising question, not the one a data scientist answers instantly.** "Training accuracy on coin flips?" is
   Cover's theorem to this learner. "It's at chance on new statements: how sure is it?" (a median of 7 logits) is the
   lesson.
@@ -324,6 +331,15 @@ The whole argument in one cinematic shot, before any words:
   every frame, so an update mid-morph continues from what is on screen.
 - **Points drawn in the glass but kept off the paper** (a fit's training statements): a per-point `noPaper` flag, and
   their rings drawn above the cloud, or a ringed point inside a dense cloud disappears.
+- **A fast scroll stacks interrupted transitions** (a mid-page reload, the scrollbar dragged, a smooth scroll through
+  twenty steps): every step on the way calls `render`, each interrupting the last. Probes' `figure.js` revived a point
+  that was still fading out by copying its state, `leaving` flag included, so it was drawn in another space's frame
+  (NaN, thousands of console errors) and deleted when the transition ended: the glass could end up empty. Reset per-
+  transition flags when an object comes back, give leaving objects the frame they are leaving, and test it: load, smooth-
+  scroll from the top to a late step and back, then check every point is drawn and the console is clean. Sequential
+  step-by-step tests never hit this.
+- **Static placeholders go stale behind the JavaScript that fills them**, and a test that reads the DOM after the fill
+  can't see it. Also compare the HTML as served (`fetch(location.href)`) with the computed numbers; it caught four.
 - **Headless WebGL, for a future Three.js piece (untested here):** without a GPU, headless Chrome may give no WebGL
   context. ClaudeAnimationBase's `render.mjs` passes `--use-angle=swiftshader --enable-unsafe-swiftshader` for software
   WebGL, and `--use-angle=vulkan` or `gl-egl` on headless NVIDIA machines.

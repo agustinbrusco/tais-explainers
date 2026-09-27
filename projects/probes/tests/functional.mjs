@@ -61,6 +61,11 @@ check(await page.evaluate(() => document.querySelectorAll("[data-step]").length)
 const prose = await page.evaluate(() => [...document.querySelectorAll("[data-n]")].map((el) => [el.dataset.n, el.textContent]));
 const NUM = await page.evaluate(() => window.probesNumbers.NUM);
 for (const [k, text] of prose) if (k !== "stretch1") check(NUM[k] === text, `prose number ${k}`, text);
+// the static text a reader without JavaScript sees (and search engines index) agrees with the computed values too
+const raw = await page.evaluate(async () => (await fetch(location.href)).text());
+const stale = [...raw.matchAll(/data-n="([^"]+)">([^<]*)</g)].filter(([, k, t]) => k !== "stretch1" && NUM[k] !== undefined && NUM[k] !== t)
+  .map(([, k, t]) => `${k}: "${t}" ≠ "${NUM[k]}"`);
+check(stale.length === 0, "the static placeholders match the computed numbers", stale.join("; "));
 check(NUM.aff12 === pct1(L12.acc.w.aff), "layer-12 probe on new cities matches the exporter", NUM.aff12);
 check(NUM.neg12_wrong === pct1(1 - L12.acc.w.neg), "the flip's share read wrong matches the exporter", NUM.neg12_wrong);
 
@@ -275,9 +280,9 @@ check((await ro()).startsWith("0.50"), "answered: 0.50", (await ro()).slice(0, 1
 await go(S.pressure);
 check((await ro()).includes("82%") && (await ro()).includes("4.4% · 1.8%"), "Gupta and Jenner's evasion rates", (await ro()).slice(0, 80));
 await go(S.drift);
-check((await ro()).includes("0.991 → ?"), "the Atlas number waits for its check");
+check((await ro()).includes("0.991 · 0.996 → ?"), "the Atlas numbers wait for their check");
 await page.click('.check[data-q="q-drift"] button[data-correct]'); await page.waitForTimeout(500);
-check((await ro()).includes("0.991 → 0.376"), "answered: 0.991 → 0.376");
+check((await ro()).includes("0.991 → 0.376 · 0.996 → 0.655"), "answered: Table 4's two rows", (await ro()).slice(0, 40));
 await page.click('.toggles[data-for="drift"] button[data-v="told"]'); await page.waitForTimeout(3500);
 check((await ro()).includes("0.975 → 0.912") && (await ro()).includes("0.95 → 0.41"), "told, not trained: Das and colleagues' four numbers");
 check(await page.evaluate(() => document.querySelector(".pv-das-seq .d-bracket")?.textContent.includes("AUROC 0.912")), "the drawn samples reproduce 0.912 after feedback");
@@ -296,7 +301,17 @@ check(await page.$eval('.check[data-q="q-conf"]', (el) => el.classList.contains(
 await go(S.flip);
 check(await page.evaluate(() => document.querySelectorAll('[data-echo="p3"] .fb li').length) === 4, "P3's reveal shows all four options' feedback");
 
-check(errors.length === 0, "no console errors", errors.join(" | "));
+// 12. A fast scroll (a reload mid-page, the scrollbar dragged) stacks interrupted transitions: nothing may go NaN or vanish
+await go(0); await page.waitForTimeout(800);
+await page.evaluate((j) => document.querySelectorAll("[data-step]")[j].scrollIntoView({ behavior: "smooth", block: "center" }), S.contested);
+await page.waitForTimeout(3500);
+await page.evaluate((j) => document.querySelectorAll("[data-step]")[j].scrollIntoView({ behavior: "smooth", block: "center" }), S.push);
+await page.waitForTimeout(9000);
+const ptsNow = await page.evaluate(() => { const p = [...document.querySelectorAll("#fig g.pts path.pt")];
+  return { n: p.length, ok: p.filter((e) => +getComputedStyle(e).opacity > 0.5 && !/NaN/.test(e.getAttribute("transform") ?? "")).length }; });
+check(ptsNow.n > 0 && ptsNow.ok === ptsNow.n, "after a fast scroll down and back, every point is drawn", JSON.stringify(ptsNow));
+
+check(errors.length === 0, "no console errors", errors.slice(0, 3).join(" | "));
 await browser.close(); server.close();
 console.log(failures ? `\n${failures} failure(s)` : "\nall checks passed");
 process.exit(failures ? 1 : 0);

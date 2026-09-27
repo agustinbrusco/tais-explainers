@@ -517,3 +517,10 @@ sub { font-size: .7em; }
 @media (max-width: 860px) { .d-base { font-size: 20px; } }
 .m-mean-t { paint-order: stroke; stroke: var(--sheet); stroke-width: 5px; stroke-linejoin: round; }
 .cp-chip.one .cp-chip-text { fill: var(--ink); font-weight: 500; }
+.m-honest { stroke: var(--ink3); stroke-width: 2; stroke-dasharray: 6 5; }
+.m-lg-honest { stroke: var(--ink3); stroke-width: 2.4; stroke-dasharray: 5 4; }
+.m-gap { fill: none; stroke: var(--overseer-ink); stroke-width: 1.6; }
+.m-gap-t { fill: var(--overseer-ink); font: 600 16px var(--font-mono); paint-order: stroke; stroke: var(--sheet); stroke-width: 5px; stroke-linejoin: round; }
+.m-loop-bracket { fill: none; stroke: var(--training-ink); stroke-width: 1.6; }
+@media (max-width: 860px) { .m-gap-t { font-size: 19px; } }
+.glass-tag { fill: #0b1019; opacity: .92; }

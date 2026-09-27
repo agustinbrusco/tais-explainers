@@ -6,6 +6,57 @@ Newest first. Each entry: what was reviewed, by whom, what was found, what was d
 
 
 
+## The IV–VI reviews resolved; a restructured arc; a fast-scroll bug (2026-09-27/28, autonomous pass; Opus)
+
+Reviews of the six-chapter draft: technical (Fable 5.1, 1 blocker, 10 shoulds, 14 nits), rigor (Fable, 1 blocker,
+12 shoulds, 11 nits), learner-sim (Opus, beat by beat). Every finding was checked against its source or the code.
+
+**Accepted and fixed**
+- *Blocker (both Fable reviews): check-yourself Q4* taught the hypothesis the push step had dropped. Rewritten to what was
+  measured (the rule and the geometry at M&T's scale; about equal at matched displacement in distribution; the sideways
+  part moves answers out of distribution; the tuned-strength gap unexplained). C-DEF-4 and script beat 16 updated.
+- *Mis-scoped numbers*: the 70% text share is Gupta and Jenner's Llama 2 7B run (not the Qwen bars); Liars' Bench is one
+  probe per model, four models (0.64 on Llama); Kowalski's 5–21% is nine models; the Atlas shows both Table 4 rows
+  (0.991 → 0.376 and 0.996 → 0.655, mean of four models, wide spread), in the paper's three decimals; Das is told-of-the-
+  monitor (0.975) vs also-shown-its-scores (0.912), and "peak" is the highest of four agents, not a token pooling;
+  hint-reliance probes read hidden states pooled at the answer, not the latent trace, and lose 3–5 (SVAMP) or 17–25
+  (SIQA) points; GDM's hard-max range and the rolling-window variants are separated, and the attention probe's cost is
+  misses; the 0.50/0.57 sandbagging discrepancy is stated.
+- *Free parameters shown as data*: the dial's caveat now says where each honest cloud sits is illustrative; the Backdoors
+  readout is the published "average honest response above 99.9% of chat", not a shape-derived 97%; GLM-5's panel draws no
+  zero bar for "no rise above the unsteered rate" and says the unsteered rate isn't drawn.
+- *Misattributions and misquotes*: Lindsey is quoted in his own words (the "less clear for later models" line is Read et
+  al.'s summary); the awareness readout is a transcript classifier, not a probe; "evaluating a detector requires
+  examples…"; the system card's "reaching a maximum of 8–9%" (it had been misquoted as "to a maximum"); the persona card
+  says preventative steering spares capabilities *more* (than inference-time steering), not that it keeps them.
+- *Framing*: "the concept moved" → what the model files under deception moved (the Atlas: general deception data change
+  little, "so a retrained detector learns the same uninformative direction"); q-control names the matched control per
+  recipe (random SAE features for SAE vectors, an unrelated pair for pair vectors); a truth probe reads, at best, the
+  model's assessment of a statement; the likely-direction check now carries M&T's own caveat (on Spanish–English
+  statements plausibility and truth correlate at r = .95) and no longer claims "a good handle needn't be a good reader".
+- *Learner-sim's structure*: chapter order handle IV → monitor V; every held answer is held (ledgers and reveal
+  paragraphs wait for their check via `data-after`; the drift figure has a held state, no animation until answered;
+  neutral headings under predicts; every option has a rationale); P5 re-posed about probe B; a base-rate knob with a
+  precision readout; side dishes take the secondary results; glosses (KL penalty, instructed pairs, the Atlas,
+  black-to-white boost, why preventative steering adds the vector, hint-reliance); the ending returns to the prologue's
+  three readers; Q3 is the vendor question (AUROC 0.99, one attack in ten thousand); the checklist figure beside the
+  questions has no hints.
+- *Stale static text*: the prose test now also compares the HTML as served (before JavaScript) with the computed numbers;
+  it caught four placeholders (layer 27/28 lengths 303/157, the max-pooling example).
+
+**A bug found in this pass (not by the reviewers).** Jumping straight to a step (a mid-page reload, the scrollbar
+dragged, a smooth scroll across many steps) stacks interrupted transitions. A point still fading out of an interrupted
+transition was revived with its `leaving` flags copied, so it was drawn in another space's frame (NaN positions, thousands
+of console errors) and then deleted when the transition finished: the glass could end up empty. Fixed in `figure.js`
+(revived points reset their flags; leaving points keep the frame of the space they left); a regression test scrolls from
+the top to chapter IV and back and checks every point is drawn, with no console errors.
+
+**Not changed, with reasons**
+- Das's control cloud keeps equal variances: the caveat says where the control runs sit relative to the threshold is not
+  data (the paper's 95th-percentile rule can't be met by these shapes; fitting it would add a second free parameter).
+- The AxBench converse stays as the cleaner evidence that reading and steering come apart; the "likely" row is shown with
+  its caveat rather than dropped.
+
 ## Chapters IV–VI drafted, and the review of the new I–III steps resolved (2026-09-27, autonomous pass; Opus)
 
 **Resolution of the technical (Fable 5.1) and rigor (Fable) reviews of the new I–III steps.** Every finding was checked
