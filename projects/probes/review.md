@@ -6,6 +6,24 @@ Newest first. Each entry: what was reviewed, by whom, what was found, what was d
 
 
 
+## Performance review (2026-09-28; Opus, measure-only): interim notes, report pending
+
+Written by the main session from the reviewer's outputs while it finished (in case the session was interrupted). The
+reviewer's own report goes to `build/perf/REPORT.md`; its scripts and raw outputs are in `build/perf/` (gitignored).
+- **Where it hurts:** the glass figure's transitions (`figure.js`). Under a 4× CPU throttle on desktop, 16 of 32 steps
+  pass every frame budget; every paper-scene step passes (IV–VI are smooth). The failures are the glass steps with
+  choreography: e.g. fit (step 10) median frame 100 ms with 89 long tasks (9.3 s total), the flipbook (step 7) 46 long
+  tasks, the retrained-probe views (steps 17–18) median 267 ms per frame, the push (step 20) 117 long tasks. The traces are
+  scripting-bound (per-frame work over up to ~2,300 SVG points), then style and layerize. At 1× desktop most of these run
+  at 16.7 ms median (gp, step 18, is 66.6 ms). On a phone at 6× throttle 20 of 32 steps pass.
+- **Controls:** the same pattern for toggles that retrain or re-project the glass (fit labels/show, pairs, flip, fix, gp,
+  push, job: 66–283 ms median frames at 4×); paper-scene toggles and the dial pass. The hero's replay fails at 4× (66.6 ms
+  median frames).
+- **Outputs to read:** `build/perf/out/table-steps.md` (the per-step table above, with controls), the traces
+  (`trace-desktop-4x-*.json.gz`, `steps-*-trace*.json`), and the batch logs.
+- **Next:** read the reviewer's `REPORT.md` for its ranked same-pixel fixes, apply them in a worktree with pixel diffs,
+  and fix the step-counter-on-load bug in `kit/web/steps.js` at the same time (README, next actions 5–6).
+
 ## Learner-sim on the new arc (2026-09-28; Opus) and what changed
 
 It found spoilers down from 7 of 8 checks to 3 clearly spoiled, plus a new path: every six-question chip carried its
