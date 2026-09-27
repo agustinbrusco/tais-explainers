@@ -12,7 +12,7 @@ sub { font-size: .7em; }
 .hero .hero-scene svg { width: 100%; height: 100%; display: block; }
 .hero h1 em { color: var(--overseer); font-style: italic; }
 .hero .lede { max-width: 29rem; }
-.hero .style-frame { margin: 1.4rem 0 0; font: 500 .66rem/1.4 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--training); opacity: .85; }
+.hero .wip { margin: 1.4rem 0 0; font: 500 .66rem/1.4 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
 .hero .scene-caption { right: 1.6rem; bottom: 1.1rem; max-width: 30rem; transition: opacity .4s; }
 .hero .scene-caption b { color: var(--overseer); font-weight: 600; }
 .hero-replay { position: absolute; right: 1.4rem; top: 1.2rem; z-index: 3; font: 500 .7rem var(--font-mono); letter-spacing: .08em;
@@ -121,6 +121,14 @@ sub { font-size: .7em; }
 .ro span { font: 500 .64rem/1.3 var(--font-mono); color: var(--ink3); letter-spacing: .03em; max-width: 13.5rem; }
 .ro-arrow { font: 400 1.3rem/1 var(--font-display); color: var(--ink3); padding-bottom: 1.05rem; }
 
+/* a readout that is a small chart: held-out accuracy by layer */
+.stage svg.spark { width: 200px; height: auto; max-height: none; display: block; }
+.spark .sp-line { fill: none; stroke: var(--overseer-ink); stroke-width: 1.8; }
+.spark .sp-half { stroke: var(--rule); stroke-dasharray: 3 3; }
+.spark .sp-now { stroke: var(--ink3); stroke-width: 1; }
+.spark .sp-dot { fill: var(--overseer-ink); }
+.spark .sp-t { fill: var(--ink3); font: 500 9px var(--font-mono); }
+
 /* the six questions: glyphs that fill in as the piece answers them (not controls) */
 .six { display: flex; align-items: center; flex-wrap: wrap; gap: .25rem .9rem; padding-top: .5rem; border-top: 1px solid var(--rule);
   font: 500 .6rem/1.2 var(--font-mono); color: var(--ink3); cursor: default; }
@@ -150,7 +158,8 @@ sub { font-size: .7em; }
 .slider .reg-out { grid-column: 1 / -1; font: 500 .78rem/1.3 var(--font-mono); color: var(--ink2); }
 .slider .reg-out b { color: var(--overseer-ink); font-weight: 600; }
 
-/* quick checks: one click, answered in place */
+/* quick checks: one click, answered in place; a paragraph that would give the answer away waits for it */
+[data-after]:not(.shown) { display: none; }
 .check { margin: 0 0 1.1rem; padding: .75rem .95rem .8rem; border: 1px solid var(--rule); border-radius: 10px; background: var(--card);
   font: 400 .92rem/1.5 var(--font-sans); }
 .check .q { margin: 0 0 .5rem; font-weight: 500; color: var(--ink); }
@@ -169,6 +178,10 @@ sub { font-size: .7em; }
 .guess { flex-direction: column; align-items: stretch; }
 .guess button { border-radius: 8px; text-align: left; }
 .guessed b { color: var(--ink); }
+.guessed { margin: 0 0 1rem; font: 400 .95rem/1.5 var(--font-sans); color: var(--ink2); }
+.guessed .fb { list-style: none; margin: .4rem 0 0; padding: 0; display: grid; gap: .3rem; font-size: .88rem; }
+.guessed .fb li { padding-left: .8rem; border-left: 2px solid var(--rule); }
+.guessed .fb li.mine { border-left-color: var(--ink); color: var(--ink); }
 
 /* the six-questions ledger, in the prose where a question is answered */
 .ledger { display: grid; gap: .15rem; margin: 1.2rem 0 .4rem; padding: .65rem .9rem .7rem 2.1rem; position: relative;
@@ -236,7 +249,8 @@ sub { font-size: .7em; }
 .p-node.on { opacity: .9; }
 .p-node.on.row { fill: #d6e5fc; }
 .p-arc { fill: none; stroke: var(--attention); stroke-width: 1.3; }
-.p-tap { fill: none; stroke: var(--overseer); stroke-width: 2.2; filter: drop-shadow(0 0 3px rgba(245, 192, 74, .6)); }
+.p-tap { fill: none; stroke: var(--overseer); stroke-width: 1.4; filter: drop-shadow(0 0 3px rgba(245, 192, 74, .6)); }
+.p-tap.inner { stroke-width: 2.2; }
 .glass-label.p-layer { fill: var(--overseer); }
 .glass-label.end { text-anchor: end; }
 .p-lead { fill: none; stroke: var(--overseer-ink); stroke-width: 1.6; }
@@ -261,14 +275,24 @@ sub { font-size: .7em; }
 .p-brace { fill: none; stroke: var(--ink3); stroke-width: 1.2; }
 .p-ser { fill: none; stroke: var(--overseer-ink); stroke-width: 1.3; stroke-opacity: .7; }
 .p-ser.f { stroke-dasharray: 4 3; }
-.p-dot circle.t { fill: var(--overseer-ink); }
-.p-dot circle.f { fill: var(--sheet); stroke: var(--overseer-ink); stroke-width: 1.6; }
+.p-mark.t { fill: var(--overseer-ink); }
+.p-mark.f { fill: var(--sheet); stroke: var(--overseer-ink); stroke-width: 1.6; }
+.p-mark.both { fill: var(--overseer-ink); }
+.p-markring { fill: none; stroke: var(--overseer-ink); stroke-width: 1.6; }
+.p-accbar rect { fill: var(--overseer-ink); fill-opacity: .55; }
+.p-accbar.sel rect { fill-opacity: 1; }
+.p-acclab { fill: var(--ink2); font: 500 16px var(--font-mono); }
+.p-accbar.sel .p-acclab { fill: var(--overseer-ink); font-weight: 600; }
+.p-chance { stroke: var(--ink3); stroke-width: 1.2; stroke-dasharray: 4 4; }
 .p-band { fill: var(--overseer); fill-opacity: .16; }
 .p-red { stroke: var(--overseer-ink); stroke-width: 1.8; }
 .p-red.f { stroke-dasharray: 7 5; }
 .p-own { stroke: var(--overseer-ink); stroke-width: 1.4; stroke-dasharray: 5 4; }
 .legend .lg-node { fill: var(--residual-ink); }
-.legend .lg-tap { fill: none; stroke: var(--overseer-ink); stroke-width: 2; }
+.legend .lg-tap { fill: none; stroke: var(--overseer-ink); stroke-width: 1.3; }
+.legend .lg-tap.in { stroke-width: 2; }
+.legend .lg-bar { fill: var(--overseer-ink); fill-opacity: .7; }
+.legend .lg-ring { fill: none; stroke: var(--overseer-ink); stroke-width: 1.5; }
 .legend .lg-arc { fill: none; stroke: var(--attention-ink); stroke-width: 1.6; }
 .legend .lg-score.t { fill: var(--overseer-ink); }
 .legend .lg-score.f { fill: var(--sheet); stroke: var(--overseer-ink); stroke-width: 1.6; }

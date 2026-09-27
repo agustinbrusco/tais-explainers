@@ -53,7 +53,7 @@ await page.goto(`http://localhost:${port}/projects/probes/web/index.html`);
 await page.waitForFunction(() => window.explainer && window.probesNumbers);
 const go = async (i) => { await page.evaluate((j) => window.explainer.goto(j, { scroll: "instant" }), i); await page.waitForTimeout(500); };
 const ro = async () => (await page.textContent("#readouts")).replace(/\s+/g, " ").trim();
-const S = { collect: 0, probe: 1, position: 2, fit: 3, reg: 4, predict: 5, flip: 6, fix: 7, gp: 8 };
+const S = { collect: 0, probe: 1, position: 2, pooling: 3, layer: 4, fit: 5, reg: 6, predict: 7, flip: 8, fix: 9, gp: 10 };
 
 // 2. Every number in the prose is the page's computed value
 const prose = await page.evaluate(() => [...document.querySelectorAll("[data-n]")].map((el) => [el.dataset.n, el.textContent]));
@@ -78,25 +78,47 @@ check(c0.rightTrue + c0.leftFalse === Math.round(L12.acc.w.aff * N), "Fig. 2 cou
   JSON.stringify(c0));
 check((await ro()).includes(NUM.aff12), "Fig. 2 readout", NUM.aff12);
 
-// 5. Which token: the readouts are the exporter's accuracies, and the gold one follows the toggle
+// 5. Which token: a probe per position. "in" is held back until the quick check is answered, then exactly 50%
 await go(S.position);
+const BP = PL.by_position;
+check((await ro()).startsWith("?"), "Fig. 3 holds back the “in” readout until the check is answered", (await ro()).slice(0, 40));
+check(await page.$eval('[data-after="q-in"]', (el) => getComputedStyle(el).display === "none"), "the paragraph that gives the answer waits for it");
+await page.click('.check[data-q="q-in"] button[data-correct]'); await page.waitForTimeout(500);
 const r2 = await ro();
-check([PA.final, PA.every_mean, PA.every_max, PA.at_in].every((v) => r2.includes(pct1(v))), "Fig. 3 readouts: period, mean, max, “in”", r2.slice(0, 90));
-await page.click('.toggles[data-for="pos"] button[data-v="max"]'); await page.waitForTimeout(400);
-const gold = await page.evaluate(() => document.querySelector("#readouts .big.gold")?.textContent);
-check(gold === pct1(PA.every_max), "the max toggle lights the max readout", gold);
+check([BP.in, BP.country_last, BP.period].every((v) => r2.includes(pct1(v))), "Fig. 3 readouts after the check: “in”, country, period", r2.slice(0, 90));
+check(BP.in === 0.5 && ["The", "city", "of", "city_first", "city_last", "is"].every((k) => BP[k] === 0.5), "every position before the country is at chance");
+await page.click('.toggles[data-for="pos"] button[data-v="country"]'); await page.waitForTimeout(400);
+check((await page.evaluate(() => document.querySelector("#readouts .big.gold")?.textContent)) === pct1(BP.country_last), "the toggle lights the country readout");
+
+// 5b. Every token, pooled: the max readout is held back until its check is answered
+await go(S.pooling);
+const r3 = await ro();
+check(r3.includes(pct1(PA.mean)) && r3.includes(pct1(PA.every_mean)) && r3.includes("?"), "Fig. 4 readouts: mean state, mean of scores, max held", r3.slice(0, 90));
+await page.click('.check[data-q="q-max"] button[data-correct]'); await page.waitForTimeout(500);
+check((await ro()).includes(pct1(PA.every_max_own)) && (await ro()).includes(pct1(PA.every_max)), "Fig. 4 max readout after the check: own threshold and at 0");
+await page.click('.toggles[data-for="pool"] button[data-v="miss"]'); await page.waitForTimeout(500);
+check(await page.evaluate(() => document.querySelectorAll(".p-chip").length) === PL.max_miss.tokens.length, "the misread statement's tokens replace Krasnodar's");
+
+// 5c. Which layer: a flipbook of every layer; layer 0 is one point
+await go(S.layer);
+check((await ro()).includes(pct1(DATA.by_layer[12].acc)), "Fig. 5 readout at layer 12", pct1(DATA.by_layer[12].acc));
+check(DATA.by_layer[0].identical === true && DATA.by_layer[0].acc === 0.5, "layer 0: every statement's state is the same");
 
 // 6. Fitting proves nothing: 100% train on coin flips, ~50% held out
 await go(S.fit);
 const F = DATA.fit16;
 const r1 = await ro();
-check(r1.includes(pct1(F.coin.acc.train)) && r1.includes(pct1(F.coin.acc.held)), "Fig. 4 coin flips: training and new", r1.slice(0, 60));
+const heldAcc = (f) => f.held.x.filter((x, i) => ((x - f.thr > 0 ? 1 : 0) === f.held.label[i])).length / f.held.x.length;
+check(r1.includes("100.0%") && r1.includes(pct1(heldAcc(F.coin))), "Fig. 6 coin flips: training and new (from the drawn points)", r1.slice(0, 60));
+check(Math.abs(heldAcc(F.coin) - F.coin.acc.held) <= 1 / F.coin.held.x.length + 5e-4, "the drawn points' accuracy matches the exporter's");
 check(F.coin.acc.train === 1 && Math.abs(F.coin.acc.held - 0.5) < 0.05, "coin flips fit perfectly and generalize at chance");
 await page.click('.toggles[data-for="fit"] button[data-v="real"]'); await page.waitForTimeout(400);
-check((await ro()).includes(pct1(F.real.acc.held)), "Fig. 4 true labels: new statements", pct1(F.real.acc.held));
+check((await ro()).includes(pct1(heldAcc(F.real))), "Fig. 6 true labels: new statements", pct1(heldAcc(F.real)));
 
-// 7. The regularization slider: Δμ at the strong end
+// 7. The regularization slider: Δμ at the strong end; the angle is held back until its check is answered
 await go(S.reg);
+check((await ro()).startsWith("?"), "Fig. 7 holds back the angle until the check", (await ro()).slice(0, 20));
+await page.click('.check[data-q="q-angle"] button[data-correct]'); await page.waitForTimeout(500);
 await page.evaluate(() => { const r = document.getElementById("reg-c"); r.value = "0"; r.dispatchEvent(new Event("input")); });
 await page.waitForTimeout(400);
 check((await ro()).startsWith("0°"), "slider at C = 10⁻⁶: 0° from Δμ", (await ro()).slice(0, 30));
@@ -111,9 +133,9 @@ await go(S.flip);
 const echo = await page.textContent('[data-echo="p3"]');
 check(echo.includes(pct1(L12.acc.w.neg)), "P3 echo states the real share", echo);
 const r4 = await ro();
-check(r4.includes(pct1(L12.acc.w.neg)) && r4.includes(L12.acc.w.neg_auroc.toFixed(3)), "Fig. 7 readouts: accuracy and AUROC", r4);
+check(r4.includes(pct1(L12.acc.w.neg)) && r4.includes(L12.acc.w.neg_auroc.toFixed(3)), "Fig. 9 readouts: accuracy and AUROC", r4);
 const c4 = await page.evaluate(() => window.probesFig.counts);
-check(c4.rightTrue + c4.leftFalse === Math.round(L12.acc.w.neg * N), "Fig. 7 counts match the negations' accuracy", JSON.stringify(c4));
+check(c4.rightTrue + c4.leftFalse === Math.round(L12.acc.w.neg * N), "Fig. 9 counts match the negations' accuracy", JSON.stringify(c4));
 for (const l of ["8", "16"]) {
   await page.click(`.toggles[data-for="flip"] button[data-v="${l}"]`); await page.waitForTimeout(400);
   const r = await ro(), A = DATA.layers[l].acc.w;
@@ -136,8 +158,11 @@ check(r6.includes(pct1(T16.aff)) && r6.includes(pct1(T16.neg)), "Fig. 9 along g:
 
 // 11. Quick checks answer in place
 await go(S.fit);
-await page.click('.check[data-q="q-fit"] button[data-correct]');
-check(await page.$eval('.check[data-q="q-fit"]', (el) => el.classList.contains("answered") && el.classList.contains("right")), "quick check answers in place");
+await page.click('.check[data-q="q-conf"] button[data-correct]');
+check(await page.$eval('.check[data-q="q-conf"]', (el) => el.classList.contains("answered") && el.classList.contains("right")), "quick check answers in place");
+// P3's reveal lists every option's feedback, the reader's own marked
+await go(S.flip);
+check(await page.evaluate(() => document.querySelectorAll('[data-echo="p3"] .fb li').length) === 4, "P3's reveal shows all four options' feedback");
 
 check(errors.length === 0, "no console errors", errors.join(" | "));
 await browser.close(); server.close();

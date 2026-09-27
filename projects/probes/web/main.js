@@ -1,6 +1,7 @@
-// What a Probe Reads: the style frame (7 steps of the core sequence). Every number on the page is computed here from
-// build/data/probes.json (data/export.py), from the same coordinates the figure draws; prose numbers are filled from
-// the same table. render(i) is a pure function of the step index and the controls' state.
+// What a Probe Reads (work in progress: chapters I–III). Every number on the page is computed here from
+// web/data/probes.json (data/export.py), from the same coordinates the figure draws; prose numbers are filled from the
+// same table. render(i) is a pure function of the step index and the controls' state (including which quick checks
+// have been answered: a check holds back the readout it asks about).
 import * as d3 from "d3";
 import { mountSteps } from "../../../kit/web/steps.js";
 import { Figure, LAYOUT } from "./figure.js";
@@ -85,13 +86,37 @@ const NUM = {
     at_in: fmt.pct1(PA.at_in), every_mean: fmt.pct1(PA.every_mean), every_max: fmt.pct1(PA.every_max), final_pos: fmt.pct1(PA.final),
   });
 }
+Object.assign(NUM, Object.fromEntries([2, 4, 6, 8, 10, 11, 28].map((L) => [`acc_l${L}`, fmt.pct1(DATA.by_layer[L].acc)])));
+{
+  const PL = DATA.pipeline, PA = PL.acc[String(PL.layer)], BP = PL.by_position, MM = PL.max_miss;
+  const n12 = E[12].w.neg, yn = lab.neg;
+  const side = (truth, readTrue) => n12.s.filter((v, i) => yn[i] === truth && (v > 0) === readTrue).length;
+  const cap = (x) => x.toLocaleString("en-US");
+  Object.assign(NUM, {
+    n_train_cities: cap(DATA.meta.n.cities / 2), aff12_count: cap(E[12].w.aff.right),
+    pos_country_first: fmt.pct1(BP.country_first), pos_country: fmt.pct1(BP.country_last), pos_period: fmt.pct1(BP.period),
+    mean_state: fmt.pct1(PA.mean), first_ratio: `${Math.round(PL.first_token_norm_ratio / 10) * 10}`,
+    first_score: cap(Math.round(PL.scores[String(PL.layer)].true.final[0])).replace("-", "−"),
+    stripes_corr: PL.x_stripes.true_false_mean_corr.toFixed(2),
+    max_miss_n: `${MM.n_missed_false}`, max_miss_of: `${MM.n_false_test}`, max_miss_text: MM.text,
+    max_miss_tok: MM.tokens[d3.maxIndex(MM.scores.slice(0, -2))].trim(),
+    // the flip, by class and side of the boundary
+    negT_false: `${side(1, false)}`, negF_false: `${side(0, false)}`, neg_class: `${yn.filter((v) => v === 1).length}`,
+    neg_called_false: fmt.pct1(E[12].w.neg.calledFalse), neg12_acc: fmt.pct1(E[12].w.neg.acc),
+    dmu_neg12_false: fmt.pct1(E[12].dmu.neg.calledFalse),
+    wsp16_auroc: fmt.f2(E[16].w.sp.auroc),
+    g_len16: Ls(16).norm.tG.toFixed(1), p_len16: Ls(16).norm.tP.toFixed(1),
+    coin_margin: F.coin.margin.toFixed(2), real_margin: F.real.margin.toFixed(2),
+  });
+}
 window.probesNumbers = { NUM, E, pathEval, sameSide };      // for tests
 window.probesFig = fig;
 
 // ---- views ----
-const ui = { collect: { which: "true" }, pos: { how: "final" }, fit: { labels: "coin", show: "held" }, reg: 8, flip: { layer: "12" },
+const ui = { collect: { which: "true" }, pos: { at: "period" }, pool: { how: "mean", which: "kras" }, layer: 12, fit: { labels: "coin", show: "held" }, reg: 8, flip: { layer: "12" },
   fix: { layer: "12", set: "cities" }, gp: { layer: "16" } };
 const guesses = {};
+const revealed = {};                 // quick checks answered: their readouts are no longer held back
 const probeOf = (l, name) => ({ ...Ls(l).probes[name], kind: Ls(l).probes[name].norm ? "lr" : "dim" });
 
 function pointsFor(l, set, keyPrefix, shape) {
@@ -163,12 +188,14 @@ const V = {
       title: "A logistic-regression probe at layer 12",
       badge: badge("real", `Qwen2.5-1.5B · layer 12 · final token · ${N_ALL.toLocaleString("en-US")} statements from held-out cities`),
       readouts: RO(fmt.pct1(e.acc), `new statements read correctly · ${e.right} of ${e.n}`) +
-        RO(`‖w‖ = ${Ls(12).probes.w.norm.toFixed(2)}`, "logits per unit of h: the level sets' spacing", "ink"),
+        RO(`‖w‖ = ${Ls(12).probes.w.norm.toFixed(2)}`, `logits per unit of h: level sets ${(1 / Ls(12).probes.w.norm).toFixed(2)} units apart`, "ink"),
       six: {},
     };
   },
   // which token a probe reads
   position: () => positionView(),
+  // or every token, pooled
+  pooling: () => poolingView(),
   // a perfect fit proves nothing
   fit: () => {
     const f = F[ui.fit.labels], part = ui.fit.show === "train" ? f.train : f.held;
@@ -185,7 +212,9 @@ const V = {
     const ys = rowsCur.map((r) => r[1]).sort(d3.ascending);
     const sc = { ...scR, cx: f.thr, cy: (d3.quantile(ys, 0.01) + d3.quantile(ys, 0.99)) / 2 };
     const order = pts.slice().sort((a, b) => a.c[0] - b.c[0]).map((q) => q.key);
-    const a = f.acc;
+    // accuracy from the coordinates the figure draws, so the readout and the paper's counts can't disagree
+    const accOf = (part) => part.x.filter((x, i) => ((x - f.thr > 0 ? 1 : 0) === part.label[i])).length / part.x.length;
+    const a = { train: accOf(f.train), held: accOf(f.held) };
     return {
       layer: 16, space: `fit:${ui.fit.labels}`, pts, frame, sc, probe, _order: order, choreo: "read", lattice: frame, binW: narrow ? 8 : 5,
       paperLabel: PAPER(),
@@ -193,7 +222,7 @@ const V = {
       legend: [{ glyph: "true", text: ui.fit.labels === "coin" ? "heads" : "true" }, { glyph: "false", text: ui.fit.labels === "coin" ? "tails" : "false" },
         ...(ui.fit.show === "train" ? [{ glyph: "ring", text: "fitted to" }] : [])],
       title: ui.fit.labels === "coin" ? "Fitted to coin-flip labels" : "The same recipe, true labels",
-      badge: badge("real", `layer 16 · 300 training statements · C = 10⁴ · labels: ${ui.fit.labels === "coin" ? "coin flips" : "true / false"}`),
+      badge: badge("real", `Qwen2.5-1.5B · layer 16 · 300 training statements · C = 10⁴ · labels: ${ui.fit.labels === "coin" ? "coin flips" : "true / false"}`),
       readouts: RO(fmt.pct1(a.train), "training statements", "ink") +
         RO(fmt.pct1(a.held), "new statements", ui.fit.labels === "coin" ? "ink" : "gold") +
         RO(`‖w‖ = ${f.norm < 10 ? f.norm.toFixed(1) : Math.round(f.norm)}`, `logits per unit of h (${ui.fit.labels === "coin" ? `true labels: ${real.norm.toFixed(1)}` : `coin flips: ${Math.round(F.coin.norm)}`})`, "ink"),
@@ -207,7 +236,7 @@ const V = {
     ...viewAff(12), choreo: "move",
     cards: [krasCards(12, "aff")[0], { ...krasCards(12, "aff")[0], id: "pending", text: "…is not in Russia. → ?", x: layout.glass.x0 + 4, anchor: "start", pending: true }],
     title: "The layer-12 probe, before “not”",
-    badge: badge("real", "layer 12 · trained on “is in” only"),
+    badge: badge("real", "Qwen2.5-1.5B · layer 12 · trained on “is in” only"),
     readouts: RO(fmt.pct1(E[12].w.aff.acc), "“is in”, new cities") + ARROW + RO("?", "“is not in”, the same cities", "ink"),
     six: { 1: "done" },
   }),
@@ -220,8 +249,8 @@ const V = {
       layer: l, space: `L${l}`, pts, frame: fr, sc, probe: p, choreo: "flip", cards: krasCards(l, "neg"),
       paperLabel: PAPER(), axes: AX_FLIP,
       title: `The same probe on “is not in”`,
-      badge: badge("real", `layer ${l} · trained on “is in” only · tested on “is not in”`),
-      readouts: RO(fmt.pct1(e.aff.acc), "“is in”", "ink") + ARROW + RO(fmt.pct1(e.neg.acc), "“is not in”", "ink") +
+      badge: badge("real", `Qwen2.5-1.5B · layer ${l} · trained on “is in” only · tested on “is not in”`),
+      readouts: RO(fmt.pct1(e.aff.acc), "“is in” (circles)", "ink") + ARROW + RO(fmt.pct1(e.neg.acc), "“is not in” (squares)", "ink") +
         RO(fmt.f3(e.neg.auroc), "AUROC on “is not in”: 0.5 no signal, 0 inverted", "gold"),
       six: { 1: "done", 2: "now" },
     };
@@ -230,8 +259,10 @@ const V = {
   fix: () => fixView(ui.fix.layer, ui.fix.set, "B"),
   // truth has at least two directions
   gp: () => gpView(ui.gp.layer),
+  // which layer
+  layer: () => layerView(ui.layer),
 };
-const ORDER = ["collect", "probe", "position", "fit", "reg", "predict", "flip", "fix", "gp"];
+const ORDER = ["collect", "probe", "position", "pooling", "layer", "fit", "reg", "predict", "flip", "fix", "gp"];
 const views = ORDER.map((k) => V[k]);
 const STEP = Object.fromEntries(ORDER.map((k, i) => [k, i]));
 
@@ -249,16 +280,63 @@ function collectView() {
   };
 }
 function positionView() {
-  const L = String(P.layer), a = P.acc[L], how = ui.pos.how;
-  const g = (k) => (how === k ? "gold" : "ink");
+  // a probe trained at each position of "The city of X is in Y." (layer 12), drawn under the running example's tokens
+  const BP = P.by_position, tok = P.tokens.true, n = tok.length;
+  const acc = tok.map((_, i) => (i === n - 1 ? BP.period : i === n - 2 ? BP.country_last : 0.5));
+  const sel = { in: n - 3, country: n - 2, period: n - 1 }[ui.pos.at];
+  const g = (k) => (ui.pos.at === k ? "gold" : "ink");
+  const held = !revealed["q-in"];
   return {
     scene: "pipe", title: "Which token does a probe read?",
-    badge: badge("real", `layer ${P.layer} · probes trained on ${P.n_train.toLocaleString("en-US")} statements, tested on ${P.n_test.toLocaleString("en-US")} from held-out cities`),
-    readouts: RO(fmt.pct1(a.final), "read at the period", g("final")) + RO(fmt.pct1(a.every_mean), "every token, mean of scores", g("mean")) +
-      RO(fmt.pct1(a.every_max), `every token, max of scores · ${fmt.pct1(a.every_max_own)} with its own threshold`, g("max")) +
-      RO(fmt.pct1(a.at_in), "read at “in”, before the country", "ink"),
-    pipe: { mode: "position", tokens: P.tokens, scores: { true: P.scores[L].true.every, false: P.scores[L].false.every }, how, layer: P.layer,
-      thrMax: a.every_max_thr },
+    badge: badge("real", `Qwen2.5-1.5B · layer ${P.layer} · a probe per position, trained on ${P.n_train.toLocaleString("en-US")} statements, tested on ${P.n_test.toLocaleString("en-US")}`),
+    readouts: RO(held ? "?" : fmt.pct1(BP.in), "read at “in”", g("in")) + RO(fmt.pct1(BP.country_last), "read at the country's (last) token", g("country")) +
+      RO(fmt.pct1(BP.period), "read at the period", g("period")),
+    pipe: { mode: "position", tokens: P.tokens, acc: held ? acc.map((a, i) => (i < n - 2 ? null : a)) : acc, sel, layer: P.layer },
+    six: {},
+  };
+}
+function poolingView() {
+  const L = String(P.layer), a = P.acc[L], how = ui.pool.how, MM = P.max_miss;
+  const held = !revealed["q-max"];
+  const series = ui.pool.which === "kras"
+    ? [{ k: "t", tokens: P.tokens.true, scores: P.scores[L].true.every }, { k: "f", tokens: P.tokens.false, scores: P.scores[L].false.every }]
+    : [{ k: "f", tokens: MM.tokens, scores: MM.scores }];
+  return {
+    scene: "pipe", title: ui.pool.which === "kras" ? "Every token, pooled" : "A statement the maximum misreads",
+    badge: badge("real", `Qwen2.5-1.5B · layer ${P.layer} · a probe trained on every token (labels copied), tested on ${P.n_test.toLocaleString("en-US")} statements`),
+    readouts: RO(fmt.pct1(a.mean), "mean of the states, then the probe", "ink") + RO(fmt.pct1(a.every_mean), "every token scored, mean of scores", how === "mean" ? "gold" : "ink") +
+      RO(held ? "?" : fmt.pct1(a.every_max_own), held ? "every token scored, max of scores" : `max of scores, own threshold · ${fmt.pct1(a.every_max)} at 0`, how === "max" ? "gold" : "ink"),
+    pipe: { mode: "pooling", series, how: held && how === "max" ? "mean" : how, layer: P.layer, thrMax: a.every_max_thr },
+    six: {},
+  };
+}
+
+// ---- which layer: a flipbook of every layer's own plane ----
+const BL = DATA.by_layer;
+function sparkline(L) {
+  // held-out accuracy by layer, as a small chart inside the readout: gold curve, the current layer marked
+  const w = 210, h = 54, x = d3.scaleLinear().domain([0, 28]).range([6, w - 6]), y = d3.scaleLinear().domain([0.5, 1]).range([h - 12, 4]);
+  const line = d3.line().x((d) => x(d.layer)).y((d) => y(d.acc))(BL);
+  const f = BL[L];
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-hidden="true"><line class="sp-half" x1="6" x2="${w - 6}" y1="${y(0.5)}" y2="${y(0.5)}"/>` +
+    `<path class="sp-line" d="${line}"/><line class="sp-now" x1="${x(L)}" x2="${x(L)}" y1="2" y2="${h - 12}"/>` +
+    `<circle class="sp-dot" cx="${x(L)}" cy="${y(f.acc)}" r="3.6"/><text class="sp-t" x="6" y="${h - 1}">0</text>` +
+    `<text class="sp-t" x="${w - 6}" y="${h - 1}" text-anchor="end">28</text><text class="sp-t" x="${w / 2}" y="${h - 1}" text-anchor="middle">layer</text></svg>`;
+}
+function layerView(L) {
+  const f = BL[L];
+  const idx = narrow ? DATA.show : d3.range(N_ALL);
+  const pts = idx.map((i) => ({ key: `ly:${i}`, c: [f.x[i], f.y[i]], truth: lab.aff[i], shape: "c", text: txt.aff[i] }));
+  const frame = { u: [1, 0], v: [0, 1] };
+  const probe = f.norm ? { coef: [1, 0], thr: f.thr, norm: f.norm, kind: "lr" } : null;
+  const sc = f.identical ? { kx: 1, ky: 1, cx: 0, cy: 0 } : fig.fitScale({ frame, aspect: "fit", probe }, pts.map((q) => q.c));
+  return {
+    layer: L || null, space: `ly${L}`, pts, frame, sc, probe, paper: !!probe, choreo: "cut", lattice: frame,
+    paperLabel: PAPER(), axes: { x: "onto this layer's ŵ →", y: "largest remaining variance ↑" }, legend: [...LG.tf],
+    title: L === 0 ? "Layer 0: the embedding" : `A probe trained at layer ${L}`,
+    badge: badge("real", `Qwen2.5-1.5B · layer ${L} · final token · ${N_ALL.toLocaleString("en-US")} statements from held-out cities`),
+    readouts: `<div class="ro ro-spark"><b class="big gold">${fmt.pct1(f.acc)}</b><span>${L === 0 ? "every final token is “.”: one point, chance" : `new statements read correctly at layer ${L}`}</span></div>` +
+      `<div class="ro">${sparkline(L)}<span>held-out accuracy by layer</span></div>`,
     six: {},
   };
 }
@@ -280,18 +358,19 @@ function regView(ci) {
   const pts = pointsFor(l, "aff", "p", "c");
   const order = pts.slice().sort((a, b) => dot(a.c, u) - dot(b.c, u)).map((p) => p.key);
   const angle = Math.round(q.angle);
+  const held = !revealed["q-angle"];
   return {
     layer: l, space: `L${l}`, pts, frame, sc, probe, _order: order, levels: false, binW: narrow ? 6 : 4,
     choreo: "move", lattice: null,
-    ghosts: ci === 0 ? [] : [{ ...dmu, id: "dmu", angle: `${angle}°` }],
+    ghosts: ci === 0 ? [] : [{ ...dmu, id: "dmu", angle: held ? "?" : `${angle}°` }],
     means: [{ c: means.aff_true, label: "μ true", dx: 12, dy: -12 }, { c: means.aff_false, label: "μ false", dx: -12, dy: 26, anchor: "end" }],
     meanSegment: true,
     paperLabel: PAPER(),
     axes: { x: "onto ŵ →", y: "Δμ, the part ⊥ ŵ ↑" },
     legend: [...LG.tf, { glyph: "bnd", text: "w's boundary" }, { glyph: "ghost", text: "Δμ's boundary" }, { glyph: "mean", text: "class means" }],
-    title: ci === 0 ? "Strong penalty: w points along Δμ" : `Logistic regression, ${angle}° from Δμ`,
-    badge: badge("real", `layer 12 · ${N_ALL.toLocaleString("en-US")} statements from held-out cities · plane of ŵ and Δμ, true angles`),
-    readouts: RO(`${angle}°`, "w vs Δμ, in all 1,536 dimensions", "gold") +
+    title: ci === 0 ? "Strong penalty: w points along Δμ" : held ? "Logistic regression and Δμ" : `Logistic regression, ${angle}° from Δμ`,
+    badge: badge("real", `Qwen2.5-1.5B · layer 12 · plane of ŵ and Δμ, true angles`),
+    readouts: RO(held ? "?" : `${angle}°`, "w vs Δμ, in all 1,536 dimensions", "gold") +
       RO(fmt.pct1(q.ev.acc), `w reads new statements · C = ${cLabel(q.C)}`, "ink") +
       RO(fmt.pct1(E[12].dmu.aff.acc), "Δμ, midpoint threshold", "ink"),
     six: { 1: "done" },
@@ -332,7 +411,7 @@ function fixView(l, set, stage) {
     legend: [{ glyph: "true", text: cities ? "“is in”" : "Spanish word" }, { glyph: "sq-true", text: "negated" }, { glyph: "false", text: "hollow = false" },
       ...(stage === "B" ? [{ glyph: "ghost", text: "old boundary" }] : [])],
     title: stage === "A" ? "The old probe, in the plane of both" : cities ? "Retrained on both polarities" : "The retrained probe, Spanish words",
-    badge: badge("real", `layer ${l} · retrained on “is in” and “is not in” · plane of both probes, true angles`),
+    badge: badge("real", `Qwen2.5-1.5B · layer ${l} · retrained on “is in” and “is not in” · plane of both probes`),
     readouts: stage === "A" ? RO(fmt.pct1(e1.neg.acc), "the old probe on “is not in”", "ink") : ro,
     six: { 1: "done", 2: "now" },
   };
@@ -359,7 +438,7 @@ function gpView(l) {
     axes: { x: "g, general truth →", y: "" },
     legend: [{ glyph: "true", text: "“is in”" }, { glyph: "sq-true", text: "“is not in”" }, { glyph: "false", text: "hollow = false" }, { glyph: "ghost", text: "old probe's boundary" }],
     title: "General truth and polarity",
-    badge: badge("real", `layer ${l} · plane of g and p (p made orthogonal to g) · true proportions`),
+    badge: badge("real", `Qwen2.5-1.5B · layer ${l} · plane of g and p (p made orthogonal to g) · true proportions`),
     readouts: RO(fmt.pct1(e.aff.acc), "along g: “is in”", "gold") + RO(fmt.pct1(e.neg.acc), "along g: “is not in”", "gold") +
       RO(`${cosOf(l, "w", "tP").toFixed(2)} · ${cosOf(l, "w", "tG").toFixed(2)}`, "the old probe's cosines with p and g", "ink"),
     six: { 1: "done", 2: "done" },
@@ -372,6 +451,12 @@ function badge(kind, text) {
 }
 
 // ---- rendering ----
+/** Phones draw a subset of the statements: the counts under the figure are of what is drawn, the big numbers of all. */
+function withDrawn(v) {
+  if (!narrow || !v.pts || typeof v.readouts !== "string") return v;
+  v.readouts = v.readouts.replace("</span></div>", ` · paper: ${v.pts.length} drawn</span></div>`);
+  return v;
+}
 /** Readouts for scenes that don't set their own: the old ones dim, then the new ones land. */
 function setReadouts(html) {
   const r = d3.select("#readouts").interrupt();
@@ -405,6 +490,7 @@ async function render(i, prev) {
   }
   pipe.setVisible(false, prev === -1 ? 0 : 350);
   fig.setVisible(true, prev === -1 ? 0 : 450);
+  withDrawn(v);
   if (prev === -1 && !reduced && offscreen()) {
     // an empty glass first, so the figure's own choreography plays when it arrives
     await fig.show({ ...v, pts: [], probe: null, paper: false, cards: [], ghosts: [], means: [], groups: [], readouts: "", choreo: "cut" });
@@ -426,6 +512,21 @@ async function render(i, prev) {
     await fig.show(fixView(ui.fix.layer, "cities", "A"));
     if (my !== token) return;
     await sleep(700);
+    if (my !== token) return;
+  }
+  if (i === STEP.layer && prev !== STEP.layer && !reduced) {
+    // a flipbook through the layers, 0 → 28, then back to where the slider was
+    const target = ui.layer;
+    for (const L of [...d3.range(0, 29), ...d3.range(27, target - 1, -1)]) {
+      if (my !== token) return;
+      const f = layerView(L);
+      await fig.show({ ...f, readouts: null });
+      d3.select("#readouts").interrupt().style("opacity", 1).html(f.readouts);
+      d3.select("#fig-title").text(f.title);
+      d3.select("#fig-badge").html(f.badge);
+      setLayerOut(L);
+      await sleep(L === 0 ? 900 : 170);
+    }
     if (my !== token) return;
   }
   if (my !== token) return;
@@ -457,14 +558,22 @@ document.querySelectorAll(".check").forEach((box) => {
     box.querySelectorAll("button").forEach((o) => o.classList.toggle("on", o === b));
     box.classList.add("answered");
     box.classList.toggle("right", b.hasAttribute("data-correct"));
+    // a check holds back the readout it asks about, and any paragraph that would give it away: answering releases them
+    if (revealed[box.dataset.q]) return;
+    revealed[box.dataset.q] = true;
+    document.querySelectorAll(`[data-after="${box.dataset.q}"]`).forEach((el) => el.classList.add("shown"));
+    const i = window.explainer.current, v = views[i]();
+    token++;
+    if (v.scene === "pipe") { setReadouts(v.readouts); pipe.show({ ...v.pipe, choreo: "play" }); }
+    else fig.show({ ...v, choreo: "move" });
   });
 });
 
 const FEEDBACK = {
-  99: `The negated statements' states do carry their truth (a probe retrained on both reads them at ${NUM.w2neg12}, two steps on), but this probe's direction doesn't read it.`,
+  99: `The negated statements' states do carry their truth: a probe retrained on both reads them at ${NUM.w2neg12}, on the next step. This probe's direction doesn't read it.`,
   75: "Not noise: the errors are systematic, as the ranking shows.",
   50: "That is what layer 16 scores, for a different reason (below).",
-  30: `Right: ${fmt.pct1(E[12].w.neg.acc)}.`,
+  30: `Right: ${fmt.pct1(E[12].w.neg.acc)}, and ranked almost perfectly upside down.`,
 };
 document.querySelectorAll(".guess").forEach((box) => {
   box.addEventListener("click", (e) => {
@@ -477,14 +586,17 @@ document.querySelectorAll(".guess").forEach((box) => {
 function echoGuesses() {
   document.querySelectorAll("[data-echo]").forEach((el) => {
     const g = guesses[el.dataset.echo];
-    el.innerHTML = g ? `You said <b>${g.text.split(":")[0]}</b>. ${FEEDBACK[g.a] ?? ""}` : "";
+    const box = document.querySelector(`.guess[data-q="${el.dataset.echo}"]`);
+    const opts = box ? [...box.querySelectorAll("button")].map((b) => ({ a: b.dataset.a, label: b.textContent.split(":")[0].trim() })) : [];
+    const list = opts.map((o) => `<li class="${o.a === g?.a ? "mine" : ""}"><b>${o.label}</b> ${FEEDBACK[o.a] ?? ""}</li>`).join("");
+    el.innerHTML = (g ? `You said <b>${g.text.split(":")[0]}</b>. ` : "") + `<ul class="fb">${list}</ul>`;
     el.classList.toggle("right", !!g?.right);
   });
 }
 
 const LEDGER = {
-  1: ["Representation or probe?", "A perfect training fit is guaranteed in high dimensions. Held-out accuracy and controls are what separate a representation from a probe that memorized."],
-  2: ["Concept or dataset?", "This probe read a quirk of its training data: city–country match. Test on shifted data, and read the ranking (AUROC), not only accuracy."],
+  1: ["Representation or probe?", "A perfect training fit is guaranteed whenever there are no more points than dimensions plus one (here 300 against 1,537). Held-out accuracy and controls are what separate a representation from a probe that memorized."],
+  2: ["Concept or dataset?", "This probe partly read (our reading) a quirk of its training data, city–country match: it leans on p as much as on g. Test on shifted data, and read the ranking (AUROC), not only accuracy."],
 };
 document.querySelectorAll(".ledger").forEach((el) => {
   const [q, a] = LEDGER[el.dataset.qn];
@@ -503,7 +615,7 @@ document.querySelectorAll(".toggles").forEach((box) => {
     token++;
     const v = views[i]();
     if (v.scene === "pipe") { setReadouts(v.readouts); pipe.show(v.pipe); }
-    else fig.show({ ...v, choreo: box.dataset.for === "flip" || box.dataset.k === "layer" ? "move" : box.dataset.for === "fit" ? "read" : "move" });
+    else fig.show({ ...withDrawn(v), choreo: box.dataset.for === "flip" || box.dataset.k === "layer" ? "move" : box.dataset.for === "fit" ? "read" : "move" });
     d3.select("#fig-title").text(v.title);
     d3.select("#fig-badge").html(v.badge);
   });
@@ -512,7 +624,7 @@ const reg = document.getElementById("reg-c");
 const regOut = document.getElementById("reg-out");
 const showReg = () => {
   const q = pathEval[ui.reg];
-  regOut.innerHTML = `C = ${cLabel(q.C)} · <b>${Math.round(q.angle)}°</b> from Δμ · <b>${fmt.pct1(q.ev.acc)}</b>`;
+  regOut.innerHTML = `C = ${cLabel(q.C)} (the inverse of the penalty) · <b>${revealed["q-angle"] ? `${Math.round(q.angle)}°` : "?"}</b> from Δμ · <b>${fmt.pct1(q.ev.acc)}</b>`;
 };
 reg.addEventListener("input", () => {
   ui.reg = Number(reg.value);
@@ -524,6 +636,26 @@ reg.addEventListener("input", () => {
   fig.show({ ...v, choreo: "move" });
 });
 showReg();
+
+// the layer slider: each position is a frame of the flipbook (readouts set directly, without a cross-fade)
+const layerIn = document.getElementById("layer-l");
+const layerOut = document.getElementById("layer-out");
+function setLayerOut(L) {
+  if (layerIn) layerIn.value = String(L);
+  if (layerOut) layerOut.innerHTML = `layer <b>${L}</b> · <b>${fmt.pct1(BL[L].acc)}</b> of new statements`;
+}
+layerIn?.addEventListener("input", () => {
+  ui.layer = Number(layerIn.value);
+  setLayerOut(ui.layer);
+  if (window.explainer.current !== STEP.layer) return;
+  token++;
+  const v = V.layer();
+  d3.select("#fig-title").text(v.title);
+  d3.select("#fig-badge").html(v.badge);
+  fig.show({ ...v, readouts: null });
+  d3.select("#readouts").interrupt().style("opacity", 1).html(v.readouts);
+});
+setLayerOut(ui.layer);
 
 // ---- side dish: Cover's function-counting curve, for d = 5, 50 and 1,536 ----
 (function coverCurve() {

@@ -78,7 +78,7 @@ re-run as project data scripts with one pinned protocol):
 | trained on "is in", tested on "is not in" | logistic regression **0.03–0.11 at L12**, ranked upside down (AUROC **0.005**); ~0.5 at L8 and L16 because every negation lands on the false side, yet still ranked upside down (AUROC 0.02, 0.39); difference of means ~0.48 at the tick but also upside down (AUROC 0.03) |
 | difference-of-means directions of the two polarities | cosine −0.79 (L8) → −0.47 (L12) → −0.15 (L16) |
 | difference of means, cities → Spanish-English translations | 0.85 at L12, **0.98 at L16** (logistic regression: 0.62–0.67 / 0.78–0.79) |
-| trained on both polarities | 0.99 on both; Spanish words near chance at L12; at L16 negated 0.45 → 0.83 but plain 0.79 → 0.73 (helps the shift you added, costs elsewhere) |
+| trained on both polarities | 0.99 on both; Spanish words near chance at L12; at L16 negated 0.45 → 0.83 but plain 0.79 → 0.73 (spike numbers; on our statements the drop at L16 is calibration: the ranking improves, see C-III-8) |
 | a probe that sees only the country name | 0.48 (chance): the dataset controls for the country prior |
 | the model's own zero-shot "true or false?" | AUROC 1.00 but accuracy 0.61 at P = 0.5: it ranks perfectly and leans "false" |
 | the model's own few-shot answer vs the probe | the model is right on 96%; on the 29 statements it gets wrong, the probe has 28 right (to check with completions before we say "it knows more than it shows") |
@@ -296,8 +296,12 @@ figure waits as an empty glass until the stage is on screen, so its read is seen
 - `tests/functional.mjs` now takes every expected value from the exporter's numbers (survives regeneration) and checks
   the new steps (the exact "in" fact, the per-token coincidence, the readouts, the toggle).
 
+**Done since (2026-09-27, third part):** the review round (technical and rigor on Fable, learner-sim on Opus) and its
+fixes, logged in `review.md`. Chapter I now runs: a statement becomes a data point → the probe → which token (a probe per
+position) → every token, pooled → which layer (a flipbook). Then chapters II–III as before. 11 steps built.
+
 **Next actions, in order:**
-1. Quick technical re-check of `script.md` (Fable), then build the remaining ~23 steps with the new engine (`figure.js`):
+1. The script's re-check is done (no blockers; its shoulds are in `script.md`). Build the remaining ~19 steps with the new engine (`figure.js`):
    prologue and chapter I (two statements → the probe; why linear; which layer); the in-browser trainer (n, L2, shuffle;
    drag the direction); chapter II's table and Othello; P4 and the push (violet arrows: writing); chapter IV (the dial,
    the cascade, pooling, the evidence board, pressure with magenta trails); chapter V; limits and check-yourself; side

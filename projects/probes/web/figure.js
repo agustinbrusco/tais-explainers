@@ -300,7 +300,7 @@ export class Figure {
     step(this.reduced || choreo === "cut" ? T.total : 0);
     this.cur = { ...tgt, frame: tgt.frame, sc: tgt.sc, lvlStep: this.lvlStep };
     // readouts land last; until then the old ones stay, dimmed, so the panel never goes blank
-    if (this.readEl) {
+    if (this.readEl && view.readouts !== null) {           // null: the caller manages the readouts itself
       const r = d3.select(this.readEl).interrupt();
       const html = view.readouts ?? "";
       if (T.readout > 0 && r.html()) {

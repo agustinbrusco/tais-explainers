@@ -4,6 +4,69 @@ Newest first. Each entry: what was reviewed, by whom, what was found, what was d
 
 
 
+
+## Review round on the built chapters I–III (2026-09-27): technical (Fable), rigor (Fable), learner-sim (Opus)
+
+Verdicts: technical "needs changes" (1 blocker, 7 shoulds, script re-check clean with 5 shoulds); rigor "no blockers"
+(7 shoulds); learner-sim: the new steps answer the learner's question "mostly", with the gaps listed below. Each finding was
+checked against the data or the source before acting; resolutions:
+
+- **Blocker (technical #1): "retraining costs elsewhere"** at layer 16 was a calibration effect, since the retrained probe
+  *ranks* Spanish words better (AUROC 0.977 → 0.989) while its accuracy falls. The sentence now says the direction carries
+  over and a new topic can need a new threshold; C-III-8's note and `script.md` beat 14 follow.
+- **"Which token?" was one overloaded beat** (all three reviews). Split into two steps:
+  - **3, position:** a probe per position, exactly 50% up to "in" (exact by pairing) and 97.5% / 98.8% / 98.4% at the
+    country's first and last tokens and the period. It answers "why not the country?": a fixed position, plus Marks &
+    Tegmark's footnote 3. The patching summary is now stated as their hypothesis, in LLaMA-2-13B, under a few-shot prompt.
+  - **4, pooling:** the linear identity (mean of states vs mean of scores; the learner asked about averaging activations),
+    and why prefix scores sit at zero (each state appears once with each label). A check on max pooling comes before its
+    readout. Max is headlined with its own threshold (87.8%), and 50.0% is shown as the per-token-threshold mismatch. A
+    held-out false statement max misreads can be toggled in ("The city of Abidjan is in Colombia.").
+  - **The production paragraph** moved into a side dish and was corrected: both labs smooth, then take a maximum;
+    MultiMax is one GDM variant; RL-Obfuscation trains max-pooled probes through the max.
+- **Leaks** (learner-sim): quick checks now ask the surprising question and hold back the readout they ask about, and a
+  paragraph that would give an answer away waits for it (`data-after`):
+  - step 1: "how many columns change?";
+  - step 3: the probe at "in";
+  - step 4: max pooling;
+  - step 6: how confident is the chance-level coin-flip probe (a median of 7 logits);
+  - step 7: the angle between Δμ and w, held back in the figure until answered.
+
+  The reveal heading after P3 no longer says "upside down", and the reveal lists every option's feedback.
+- **Words vs picture:**
+  - **513/513:** the split is now stated (513 training, 513 held-out cities, 1,026 statements per side).
+  - **The flip:** described as inversion plus drift, with per-class counts and Krasnodar's two twins.
+  - **Readout labels:** "‖w‖ … level sets 0.22 units apart" (density, not spacing); circles/squares named in the flip's
+    readouts.
+  - **Fig. 4:** readouts computed from the drawn points, so the counts add up (fit16 now at 4 d.p.).
+  - **Phones:** counts are of the drawn subset, and the readout says so.
+  - **Hero:** the stale magenta "style frame" line is gone; the caption says the opening view was chosen so the classes
+    overlap; the lede says 98%.
+  - **Rigor nits:**
+    - both ledgers corrected (no "guaranteed in high dimensions"; "our reading");
+    - p's circularity named, and the non-circular evidence given;
+    - the strong-L2 conditions (raw, centred, unpenalized bias; standardizing changes the limit);
+    - balanced classes for the mass-mean threshold;
+    - "in general position" in the side dish;
+    - the dashed ghost line's sides;
+    - the model named on every real badge;
+    - glass and paper defined in step 1;
+    - h's colour map, its 12 × 128 fold, and the stripes in X (shared by both classes, r = 0.99).
+- **Glyphs:**
+  - "read here" is a double ring, no longer the "fitted to" ring;
+  - identical true/false scores are one half-filled marker;
+  - the position chart uses gold bars on a 50% floor.
+- **New step, "Which layer?"** (built during the round): a flipbook of every layer's own plane, whose up-axis signs are
+  anchored at Fig. 2's orientation. Layer 0 is a single point, and the accuracy-by-layer curve sits inside the readout.
+- **Not done (logged for the next pass):**
+  - a draggable read position (the toggle stands in);
+  - moving the counts for clipped points;
+  - a "why linear?" beat;
+  - the remaining script shoulds apply when those beats are built (S1 SD2's two regimes, S2 RMSNorm, S3 P4's cos² at L16,
+    S4 maxpool training in the RL beat, S5 spike re-runs).
+- Stills `build/shots6/` (desktop), `build/shots6m/` (phone); films re-shot on this build: `build/motion-c/collect.png`,
+  `build/motion-h/read.png`, `build/motion-f/flip.png`, `build/motion-l/flipbook.png`, `build/hero/`.
+
 ## Our own statements, and where a probe reads (2026-09-27)
 
 - **Why:** the learner asked for "a viz of how the activations are collected as data points", "accurate to the way it's

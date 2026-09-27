@@ -22,9 +22,9 @@
         <p class="eyebrow">Interpretability · linear probes · real hidden states</p>
         <h1>What a Probe <em>Reads</em></h1>
         <p class="lede">A linear probe is a direction through a model's hidden states, and a threshold. Finding one that reads
-          a concept at 99% takes minutes. Knowing what it actually reads takes more.</p>
+          a concept at 98% takes minutes. Knowing what it actually reads takes more.</p>
         <p class="byline"><span><b>Made with Claude</b></span><span>real states of Qwen2.5-1.5B</span></p>
-        <p class="style-frame">Style frame · 7 of 30 steps · data from a scratch run</p>
+        <p class="wip">Work in progress · chapters I–III · 11 of about 30 steps</p>
       </div>
       <p class="scene-caption" id="hero-caption">statements about cities at layer 12 · filled: true · hollow: false</p>
     </header>
@@ -33,112 +33,208 @@
       <section class="step" data-step>
         <h2>From a statement to a data point</h2>
         <p>A probe is a classifier, so it starts with a dataset. Take <span class="c-token">The city of Krasnodar is in
-          Russia.</span> The model splits it into <span class="n" data-n="n_tokens">11</span> tokens and computes, for each
-          token and at each of its 28 layers, a <span class="c-residual">hidden state</span>: a vector of 1,536 numbers, the
-          residual stream. The glass draws that grid, one column per token and one dot per state.</p>
-        <p>We read one of those states, the one at layer 12 over the final token (the period), and call it <var>h</var>. It
-          is stored with the statement's label <var>y</var>, 1 for true and 0 for false, as one row of a table. Do the same
-          for every statement about the training cities, <span class="n" data-n="n_train">1,026</span> of them, and you have
-          a matrix <var>X</var> with one row per statement and 1,536 columns, and its labels <var>y</var>. A probe is a
-          classifier fitted to (<var>X</var>, <var>y</var>).</p>
+          Russia.</span> The model splits it into <span class="n" data-n="n_tokens">11</span> tokens and computes a
+          <span class="c-residual">hidden state</span> for each token at every depth: the embedding (layer 0), then the output
+          of each of its 28 blocks. Each state is a vector of 1,536 numbers, the residual stream. The dark window, the
+          <em>glass</em>, is the model's interior: one column per token, one dot per state.</p>
+        <p>We read one of those states, the one at layer 12 over the final token, the period (why those two, in the next
+          steps), and call it <var>h</var>. It is stored with the statement's label <var>y</var>, 1 for true and 0 for false,
+          as one row of a table. The light part of the figure is <em>paper</em>: what we read out of the model and can work
+          with. Do the same for every statement about the <span class="n" data-n="n_train_cities">513</span> training cities,
+          two per city, and you have a matrix <var>X</var> with <span class="n" data-n="n_train">1,026</span> rows and 1,536
+          columns, and its labels <var>y</var>. A probe is a classifier fitted to (<var>X</var>, <var>y</var>).</p>
+        <div class="check" data-q="q-cols">
+          <p class="q">Switch to the false statement, “…in <span data-n="false_country">China</span>.” How many of the 11
+            columns get new states?</p>
+          <div class="opts"><button data-a="all">all 11</button><button data-a="two" data-correct>the last two</button><button data-a="one">only the country's</button></div>
+          <p class="a">The last two, the country's and the period's. Each state is computed from its own token and the tokens
+            before it, so up to “in” the two statements are the same input and have the same states, and the period's state
+            reads the new country.</p>
+        </div>
         <div class="toggles" data-for="collect">
           <span>statement</span>
           <button data-k="which" data-v="true" class="on">…in Russia.</button>
           <button data-k="which" data-v="false">…in <span data-n="false_country">China</span>.</button>
         </div>
-        <p>Switch to the false statement and only the last two columns are computed again: up to “in”, the two statements
-          are the same input, and each state is computed from its own token and the tokens before it. That will matter two
-          steps from now.</p>
+        <p>In <var>h</var>'s chip, blue is positive and grey negative, brighter for larger values. Its 1,536 numbers are
+          folded into 12 rows of 128, and each row of <var>X</var> shows every 12th number, <var>h</var>'s top row. The
+          vertical stripes in <var>X</var> are coordinates that are large in almost every statement, true or false alike (the
+          average true row and the average false row correlate at <span class="n" data-n="stripes_corr">0.99</span>): you
+          can't see truth in the numbers by eye.</p>
         <p class="caveat"><strong>Where the statements come from</strong> Every city in the
           <a href="https://www.geonames.org/">GeoNames</a> gazetteer
-          (<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>) with more than 500,000 people, a name no other city shares, in a UN member state: <span class="n" data-n="n_cities">1,026</span>
-          cities in <span class="n" data-n="n_countries">123</span> countries, each once with its country and once with a
-          wrong one, drawn as often as that country appears in the true statements, so a country's name says nothing about
-          truth (Marks and Tegmark's recipe). The columns and layers are a sketch; <var>h</var> and the rows of <var>X</var>
-          are the model's real numbers, and the table draws every 12th number of each row.</p>
+          (<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>) with more than 500,000 people and a name no
+          other city shares, in a UN member state, leaving out city-states and cities named after their country:
+          <span class="n" data-n="n_cities">1,026</span> cities in <span class="n" data-n="n_countries">123</span> countries,
+          split at random into two halves, one for training and one held out. Each city appears once with its country and
+          once with a wrong one, drawn as often as that country appears in the true statements, so a country's name says
+          nothing about truth (Marks and Tegmark's recipe). The columns and layers are a sketch; <var>h</var> and the rows of
+          <var>X</var> are the model's real numbers.</p>
       </section>
 
       <section class="step" data-step>
         <h2>A direction and a threshold</h2>
-        <p>Each point is one statement's <var>h</var>, the data point from the last step: the
-          <span class="c-residual">hidden state</span> at layer 12 over its final token, 1,536 numbers. The statements are
-          about cities the probe was not trained on. Filled points are true statements; hollow ones are false.</p>
+        <p>Each point in the glass is one statement's <var>h</var>, its state at layer 12 over the period. These are the
+          <span class="n" data-n="n_test">1,026</span> statements about the held-out cities, which the probe never saw.
+          Filled points are true statements; hollow ones are false.</p>
         <p>A linear <span class="c-overseer">probe</span> is a weight vector <var>w</var> and a bias <var>b</var>. It scores
           a statement as <var>w</var>·<var>h</var> + <var>b</var> and calls it true when the score is positive. The score
           depends only on where <var>h</var> projects onto the direction <var>ŵ</var> = <var>w</var>/‖<var>w</var>‖: every
-          state on a hyperplane perpendicular to <var>w</var> gets the same score. The gold lines are those level sets,
-          one logit apart, and the heavy one is the decision boundary.</p>
-        <p>Here <var>w</var> and <var>b</var> are what logistic regression learns from <span class="n" data-n="n_train">1,026</span> labelled statements about
-          other cities. The view is turned so that <var>ŵ</var> points right: a statement's horizontal position is its
-          projection onto <var>ŵ</var>. The paper under the glass collects those projections on the same axis, in the
-          grid's units, measured from the boundary: filled bars for true statements, outlined bars for false, each class
+          state on a hyperplane perpendicular to <var>w</var> gets the same score. The gold lines are those level sets, one
+          logit apart, and the heavy one is the decision boundary.</p>
+        <p>Here <var>w</var> and <var>b</var> are what logistic regression learns from the training statements. The view is
+          turned so that <var>ŵ</var> points right, so a statement's horizontal position is its projection onto
+          <var>ŵ</var>. The paper under the glass is that projection: the same axis, in <var>h</var>'s own units (the
+          grid's), measured from the boundary, with one histogram per class, filled for true and outlined for false, each
           scaled to sum to one.</p>
-        <p>Of the <span class="n" data-n="n_test">1,026</span> statements about cities the probe never saw, it reads
-          <span class="n" data-n="aff12_count">744</span> correctly: <span class="n" data-n="aff12">99.5%</span>.</p>
+        <p>Of the <span class="n" data-n="n_test">1,026</span> new statements, it reads
+          <span class="n" data-n="aff12_count">1,010</span> correctly: <span class="n" data-n="aff12">98.4%</span>.</p>
         <p class="caveat"><strong>Honest geometry</strong> The plane holds <var>ŵ</var> (across) and the direction of
           largest remaining variance (up: the top singular vector of the centred states once <var>ŵ</var> is projected
           out). Across is exact; up is one choice among 1,535. At this layer it mostly separates statements involving
-          China: the upper cluster of true statements is about Chinese cities. The grid is in the hidden state's own
-          units and the horizontal axis is stretched, so its cells are <span class="n" data-n="stretch1">7</span>× wider
-          than tall. In true proportions the cells are squares, and truth is a narrow direction beside the largest ways
-          these states vary.</p>
+          China: the upper cluster of true statements is about Chinese cities. The grid is in the hidden state's own units
+          and the horizontal axis is stretched, so its cells are <span class="n" data-n="stretch1">8.6</span>× wider than
+          tall. In true proportions the cells are squares, and truth is a narrow direction beside the largest ways these
+          states vary.</p>
       </section>
 
       <section class="step" data-step>
         <h2>Which token?</h2>
         <p>Why read the period? In this model, as in every GPT-style model, attention is causal: the state over a token is
-          computed from that token and the ones before it, never from the ones after. The state over “in” can't know how the
-          statement ends. Here that is exact: a city's true and false statements are the same input up to “in”, so their
-          states there are identical, and a probe trained to read “in” gets <span class="n" data-n="at_in">50.0%</span> of
-          new statements right. No amount of data would help it.</p>
-        <p>The period is the first token after the country, the only one whose state has seen the whole statement. Marks and
-          Tegmark found where a model keeps a statement's truth by patching, copying states from a true statement into a false
-          one and watching the model's verdict: the states that carry it sit over the statement's last word and its period.</p>
-        <div class="toggles" data-for="pos">
-          <span>read</span>
-          <button data-k="how" data-v="final" class="on">the period</button>
-          <button data-k="how" data-v="mean">every token, mean</button>
-          <button data-k="how" data-v="max">every token, max</button>
+          computed from that token and the ones before it, never from the ones after. So the state over “in” can't know how
+          the statement ends. Hover a column in the glass to see which states it was computed from.</p>
+        <div class="check" data-q="q-in">
+          <p class="q">Train a probe on the states over “in”, from the same training statements. What share of new statements
+            does it read correctly?</p>
+          <div class="opts"><button data-a="98">≈ 98%, like the period</button><button data-a="75">≈ 75%: earlier tokens hint at the answer</button><button data-a="50" data-correct>exactly 50%</button></div>
+          <p class="a">Exactly <span class="n" data-n="at_in">50.0%</span>. A city's true and false statements are the same
+            input up to “in”, so their states there are identical: whatever the probe says about one, it says about the
+            other, and it gets one of each pair right. No amount of data helps.</p>
         </div>
-        <p id="pos-every">A probe can also read every token: give each token the statement's label, train on all of them,
-          and pool the scores of a statement's tokens into one verdict. The paper shows those scores for the two Krasnodar
-          statements, identical until the country and apart after it. Pooled by the mean, they read
-          <span class="n" data-n="every_mean">…</span> of new statements correctly, as well as the period alone
-          (<span class="n" data-n="final_pos">…</span>). Pooled by the maximum, <span class="n" data-n="every_max">…</span>:
-          some token before the country scores a little above zero (in Krasnodar it is
-          “<span data-n="max_tok">ras</span>”, at <span class="n" data-n="max_tok_score">0.7</span>), so a false statement's
-          maximum stays above the boundary and it reads true. Even with a threshold of its own, set on the training
-          statements, the maximum reads only <span class="n" data-n="every_max_own">…</span>: whichever token scores highest
-          decides the verdict, whether or not it says anything about truth.</p>
-        <p>For short statements that end in a period, the period is the natural place to read. For long transcripts, where
-          what you want to detect can occupy a few tokens anywhere, probes score every token and pool. Anthropic's production
-          probe smooths its per-token scores with a moving average, so that one spurious token can't flag a whole exchange;
-          Google DeepMind's takes a hard maximum, so that a short harmful passage isn't diluted by a long context; McKenzie
-          and colleagues found that probes reading only the last token “consistently” performed poorly on their
-          conversations. Where a probe reads decides what it can see, and the monitoring chapter comes back to it.</p>
+        <p data-after="q-in">The paper shows the same test at every position: a probe trained on the states at that token, tested on the
+          held-out cities. Up to “in” every position is at exactly 50%. The country's first token already reads
+          <span class="n" data-n="pos_country_first">97.5%</span>, its last token <span class="n" data-n="pos_country">98.8%</span>,
+          and the period <span class="n" data-n="pos_period">98.4%</span>. Truth becomes readable the moment the country has
+          been read, and stays readable.</p>
+        <div class="toggles" data-for="pos">
+          <span>read at</span>
+          <button data-k="at" data-v="in">“in”</button>
+          <button data-k="at" data-v="country">the country</button>
+          <button data-k="at" data-v="period" class="on">the period</button>
+        </div>
+        <p>So why the period rather than the country? One reason is practical: the period is one fixed position in every
+          statement, while a country takes one to four tokens. The other comes from Marks and Tegmark. They patched states from
+          a true statement into a false one in LLaMA-2-13B, under a few-shot true/false prompt, and found causally important
+          states over the statement's last token and its period, which they hypothesize hold its truth value. For their
+          pictures they chose the period, because over the last word the states' main variation is the word itself
+          (“clusters for statements ending in ‘China’ regardless of their truth value”).</p>
+        <p class="caveat"><strong>A probe belongs to its position</strong> The probe of Fig. 2, trained on periods, scores the
+          first token's state at <span class="n" data-n="first_score">−4,807</span> logits: in this model the first position's
+          state is about <span class="n" data-n="first_ratio">200</span> times larger than the others'. A probe is a
+          measurement on the distribution it was trained on.</p>
       </section>
 
       <section class="step" data-step>
-        <h2>A perfect fit proves nothing</h2>
-        <p>Why trust that number? Not because the probe fits the statements it learned from. Take 300 statements, give
-          them coin-flip labels so that there is nothing to find, and fit the same kind of probe: layer 16, almost no
-          regularization. Gold rings mark the statements it was fitted to.</p>
-        <div class="check" data-q="q-fit">
-          <p class="q">What training accuracy does it reach on coin-flip labels?</p>
-          <div class="opts"><button data-a="50">≈ 50%</button><button data-a="75">≈ 75%</button><button data-a="100" data-correct>100%</button></div>
-          <p class="a">100%. In <var>d</var> dimensions a hyperplane with a bias can split any <var>d</var> + 1 points in
-            general position every possible way, and 300 statements in 1,536 dimensions are far below that.</p>
+        <h2>Or every token, pooled?</h2>
+        <p>You could also read every token and combine them. Averaging comes first to mind, and for a linear probe it
+          doesn't matter whether you average the states or the scores: <var>w</var>·mean(<var>h</var>) + <var>b</var> =
+          mean(<var>w</var>·<var>h</var> + <var>b</var>). A probe trained on each statement's mean state reads
+          <span class="n" data-n="mean_state">97.9%</span> of new statements. The other design scores every token: give each
+          token the statement's label, train on all of them, and pool each statement's token scores into one verdict.</p>
+        <p>The paper shows those per-token scores for the Krasnodar pair. Up to “in” they are identical and close to zero:
+          each of those states appears once with each label, so the best the fit can do there is sit on the fence. Pooled by
+          the mean, the statements read <span class="n" data-n="every_mean">98.5%</span>, as well as the period.</p>
+        <div class="check" data-q="q-max">
+          <p class="q">Now pool by the maximum, with a threshold chosen on the training statements. What share of new
+            statements does it read correctly?</p>
+          <div class="opts"><button data-a="98">≈ 98%: the country's token dominates</button><button data-a="88" data-correct>≈ 88%: sometimes an early token wins</button><button data-a="50">≈ 50%: an early token always wins</button></div>
+          <p class="a"><span class="n" data-n="every_max_own">87.8%</span>. In <span class="n" data-n="max_miss_n">118</span>
+            of the <span class="n" data-n="max_miss_of">513</span> false statements, a token before the country scores above
+            the maximum's threshold and decides the verdict (toggle to <span class="c-token" data-n="max_miss_text">…</span>,
+            where it is “<span data-n="max_miss_tok">…</span>”). Keep the per-token threshold of zero instead and the maximum
+            reads <span class="n" data-n="every_max">50.0%</span>: every false statement has some early token above zero (in
+            Krasnodar, “<span data-n="max_tok">ras</span>”, at <span class="n" data-n="max_tok_score">0.7</span>).</p>
         </div>
-        <p>So the test has to be on new statements, and there the coin-flip probe scores
-          <span class="n" data-n="coin_held">50.3%</span>: chance. Yet it scores them with near-certainty, a median of
-          <span class="n" data-n="coin_score">9</span> logits from the boundary. It found a direction along which the 300
-          statements barely differ (new ones sit a median <span class="n" data-n="coin_dist">0.21</span> units from its
-          boundary, against <span class="n" data-n="real_dist">3.4</span> for a probe fitted to true labels) and scaled
-          <var>w</var> up until those slivers became large scores: ‖<var>w</var>‖ = <span class="n" data-n="coin_norm">43</span>
-          against <span class="n" data-n="real_norm">5.2</span>. Both halves of that are visible at one scale: the
-          coin-flip statements fill a sliver of the axis, and the gold level sets across it are
-          <span class="n" data-n="coin_step">10 logits</span> apart, where the true-label probe's are
-          <span class="n" data-n="real_step">1 logit</span> apart.</p>
+        <div class="toggles" data-for="pool">
+          <span>pool by</span>
+          <button data-k="how" data-v="mean" class="on">mean</button>
+          <button data-k="how" data-v="max">max</button>
+          <span>statement</span>
+          <button data-k="which" data-v="kras" class="on">Krasnodar</button>
+          <button data-k="which" data-v="miss">one the maximum misreads</button>
+        </div>
+        <p>For short statements that end in a period, reading the period is the simple choice. Pooling matters for long
+          inputs, where what you want to detect can occupy a few tokens anywhere, and the probes that pool by a maximum there
+          are built for it (side dish). Where a probe reads decides what it can see; the piece comes back to this when probes
+          become monitors.</p>
+        <aside class="side-dish" aria-label="Side dish">
+          <header><span class="plate" aria-hidden="true"></span><span class="sd-kicker">Side dish · optional depth</span></header>
+          <h3>How probes on long inputs pool</h3>
+          <p>Probes that take a maximum are trained through it, or smooth first. Gupta and Jenner trained their max-pooled
+            probes on the top-scoring tokens, because trained per token, as here, they reached “zero recall up to an FPR of
+            20%”. Anthropic's production probe, in Constitutional Classifiers++, scores every token, averages the logits over a
+            sliding window in training and with an exponential moving average at inference, and escalates when the smoothed
+            score crosses a threshold: “Without averaging, a single token with a spuriously high activation could incorrectly
+            flag an entire sequence as harmful.” Google DeepMind's selected probe takes the maximum over attention-weighted
+            averages of 10-token windows; one variant, MultiMax, takes a hard maximum over single tokens so that a short
+            harmful passage isn't diluted by a long context. And on long conversations McKenzie and colleagues found that the
+            probe reading only the last token “consistently performs poorly”.</p>
+        </aside>
+      </section>
+
+      <section class="step" data-step>
+        <h2>Which layer?</h2>
+        <p>A probe reads one layer, too, and so far it has been layer 12 of 28. Scrub through the model: each frame is one
+          layer, drawn in that layer's own plane (its probe's direction across, the largest remaining variance up), with a
+          probe trained at that layer on the same statements.</p>
+        <div class="check" data-q="q-l0">
+          <p class="q">At layer 0, before any block has run, what does the cloud look like?</p>
+          <div class="opts"><button data-a="point" data-correct>a single point</button><button data-a="blob">a blob with no structure</button><button data-a="two">two clusters, true and false</button></div>
+          <p class="a">A single point. Layer 0 is the embedding of the token itself, and every statement's final token is
+            the same “.”, so all <span class="n" data-n="n_test">1,026</span> states are identical and no probe can beat
+            chance there.</p>
+        </div>
+        <div class="slider" data-for="layer">
+          <label for="layer-l">layer</label>
+          <div class="track">
+            <input id="layer-l" type="range" min="0" max="28" step="1" value="12" aria-describedby="layer-out">
+            <div class="ends"><span>0: the embedding</span><span>28: the last block</span></div>
+          </div>
+          <output id="layer-out" class="reg-out"></output>
+        </div>
+        <p>Truth becomes readable gradually, and then all at once: <span class="n" data-n="acc_l2">67.7%</span> at layer 2,
+          <span class="n" data-n="acc_l6">90.4%</span> at layer 6, <span class="n" data-n="acc_l10">95.0%</span> at layer 10,
+          and at layer 11 a jump to <span class="n" data-n="acc_l11">98.5%</span>, where it stays to the last layer
+          (<span class="n" data-n="acc_l28">98.2%</span>). Layer 12 sits just past the jump. The states keep growing with
+          depth, which is why the grid rescales from frame to frame.</p>
+        <p class="caveat"><strong>Honest geometry</strong> Each layer has its own probe and its own plane, so the scrub is a
+          flipbook of projections, not a motion through one space. The up axis's sign is chosen to agree with layer 12's
+          orientation (Fig. 2) and with each neighbour's, so that frames don't flip for no reason; nothing else ties one frame
+          to the next.</p>
+      </section>
+
+      <section class="step" data-step>
+        <h2>What a fit proves</h2>
+        <p>Why trust Fig. 2's <span class="n" data-n="aff12">98.4%</span>? Not because the probe fits the statements it
+          learned from. Take 300 training statements, give them coin-flip labels so there is nothing to find, and fit the same
+          kind of probe, at layer 16 and with almost no regularization (C = 10⁴; C is the inverse of the L2 penalty's
+          weight). It fits all 300: in <var>d</var> dimensions a hyperplane with a bias can split any <var>d</var> + 1 points
+          in general position every possible way, and 300 is far below 1,537. The figure shows the fitted statements first,
+          ringed in gold, then new ones.</p>
+        <div class="check" data-q="q-conf">
+          <p class="q">On new statements it scores <span class="n" data-n="coin_held">51.1%</span>: chance. How sure is it of
+            those verdicts?</p>
+          <div class="opts"><button data-a="0">unsure: scores near 0 logits</button><button data-a="1">hedged: about 1 logit (73%)</button><button data-a="7" data-correct>near-certain: several logits</button></div>
+          <p class="a">Near-certain: new statements sit a median of <span class="n" data-n="coin_score">7</span> logits from
+            its boundary, a confidence above 99.9%, and half of those verdicts are wrong.</p>
+        </div>
+        <p>It found a direction along which the 300 statements barely differ (new ones sit a median of
+          <span class="n" data-n="coin_dist">0.15</span> units from its boundary, against
+          <span class="n" data-n="real_dist">3.4</span> for a probe fitted to true labels) and scaled <var>w</var> up until
+          those slivers became large scores: ‖<var>w</var>‖ = <span class="n" data-n="coin_norm">50</span> against
+          <span class="n" data-n="real_norm">7.1</span>. At one scale you can see both: the coin-flip statements fill a sliver
+          of the axis, and its gold level sets are <span class="n" data-n="coin_step">10 logits</span> apart, where the
+          true-label probe's are <span class="n" data-n="real_step">2 logits</span> apart (toggle the labels).</p>
         <div class="toggles" data-for="fit">
           <span>labels</span>
           <button data-k="labels" data-v="coin" class="on">coin flips</button>
@@ -148,9 +244,12 @@
           <button data-k="show" data-v="held" class="on">new</button>
         </div>
         <p>With true labels, the same recipe reaches <span class="n" data-n="real_train">100%</span> on training
-          statements and <span class="n" data-n="real_held">99.6%</span> on new ones. Only the held-out number tells the
-          two probes apart.</p>
-        <p class="caveat"><strong>Two different controls</strong> Shuffled labels ask whether fitting means anything here
+          statements and <span class="n" data-n="real_held">98.1%</span> on new ones. Training accuracy can't tell the two
+          probes apart. Held-out accuracy can, and so can the shape of the fit: a margin of
+          <span class="n" data-n="coin_margin">0.16</span> units against <span class="n" data-n="real_margin">1.39</span>,
+          and ‖<var>w</var>‖ of <span class="n" data-n="coin_norm">50</span> against
+          <span class="n" data-n="real_norm">7.1</span>.</p>
+        <p class="caveat"><strong>Two different controls</strong> Coin-flip labels ask whether fitting means anything here
           (it doesn't). Hewitt and Liang's <em>control tasks</em> ask something subtler: give each word type its own fixed
           random label and measure how much a probe scores by memorizing which word is which. <em>Selectivity</em> is task
           accuracy minus that control score.</p>
@@ -161,7 +260,7 @@
             origin of ℝ<sup><i>d</i></sup> can realize: all 2<sup><i>n</i></sup> of them while <i>n</i> ≤ <i>d</i>, and a
             share that falls through ½ at <i>n</i> = 2<i>d</i> and then to zero. A bias is one more dimension (append a
             constant 1 to every point), so a probe <var>w</var>·<var>h</var> + <var>b</var> in 1,536 dimensions splits any
-            1,537 points every way. That is the VC dimension of affine hyperplanes, <i>d</i> + 1.</p>
+            1,537 points in general position every way. That is the VC dimension of affine hyperplanes, <i>d</i> + 1.</p>
           <svg id="sd-cover" viewBox="0 0 440 210" role="img" aria-label="Share of random labellings a hyperplane can split, against points per dimension, for d = 5, 50 and 1,536"></svg>
           <p class="sd-note">Our 300 training statements in 1,536 dimensions sit at <i>n</i>/<i>d</i> ≈ 0.2, where every
             labelling fits. A perfect training score says nothing there; around <i>n</i> ≈ 2<i>d</i> it would start to.
@@ -174,16 +273,21 @@
         <h2>Two directions that both read truth</h2>
         <p>A truth direction doesn't need an optimizer. Average the true statements' hidden states, average the false
           ones', and subtract: <span class="c-overseer">Δμ</span> = μ<sub>true</sub> − μ<sub>false</sub>, the difference of
-          means (Marks and Tegmark's “mass-mean” probe). With its threshold halfway between the two means it reads
-          <span class="n" data-n="dmu12">96.0%</span> of new statements correctly.</p>
-        <p>Yet Δμ and logistic regression's <var>w</var> point <span class="n" data-n="angle12">46°</span> apart in the full
-          1,536-dimensional space. The figure's plane contains both and is drawn in true proportions, so the angle you see
-          is the real one.</p>
-        <p>What connects them is the L2 penalty. With a strong penalty, logistic regression returns Δμ: the penalized
-          solution shrinks toward the loss gradient at <var>w</var> = 0, which points along μ<sub>true</sub> −
-          μ<sub>false</sub>. As the penalty weakens, <var>w</var> turns away from Δμ, toward directions along which each
-          class varies less. With no penalty it approaches the maximum-margin direction, since <span class="n" data-n="n_train">1,026</span> statements in 1,536
-          dimensions are linearly separable.</p>
+          means (Marks and Tegmark's “mass-mean” probe; with balanced classes, as here, the same as their centred, unbiased
+          version). With its threshold halfway between the two means it reads <span class="n" data-n="dmu12">95.4%</span> of
+          new statements correctly; logistic regression's <var>w</var>, <span class="n" data-n="aff12">98.4%</span>.</p>
+        <div class="check" data-q="q-angle">
+          <p class="q">How far apart do Δμ and <var>w</var> point, in the full 1,536 dimensions?</p>
+          <div class="opts"><button data-a="10">under 10°</button><button data-a="30">about 30°</button><button data-a="60" data-correct>about 60°</button><button data-a="90">about 90°</button></div>
+          <p class="a">About 60°: <span class="n" data-n="angle12">57°</span>. The figure's plane contains both and is drawn
+            in true proportions, so the angle you see is the real one.</p>
+        </div>
+        <p>What connects them is the L2 penalty. On raw, centred activations with the bias unpenalized, a strong penalty makes
+          logistic regression return Δμ: the penalized solution shrinks toward the loss gradient at <var>w</var> = 0, which
+          points along μ<sub>true</sub> − μ<sub>false</sub>. (Standardize each coordinate first and the limit becomes Δμ
+          rescaled coordinate by coordinate.) As the penalty weakens, <var>w</var> turns away from Δμ, roughly toward
+          directions along which each class varies less. With no penalty it approaches the maximum-margin direction, since
+          <span class="n" data-n="n_train">1,026</span> statements in 1,536 dimensions are linearly separable.</p>
         <div class="slider" data-for="reg">
           <label for="reg-c">L2 penalty</label>
           <div class="track">
@@ -192,16 +296,12 @@
           </div>
           <output id="reg-out" class="reg-out"></output>
         </div>
-        <p>Along the whole path the probe reads between <span class="n" data-n="path_min">96.0%</span> and
-          <span class="n" data-n="path_max">99.5%</span> of new statements while it turns through
-          <span class="n" data-n="path_angle">54°</span>. Accuracy doesn't pin down a direction: a wide cone of directions
-          separates true from false almost equally well, and each estimator, and each setting of it, picks its own.</p>
-        <div class="check" data-q="q-cone">
-          <p class="q">So which of these is the model's truth direction?</p>
-          <div class="opts"><button data-a="dmu">Δμ</button><button data-a="w">logistic regression's <var>w</var></button><button data-a="none" data-correct>accuracy can't say</button></div>
-          <p class="a">Accuracy can't say. Whether the model <em>uses</em> a direction is a causal question: push the
-            state along it and watch the output. That comes later, and the two directions come apart there.</p>
-        </div>
+        <p>Along the whole path the probe reads between <span class="n" data-n="path_min">95.3%</span> and
+          <span class="n" data-n="path_max">98.5%</span> of new statements while it turns through
+          <span class="n" data-n="path_angle">64°</span>. Accuracy doesn't pin down a direction: a wide cone of directions
+          separates true from false almost equally well, and each estimator, and each setting of it, picks its own. Which of
+          them the model uses is a causal question: push the state along each and watch the output. Later in the piece the two
+          come apart there.</p>
         <p class="caveat"><strong>Honest geometry</strong> The plane holds the current <var>ŵ</var> (across) and Δμ. As
           you move the slider the plane turns so that <var>ŵ</var> stays horizontal, and every frame of the turn is still
           an orthogonal projection of the same states.</p>
@@ -210,9 +310,10 @@
       <section class="step" data-step>
         <h2>Say “not”</h2>
         <div class="predict">
-          <p>Take the layer-12 probe from Fig. 2, <span class="n" data-n="aff12">99.5%</span> on new affirmative
+          <p>Take the layer-12 probe from Fig. 2, <span class="n" data-n="aff12">98.4%</span> on new affirmative
             statements, and give it <span class="c-token">The city of Krasnodar is not in Russia.</span> along with the
-            other <span class="n" data-n="n_test_minus1">1,025</span> negated statements about the same held-out cities. What share does it read correctly?</p>
+            other <span class="n" data-n="n_test_minus1">1,025</span> negated statements about the same held-out cities.
+            What share does it read correctly?</p>
           <div class="guess" data-q="p3">
             <button data-a="99">≈ 99%: the state encodes the truth, “not” included</button>
             <button data-a="75">≈ 75%: “not” adds noise it never trained on</button>
@@ -223,18 +324,23 @@
       </section>
 
       <section class="step" data-step>
-        <h2>Upside down</h2>
-        <p class="guessed" data-echo="p3"></p>
+        <h2>What “not” does to it</h2>
+        <div class="guessed" data-echo="p3"></div>
         <p>Watch it in two moves. First the truth values flip in place: filled points turn hollow and hollow ones fill.
-          Then each point travels to the hidden state of its negated twin.</p>
-        <p>Most stay on their side: <span class="n" data-n="same_side">68.2%</span> of the negated statements land on the
-          same side of the boundary as their affirmative twins, and the probe reads
-          <span class="n" data-n="neg12_wrong">69.0%</span> of them wrong.</p>
+          Then each point travels to the hidden state of its negated twin (squares are negated statements).</p>
+        <p>Two things happen at once. The negations of false statements, which are now true, stay where their twins were, on
+          the false side: <span class="n" data-n="negT_false">511</span> of <span class="n" data-n="neg_class">513</span> are
+          read false. The negations of true statements, now false, mostly drift across to the false side too
+          (<span class="n" data-n="negF_false">316</span> of <span class="n" data-n="neg_class">513</span>), which happens to
+          be right. So the probe calls <span class="n" data-n="neg_called_false">80.6%</span> of the negations false and
+          reads <span class="n" data-n="neg12_acc">31.0%</span> of them correctly. Krasnodar shows both: “…is not in
+          <span data-n="false_country">China</span>.” stays on the false side, wrongly, and “…is not in Russia.” drifts
+          there, rightly.</p>
         <p>Not noisily wrong: systematically. Rank the negated statements by score and the false ones come out on top, an
-          AUROC of <span class="n" data-n="neg12_auroc">0.006</span>, where 0.5 means no signal and 0 a perfectly inverted
-          ranking.</p>
+          AUROC of <span class="n" data-n="neg12_auroc">0.010</span>, where 0.5 means no signal and 0 a perfectly inverted
+          ranking. Among negations, the direction points the wrong way.</p>
         <p><strong>Our reading:</strong> among affirmative statements, “true” coincides with “this city belongs to this
-          country”, and that match is what the probe learned. “Not” flips the truth and leaves the match in place. Marks and
+          country”, and the probe learned partly that match. “Not” flips the truth and leaves the match in place. Marks and
           Tegmark proposed a similar confound, a feature for “close association”; the last figure shows the evidence in this
           model.</p>
         <div class="toggles" data-for="flip">
@@ -246,9 +352,10 @@
         <p>Layer 8 looks like layer 12: <span class="n" data-n="neg8_acc">18.8%</span> read correctly, AUROC
           <span class="n" data-n="neg8_auroc">0.06</span>. At layer 16 the probe calls every negated statement false. That is
           right for the false half, so accuracy is 50% and looks like guessing, but the ranking is still inverted: AUROC
-          <span class="n" data-n="neg16_auroc">0.19</span>. The difference of means does the same at layer 12
-          (<span class="n" data-n="dmu_neg12">49.8%</span>, AUROC <span class="n" data-n="dmu_neg12_auroc">0.02</span>). A
-          threshold can hide which way a direction points; the ranking can't.</p>
+          <span class="n" data-n="neg16_auroc">0.19</span>. The difference of means at layer 12 also calls nearly every
+          negation false (<span class="n" data-n="dmu_neg12_false">99.8%</span>): <span class="n" data-n="dmu_neg12">49.8%</span>
+          correct, AUROC <span class="n" data-n="dmu_neg12_auroc">0.02</span>. A threshold can hide which way a direction
+          points; the ranking can't.</p>
       </section>
 
       <section class="step" data-step>
@@ -265,17 +372,16 @@
           <button data-k="set" data-v="cities" class="on">cities</button>
           <button data-k="set" data-v="sp">Spanish words</button>
         </div>
-        <p>Now a different kind of fact: <span class="c-token">The Spanish word 'uno' means 'one'.</span> At layer 12 the
-          retrained probe reads these at <span class="n" data-n="w2sp12">92.3%</span> but their negations at only
-          <span class="n" data-n="w2negsp12">66.2%</span> (AUROC <span class="n" data-n="w2negsp12_auroc">0.76</span>). At
-          layer 16 it ranks both well (AUROC <span class="n" data-n="w2sp16_auroc">0.99</span> and
-          <span class="n" data-n="w2negsp16_auroc">0.95</span>) yet reads them at only
-          <span class="n" data-n="w2sp16">68.3%</span> and <span class="n" data-n="w2negsp16">62.5%</span>: the direction
-          carries over, and the threshold, set on cities, doesn't. There the affirmative-only probe had read the plain words
-          at <span class="n" data-n="wsp16">92.3%</span> and their negations at <span class="n" data-n="wnegsp16">50.0%</span>.</p>
-        <p>Retraining fixes the shift you trained on, negation, for cities. It promises nothing about the next shift, and it
-          can cost elsewhere: at layer 16, plain Spanish words fell from <span class="n" data-n="wsp16">92.3%</span> to
-          <span class="n" data-n="w2sp16">68.3%</span>.</p>
+        <p>Now a different kind of fact: <span class="c-token">The Spanish word 'uno' means 'one'.</span>, from our own list
+          of 265 common Spanish words, each once with its translation and once with another word's. At layer 16 the retrained
+          probe ranks these well, better than the affirmative-only probe did (AUROC
+          <span class="n" data-n="w2sp16_auroc">0.99</span> against <span class="n" data-n="wsp16_auroc">0.98</span>), yet
+          reads only <span class="n" data-n="w2sp16">68.3%</span> of them correctly: the direction carries over, and the
+          threshold, set on cities, doesn't. At layer 12 it reads the plain words at
+          <span class="n" data-n="w2sp12">92.3%</span> but their negations at <span class="n" data-n="w2negsp12">66.2%</span>
+          (AUROC <span class="n" data-n="w2negsp12_auroc">0.76</span>).</p>
+        <p>Retraining fixed the shift it trained on: negation, for cities. It promises nothing about the next shift, and a new
+          topic can need a new threshold even where the direction carries over.</p>
       </section>
 
       <section class="step" data-step>
@@ -283,26 +389,32 @@
         <p>Why does retraining on both work? Take the difference of means separately for affirmative statements,
           Δ<sub>aff</sub>, and for negated ones, Δ<sub>neg</sub>, and split them into a shared part and a flipping part:
           Δ<sub>aff</sub> = <var>g</var> + <var>p</var> and Δ<sub>neg</sub> = <var>g</var> − <var>p</var>, so
-          <var>g</var> = ½(Δ<sub>aff</sub> + Δ<sub>neg</sub>) and <var>p</var> = ½(Δ<sub>aff</sub> − Δ<sub>neg</sub>).</p>
+          <var>g</var> = ½(Δ<sub>aff</sub> + Δ<sub>neg</sub>) and <var>p</var> = ½(Δ<sub>aff</sub> − Δ<sub>neg</sub>). These
+          are the difference-of-means version of Bürger, Hamprecht and Nadler's two directions.</p>
         <p>In the plane of <var>g</var> and <var>p</var> the four kinds of statement form four groups. Truth runs along
           <var>g</var> for both polarities: a direction along <var>g</var> alone reads
-          <span class="n" data-n="tg_aff16">96.8%</span> of affirmative and <span class="n" data-n="tg_neg16">90.6%</span>
-          of negated statements. Along <var>p</var>, the upper groups are true “is in” and false “is not in”: exactly the
-          statements where city and country match. That is the evidence for our reading of the flip.</p>
-        <p>The affirmative-only probe carries as much <var>p</var> as <var>g</var> (cosines
-          <span class="n" data-n="w_tp16">0.46</span> and <span class="n" data-n="w_tg16">0.46</span>), and “not” reverses
-          the <var>p</var> part. The retrained probe has almost none (<span class="n" data-n="w2_tp16">0.01</span>).
-          Bürger, Hamprecht and Nadler (2024) found this two-dimensional structure, a general truth direction and a
-          polarity-sensitive one, in LLaMA3-8B and several other models from 7B to 27B parameters.</p>
+          <span class="n" data-n="tg_aff16">95.5%</span> of affirmative and <span class="n" data-n="tg_neg16">87.4%</span>
+          of negated statements. <var>p</var> is built to point from the mismatched groups (false “is in”, true “is not
+          in”) to the matched ones (true “is in”, false “is not in”, where city and country match), so the matched groups sit
+          up by construction.</p>
+        <p>What isn't by construction: <var>p</var> is as long as <var>g</var> (<span class="n" data-n="p_len16">9.3</span>
+          against <span class="n" data-n="g_len16">8.0</span> units at layer 16) and separates the groups cleanly, and the
+          affirmative-only probe leans on <var>p</var> about as much as on <var>g</var> (cosines
+          <span class="n" data-n="w_tp16">0.34</span> and <span class="n" data-n="w_tg16">0.30</span>), while the retrained
+          probe has almost none (<span class="n" data-n="w2_tp16">0.02</span>). That is the evidence for our reading of the
+          flip: the first probe partly read city–country match, and “not” reverses it. Bürger and colleagues found this
+          two-dimensional structure, a general truth direction and a polarity-sensitive one, in LLaMA3-8B and several other
+          models from 7B to 27B parameters.</p>
         <div class="toggles" data-for="gp">
           <span>layer</span>
           <button data-k="layer" data-v="12">12</button>
           <button data-k="layer" data-v="16" class="on">16</button>
         </div>
-        <p class="caveat"><strong>Honest geometry</strong> <var>g</var> and <var>p</var> aren't orthogonal (cosine
-          <span class="n" data-n="tg_tp16">0.32</span> at layer 16), so the vertical axis is the part of <var>p</var>
-          orthogonal to <var>g</var>, in true proportions. The dashed line is the affirmative-only probe's boundary, drawn by
-          its component in this plane. The picture is cleanest at layer 16; at layer 12 the groups overlap more.</p>
+        <p class="caveat"><strong>Honest geometry</strong> <var>g</var> and <var>p</var> aren't orthogonal (the cosine between
+          them is <span class="n" data-n="tg_tp16">0.34</span> at layer 16), so the vertical axis is the part of <var>p</var>
+          orthogonal to <var>g</var>, in true proportions. The dashed line is where the affirmative-only probe's boundary cuts
+          this plane; its hyperplane isn't in the plane, so a point's side of the dashed line isn't its real side. The picture
+          is cleanest at layer 16; at layer 12 the groups overlap more.</p>
         <div class="ledger" data-qn="2"></div>
       </section>
     </div>

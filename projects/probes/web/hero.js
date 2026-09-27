@@ -56,10 +56,10 @@ export function startHero(svgEl, DATA, { reduced = false, narrow = false } = {})
     paper.interrupt().style("opacity", 0);
     fig.cur = null; fig.pts.forEach((s) => { s.el?.remove(); s.dotEl?.remove(); s.ringEl?.remove(); }); fig.pts.clear();
     await fig.show(V0);
-    say(`${idx.length.toLocaleString("en-US")} statements about cities, as 1,536 numbers each, seen in a view that ignores the probe`);
+    say(`${idx.length.toLocaleString("en-US")} statements about cities, as 1,536 numbers each, seen in a view chosen so that true and false overlap`);
     await sleep(1300);
     await fig.show(V1);
-    say("filled: true · hollow: false · in this view they overlap");
+    say("filled: true · hollow: false · this view ignores the probe's direction, and they overlap");
     await sleep(900);
     await fig.show({ ...V2, choreo: "move" });
     say("the view turns until the probe's direction lies flat");

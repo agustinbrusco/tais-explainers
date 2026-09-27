@@ -244,7 +244,7 @@ for name, lab in [("real", ya), ("coin", coin)]:
     u = unit(w)
     v = top_pc(X[trn], [u])
     pick_tr, pick_te = trn, tst          # every training statement and every held-out one (the paper's histograms)
-    xy = lambda I: (R((X[I] - c) @ u), R((X[I] - c) @ v))
+    xy = lambda I: (R((X[I] - c) @ u, 4), R((X[I] - c) @ v, 2))    # 4 d.p. across: the coin-flip sliver is narrow
     (tx, ty), (hx, hy) = xy(pick_tr), xy(pick_te)
     s_tr, s_te = X[trn] @ w + b, X[tst] @ w + b
     nw = float(np.linalg.norm(w))
@@ -322,8 +322,103 @@ if tf.exists():
             pick_rows = np.where(tr)[0][:64]
             pipe["table"] = {"x": [R(X[i][::12], 2) for i in pick_rows], "y": ya[pick_rows].tolist(),
                              "stride": 12, "text": [ra[i]["statement"] for i in pick_rows]}
+    # A probe per position (layer 12): where in "The city of X is in Y." each state sits, from the tokenizer's character
+    # offsets, and a probe trained on the states at that position. Up to "in", a true statement and its false twin are
+    # the same input, so these are exactly 50%.
+    j12 = TL.index(12)
+    roles = {k: np.zeros(len(ya), dtype=int) for k in ("The", "city", "of", "city_first", "city_last", "is", "in",
+                                                       "country_first", "country_last", "period")}
+    for i, r in enumerate(ra):
+        text = r["statement"]
+        enc = tokz(text, return_offsets_mapping=True)
+        spans = enc["offset_mapping"]
+        assert len(spans) == span(i)[1] - span(i)[0]
+        c0 = text.index(r["city"]); c1 = c0 + len(r["city"])
+        k0 = text.rindex(r["country"]); k1 = k0 + len(r["country"])
+        inside = lambda a, b: [t for t, (s0, s1) in enumerate(spans) if s0 < b and s1 > a and s1 > s0]
+        ct, kt = inside(c0, c1), inside(k0, k1)
+        base = span(i)[0]
+        roles["The"][i], roles["city"][i], roles["of"][i] = base, base + 1, base + 2
+        roles["city_first"][i], roles["city_last"][i] = base + ct[0], base + ct[-1]
+        roles["is"][i], roles["in"][i] = base + ct[-1] + 1, base + ct[-1] + 2
+        roles["country_first"][i], roles["country_last"][i] = base + kt[0], base + kt[-1]
+        roles["period"][i] = span(i)[1] - 1
+    by_pos = {}
+    for k, pos in roles.items():
+        Xk = st[pos, j12].astype(np.float64)
+        if np.allclose(Xk[0::2], Xk[1::2], atol=0.01):   # twins identical: no probe can separate them
+            by_pos[k] = 0.5
+            continue
+        wk, bk = lr(Xk[tr], ya[tr])
+        by_pos[k] = acc(Xk[te] @ wk + bk, ya[te])
+    pipe["by_position"] = by_pos
+    # a held-out false statement that max pooling (with its own threshold) misreads, and the token that decides it
+    L12 = "12"
+    per12 = None
+    j = j12
+    X12 = A[:, 12].astype(np.float64)
+    rows12 = np.concatenate([np.arange(*span(i)) for i in np.where(tr)[0]])
+    lab12 = np.concatenate([[ya[i]] * (span(i)[1] - span(i)[0]) for i in np.where(tr)[0]])
+    we12, be12 = lr(st[rows12, j].astype(np.float64), lab12)
+    per12 = [st[slice(*span(i)), j].astype(np.float64) @ we12 + be12 for i in range(len(ya))]
+    thr12 = pipe["acc"][L12]["every_max_thr"]
+    miss = [i for i in np.where(te & (ya == 0))[0] if per12[i].max() > thr12 and per12[i][:-2].max() > thr12]
+    ex = int(miss[0]) if miss else None
+    if ex is not None:
+        pipe["max_miss"] = {"text": ra[ex]["statement"], "tokens": [tokz.decode([int(t)]) for t in ids[slice(*span(ex))]],
+                            "scores": R(per12[ex], 2), "thr": thr12, "n_missed_false": len(miss),
+                            "n_false_test": int((te & (ya == 0)).sum())}
+    # position specificity: the first token's state is far larger than the rest (massive activations), so a probe
+    # trained at the period reads nonsense there
+    norms = np.linalg.norm(st[:, j12].astype(np.float64), axis=1)
+    first = norms[off[:-1]]
+    rest = np.concatenate([norms[off[i] + 1:off[i + 1]] for i in range(len(ya))])
+    pipe["first_token_norm_ratio"] = round(float(np.median(first) / np.median(rest)), 1)
+    # the stripes in X: a few coordinates are large in every statement, true or false alike
+    Xt = X12[tr]
+    mag = np.abs(Xt).mean(0)
+    top = np.argsort(-mag)[:8]
+    pipe["x_stripes"] = {"top8_share_of_abs": round(float(mag[top].sum() / mag.sum()), 3),
+                         "true_false_mean_corr": round(float(np.corrcoef(Xt[ya[tr] == 1].mean(0), Xt[ya[tr] == 0].mean(0))[0, 1]), 3)}
     out["pipeline"] = pipe
     print("pipeline", json.dumps(pipe["acc"]), pipe["tokens"])
+    print("by position", by_pos, "| max miss", pipe.get("max_miss", {}).get("text"), pipe.get("max_miss", {}).get("n_missed_false"),
+          "| first-token norm ratio", pipe["first_token_norm_ratio"], "| stripes", pipe["x_stripes"])
+
+# Which layer: for every layer 0..28, the pinned probe's held-out accuracy (and the difference of means'), and the
+# held-out cloud in that layer's own plane (the probe's direction across, the largest remaining variance up), as two
+# coordinates per statement. Each layer's plane is a different space, so the page shows them as frames of a flipbook,
+# each an honest projection; the up axis's sign is chosen to agree with the previous layer's, so frames don't flip.
+flip = []
+china_te = np.array([ra[i]["correct_country"] == "China" for i in TE])
+for L in range(A.shape[1]):
+    X = A[:, L].astype(np.float64)
+    c = X[tr].mean(0)
+    if float(np.abs(X - c).max()) < 1e-6:              # layer 0: every final token is ".", so every state is the same
+        flip.append({"layer": L, "x": np.zeros(int(te.sum())), "y": np.zeros(int(te.sum())), "thr": 0.0, "norm": None,
+                     "acc": 0.5, "acc_dmu": 0.5, "identical": True})
+        continue
+    w, b = lr(X[tr], ya[tr])
+    u = unit(w)
+    v = top_pc(X[tr], [u])
+    mt, mf = X[tr][ya[tr] == 1].mean(0), X[tr][ya[tr] == 0].mean(0)
+    nw = float(np.linalg.norm(w))
+    flip.append({"layer": L, "x": (X[te] - c) @ u, "y": (X[te] - c) @ v, "thr": round(float(-(w @ c + b) / nw), 4),
+                 "norm": round(nw, 4), "acc": acc(X[te] @ w + b, ya[te]),
+                 "acc_dmu": acc((X[te] - (mt + mf) / 2) @ (mt - mf), ya[te])})
+# signs of the up axes: layer 12 as in Fig. 2 (statements about Chinese cities up), then each layer agrees with its
+# neighbour toward 12, so a scrub doesn't flip for no reason
+if flip[12]["y"][china_te].mean() < flip[12]["y"][~china_te].mean():
+    flip[12]["y"] = -flip[12]["y"]
+for order in (range(13, len(flip)), range(11, 0, -1)):
+    for L in order:
+        ref = flip[L - 1 if L > 12 else L + 1]["y"]
+        if np.corrcoef(flip[L]["y"], ref)[0, 1] < 0:
+            flip[L]["y"] = -flip[L]["y"]
+for f in flip:
+    f["x"], f["y"] = R(f["x"], 2), R(f["y"], 2)
+out["by_layer"] = flip
+print("by layer", [(f["layer"], f["acc"], f["acc_dmu"]) for f in flip])
 
 # The country-name baseline: a classifier that sees only which country a statement names (one-hot), trained on the
 # training cities and tested on the held-out ones. The false country is drawn by frequency, so this should be chance.
