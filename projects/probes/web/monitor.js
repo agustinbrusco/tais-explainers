@@ -339,8 +339,14 @@ export function leakView({ scored, held }) {
     const thrY = floor - 1.1 * K;
     g.append("line").attr("class", "m-thr").attr("x1", x0 - 8).attr("x2", x1 + 4).attr("y1", thrY).attr("y2", thrY);
     g.append("text").attr("class", "m-thr-t").attr("x", x1 + 4).attr("y", thrY - 8).attr("text-anchor", "end").text("threshold");
-    g.append("line").attr("class", "m-mean");
-    g.append("text").attr("class", "m-mean-t").attr("text-anchor", "start");
+    {
+      const st0 = stateOf(scored), used = st0.map((q, i) => ({ ...q, i })).filter((q) => q.counted);
+      const m = d3.mean(used, (q) => q.s), ym = floor - m * K, a = X(used[0].i), b = X(used[used.length - 1].i) + tw;
+      const mk = g.append("g");
+      mk.append("line").attr("class", "m-mean").attr("x1", a).attr("x2", b).attr("y1", ym).attr("y2", ym);
+      mk.append("text").attr("class", "m-mean-t").attr("text-anchor", "start").attr("x", a + 4).attr("y", ym - 9);
+      ctx.fadeIn(mk, 1300, 400);
+    }
     // the four AUROCs (Boxo et al.)
     const cy = floor + (phone ? 56 : 52), cw = phone ? 346 : 336, ch = phone ? 50 : 44;
     const chips = g.append("g").attr("class", "m-aus");
@@ -474,10 +480,15 @@ export function pressureView() {
       g.select(".m-max-t").transition().delay(ctx.at(t)).duration(ctx.dur(d)).attr("x", xe + 10).attr("y", floor - mx * K + 6);
     };
     g.append("path").attr("class", "m-trail");
-    g.append("line").attr("class", "m-mean");
-    g.append("text").attr("class", "m-mean-t").text("mean");
-    g.append("path").attr("class", "m-max");
-    g.append("text").attr("class", "m-max-t").text("max");
+    const marks = g.append("g");
+    {
+      const P0 = place(core), m = mean(core), mx = max(core), xe = P0[P0.length - 1].x + bw;
+      marks.append("line").attr("class", "m-mean").attr("x1", x0 + 6).attr("x2", xe + 4).attr("y1", floor - m * K).attr("y2", floor - m * K);
+      marks.append("text").attr("class", "m-mean-t").text("mean").attr("x", xe + 10).attr("y", floor - m * K + 6);
+      marks.append("path").attr("class", "m-max").attr("d", `M${x0 + 6},${floor - mx * K}H${xe + 4}`);
+      marks.append("text").attr("class", "m-max-t").text("max").attr("x", xe + 10).attr("y", floor - mx * K + 6);
+    }
+    ctx.fadeIn(marks, 2100, 400);
     drawSeq(core, 1800, 500);
     // the fillers arrive one after another (the mean sinks, leaving a magenta trail); the max doesn't move
     const t0 = 3200;
@@ -510,20 +521,20 @@ export function movesView() {
     const N = phone ? 40 : 60;
     const honest = d3.range(N).map(() => [-1.5 + 0.55 * nrm(), 0.55 * nrm()]);
     const hack0 = d3.range(N).map(() => [1.5 + 0.55 * nrm(), 0.55 * nrm()]);
-    const hack1 = hack0.map(([x, y]) => [-1.5 + (y) * 1 + 0.15 * nrm(), 2.1 + (x - 1.5)]);     // turned: overlaps along x
-    const cyMid = (G.y0 + G.y1) / 2 + 8, ky = (G.y1 - G.y0 - 60) / 4.6;
-    const sx = (x) => cx + x * (phone ? 96 : 100), sy = (y) => cyMid - (y - 1.0) * ky;
+    const hack1 = hack0.map(([x, y]) => [-1.5 + y + 0.15 * nrm(), 2.5 + (x - 1.5) * 0.8]);     // turned: overlaps along x
+    const cyMid = (G.y0 + G.y1) / 2 + 8, ky = (G.y1 - G.y0 - 56) / 5.4;
+    const sx = (x) => cx + x * (phone ? 96 : 100), sy = (y) => cyMid - (y - 1.1) * ky;
     const lv = g.append("g").attr("class", "m-levels");
     const drawLevels = (sel, vertical, cls) => {
       [-2, -1, 0, 1, 2].forEach((k) => {
         if (vertical) sel.append("line").attr("class", `${cls}${k ? "" : " zero"}`).attr("x1", cx + k * 60).attr("x2", cx + k * 60).attr("y1", G.y0 + 8).attr("y2", G.y1 - 8);
-        else sel.append("line").attr("class", `${cls}${k ? "" : " zero"}`).attr("x1", G.x0 + 8).attr("x2", G.x1 - 8).attr("y1", sy(1.05) + k * 30).attr("y2", sy(1.05) + k * 30);
+        else sel.append("line").attr("class", `${cls}${k ? "" : " zero"}`).attr("x1", G.x0 + 8).attr("x2", G.x1 - 8).attr("y1", sy(1.25) + k * 30).attr("y2", sy(1.25) + k * 30);
       });
     };
     const oldLv = lv.append("g"); drawLevels(oldLv, true, "q-lvlg");
     const newLv = lv.append("g").style("opacity", 0); drawLevels(newLv, false, "q-lvlg");
     g.append("text").attr("class", "glass-label gold").attr("x", cx + 14).attr("y", G.y0 + 30).text("a general deception probe");
-    const newLab = g.append("text").attr("class", "glass-label gold").attr("x", G.x1 - 18).attr("y", sy(1.05) - 8).attr("text-anchor", "end").text("a probe for hard-coding").style("opacity", 0);
+    const newLab = g.append("text").attr("class", "glass-label gold").attr("x", G.x1 - 18).attr("y", sy(1.25) - 8).attr("text-anchor", "end").text("a probe for hard-coding").style("opacity", 0);
     const pts = g.append("g");
     const H = pts.selectAll("circle.h").data(honest).join("circle").attr("class", "m-pt hollow").attr("r", phone ? 5.2 : 4.2).attr("cx", (d) => sx(d[0])).attr("cy", (d) => sy(d[1]));
     const K_ = pts.selectAll("circle.k").data(hack0).join("circle").attr("class", "m-pt filled").attr("r", phone ? 5.2 : 4.2).attr("cx", (d) => sx(d[0])).attr("cy", (d) => sy(d[1]));

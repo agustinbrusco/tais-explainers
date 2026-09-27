@@ -174,6 +174,13 @@ The whole argument in one cinematic shot, before any words:
 - Badge: "real · re-plotted, approx." Say the values were read off the figure by eye.
 - Reveal area charts with a left-to-right clip. Growing stacked areas from flat leaves artifacts.
 
+### Same figure, new job (probes, chapter IV)
+- To show a probe becoming a monitor, keep the reader's most familiar view and take something away: the labels (every
+  point grey, the two histograms merged into one grey one) and shade the side the alarm flags. The readout becomes a
+  flag count and a "?" for how many flags are right: the monitor's blindness, drawn.
+- Every impressive number travels with its counterpart: a board of headline cards, each with its counterparts under a
+  bracket (another model, a corrected threshold, a new benchmark), each labelled as what it is.
+
 ### Figure hygiene
 - **Badges:** on every figure. For real data, give the model and layer, and keep them on phones.
 - **Legends:** show only what's on screen.
@@ -240,6 +247,23 @@ The whole argument in one cinematic shot, before any words:
   50.0%, and 87.8% with its own. Accuracy falling while AUROC rises is calibration, not a worse direction.
 - **Name what's true by construction.** p = ½(Δ_aff − Δ_neg) *is* the match-minus-mismatch direction, so "the matched
   groups sit up along p" is not evidence; its length and the probe's loading on it are.
+- **Run the control a claim needs, even when a reviewer only asks for a rewording** (probes, 2026-09-27). A text-only
+  baseline (character n-grams, the same split: 64%) turned "it isn't in the words" into a calibrated sentence, and a
+  matched-displacement push (the Δμ push at α·cos², as long along Δμ as the logistic push) changed a conclusion: in
+  distribution the logistic push's weakness was geometry, not an ignored direction. Minutes of compute, a truer page.
+- **A fixed regularization constant is a different penalty at every n.** sklearn minimizes ½‖w‖² + C·Σ loss, so a
+  learning curve at fixed C also walks the regularization path. Before saying a direction "depends on the data it saw",
+  measure the angle between independent draws and each fit's angle to its own draw's Δμ.
+- **Like with like.** An in-distribution number set beside a paper's out-of-distribution table must say so, or be rerun
+  out of distribution (ours: 82% vs 34% in distribution, 69% vs 20% on the paper's kind of statements).
+- **A patching contrast decides what its map can show.** Swapping the statement's last word mixes that token's identity
+  with its truth: say "where those states still change the answer", not "where truth is carried".
+- **Check a source against the domain's own arithmetic.** Li et al. give both 47% and 53% as the always-"empty" error; an
+  Othello board holds 4 + t pieces after t moves, which settles it (47% empty).
+- **Illustrative distributions fitted to published rows** (the dial): Gaussians drawn as n quantile samples
+  (deterministic), parameters solved in a data script that asserts the drawn samples reproduce the published readouts at
+  the published threshold, every on-screen readout computed from the same samples, and a badge and caveat saying only the
+  rows are data.
 
 ## 5. Web pitfalls and their fixes
 - **Filters inside a `display:none` SVG vanish (Chrome).** Keep defs in an always-rendered 0×0 SVG
@@ -284,6 +308,22 @@ The whole argument in one cinematic shot, before any words:
 - **Cards that share a side of the glass collide:** lay them out per side in the order of their points.
 - **Logistic regression on raw activations:** L-BFGS hit its evaluation limit on ~20k per-token rows; `newton-cholesky`
   solves exactly and fast when d ≈ 1.5k.
+- **`pkill -f` / `pgrep -f` match their own shell** when the pattern is in the command line (the tool's shell exits with
+  it, code 144). Use the bracket trick: `pgrep -af "[e]xport_find"`.
+- **Two CPU-heavy jobs thrash.** A one-minute scikit-learn export took 18 minutes beside a torch run (BLAS threads
+  oversubscribe the cores). Run them one after the other, or cap threads.
+- **Figure numbers in the prose go stale when a step is inserted.** Compute them from the step order (`data-fig="probe"`
+  filled from `ORDER`).
+- **Feedback keyed by option value collides across predicts** (two predicts with a "99" option): key it by
+  `question:option`, falling back to the option.
+- **Antipodal frames can't be slerped:** turn through an intermediate frame (a 0/120/240/360 sweep), and let `frameAt`
+  route opposite frames through a midpoint.
+- **A colour change that must follow `--clock`** (gold → violet on an arrow) is interpolated per frame on the figure's
+  clock, not left to a CSS transition.
+- **A `d3.timer` started by an update must stop the previous one** (keep it on the node), and keep the state reached at
+  every frame, so an update mid-morph continues from what is on screen.
+- **Points drawn in the glass but kept off the paper** (a fit's training statements): a per-point `noPaper` flag, and
+  their rings drawn above the cloud, or a ringed point inside a dense cloud disappears.
 - **Headless WebGL, for a future Three.js piece (untested here):** without a GPU, headless Chrome may give no WebGL
   context. ClaudeAnimationBase's `render.mjs` passes `--use-angle=swiftshader --enable-unsafe-swiftshader` for software
   WebGL, and `--use-angle=vulkan` or `gl-egl` on headless NVIDIA machines.
