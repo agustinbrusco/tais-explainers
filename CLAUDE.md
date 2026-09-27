@@ -28,7 +28,10 @@ learner/              profile.md, concept-map.md, journal.md: who we're teaching
 3. **Separate three voices:** what the paper *showed*, what the authors *argue* it implies, and what *we*
    think. Never let the third one sound like the first.
 4. **Badge every figure:** `schematic`, `real` (with model and layer, e.g. "real: GPT-2 small, L6"), or
-   `speculative`. Prefer real data when it's feasible on CPU (see `interp` extra).
+   `speculative`. Prefer real data when it's cheap on CPU (minutes, not hours; see `interp` extra). Otherwise re-plot
+   published results, or draw illustrative data points that carry the idea, badged as such, with a caveat wherever the
+   context doesn't already make it clear (the learner, 2026-09-26: go light on experiments). An illustrative number is
+   never stated as a result.
 5. **Name simplifications where they happen,** with a caveat callout on screen, not in a footnote.
 6. **Every piece ends with its limits:** what it doesn't show, what's contested, what's unknown.
 7. **Calibrate in both directions.** Don't soften worrying evidence into a "misconception" (e.g. "no lab deploys

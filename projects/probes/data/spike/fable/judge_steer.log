@@ -1,0 +1,28 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  19%|█▉        | 65/338 [00:00<00:00, 619.85it/s]Loading weights:  38%|███▊      | 127/338 [00:00<00:00, 437.58it/s]Loading weights:  51%|█████▏    | 174/338 [00:00<00:00, 345.55it/s]Loading weights:  63%|██████▎   | 212/338 [00:00<00:00, 298.40it/s]Loading weights:  72%|███████▏  | 244/338 [00:00<00:00, 277.96it/s]Loading weights:  81%|████████  | 273/338 [00:00<00:00, 275.99it/s]Loading weights:  89%|████████▉ | 302/338 [00:01<00:00, 244.81it/s]Loading weights:  97%|█████████▋| 328/338 [00:01<00:00, 247.99it/s]Loading weights: 100%|██████████| 338/338 [00:01<00:00, 297.24it/s]
+[    7s] loaded; token ids 830 895
+[  105s] zero-shot cities_heldout {'n': 120, 'acc': 0.6083333333333333, 'auroc': 1.0, 'mean_p_true|true': 0.4624696373939514, 'mean_p_true|false': 0.10596054047346115}
+[  212s] zero-shot neg_cities {'n': 120, 'acc': 0.525, 'auroc': 0.8014480646059593, 'mean_p_true|true': 0.13302510976791382, 'mean_p_true|false': 0.07829210162162781}
+[  253s] L12 all  a=-3.0 (|push|/|h|=0.46) P(true|false)=0.472 P(true|true)=0.427 judgedT|false=0.33
+[  293s] L12 all  a=-1.5 (|push|/|h|=0.23) P(true|false)=0.176 P(true|true)=0.320 judgedT|false=0.00
+[  333s] L12 all  a=+0.0 (|push|/|h|=0.00) P(true|false)=0.119 P(true|true)=0.439 judgedT|false=0.00
+[  371s] L12 all  a=+1.5 (|push|/|h|=0.23) P(true|false)=0.175 P(true|true)=0.480 judgedT|false=0.00
+[  409s] L12 all  a=+3.0 (|push|/|h|=0.46) P(true|false)=0.239 P(true|true)=0.301 judgedT|false=0.00
+[  448s] L12 last a=-3.0 (|push|/|h|=0.46) P(true|false)=0.207 P(true|true)=0.344 judgedT|false=0.00
+[  487s] L12 last a=-1.5 (|push|/|h|=0.23) P(true|false)=0.155 P(true|true)=0.401 judgedT|false=0.00
+[  525s] L12 last a=+0.0 (|push|/|h|=0.00) P(true|false)=0.119 P(true|true)=0.439 judgedT|false=0.00
+[  565s] L12 last a=+1.5 (|push|/|h|=0.23) P(true|false)=0.129 P(true|true)=0.458 judgedT|false=0.00
+[  605s] L12 last a=+3.0 (|push|/|h|=0.46) P(true|false)=0.174 P(true|true)=0.420 judgedT|false=0.00
+[  659s] L12 coherence {'0': ' it is the capital of the Democratic Republic', '3': ' it is the capital of the Democratic Republic', '-3': ' Kinshasa is in the Amazon rain'}
+[  700s] L16 all  a=-3.0 (|push|/|h|=0.80) P(true|false)=0.783 P(true|true)=0.755 judgedT|false=1.00
+[  740s] L16 all  a=-1.5 (|push|/|h|=0.40) P(true|false)=0.097 P(true|true)=0.103 judgedT|false=0.00
+[  778s] L16 all  a=+0.0 (|push|/|h|=0.00) P(true|false)=0.119 P(true|true)=0.439 judgedT|false=0.00
+[  818s] L16 all  a=+1.5 (|push|/|h|=0.40) P(true|false)=0.254 P(true|true)=0.468 judgedT|false=0.00
+[  859s] L16 all  a=+3.0 (|push|/|h|=0.80) P(true|false)=0.269 P(true|true)=0.245 judgedT|false=0.00
+[  900s] L16 last a=-3.0 (|push|/|h|=0.80) P(true|false)=0.017 P(true|true)=0.021 judgedT|false=0.00
+[  939s] L16 last a=-1.5 (|push|/|h|=0.40) P(true|false)=0.017 P(true|true)=0.048 judgedT|false=0.00
+[  981s] L16 last a=+0.0 (|push|/|h|=0.00) P(true|false)=0.119 P(true|true)=0.439 judgedT|false=0.00
+[ 1020s] L16 last a=+1.5 (|push|/|h|=0.40) P(true|false)=0.323 P(true|true)=0.487 judgedT|false=0.00
+[ 1060s] L16 last a=+3.0 (|push|/|h|=0.80) P(true|false)=0.335 P(true|true)=0.447 judgedT|false=0.00
+[ 1118s] L16 coherence {'0': ' it is the capital of the Democratic Republic', '3': ' it is the capital of the country,', '-3': ' the city of Brazil is in Brazil.'}
+[ 1118s] wrote fable/judge_steer.json

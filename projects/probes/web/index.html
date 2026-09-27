@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A Ruler Through the Glass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap">
+  <link rel="stylesheet" href="../../../kit/web/tokens.css">
+  <link rel="stylesheet" href="../../../kit/web/base.css">
+  <link rel="stylesheet" href="./probes.css">
+  <script type="importmap">
+    { "imports": { "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm" } }
+  </script>
+</head>
+<body>
+  <main class="explainer">
+    <header>
+      <p class="proto-note">Prototype · the money shot and one side-dish · real data from a scratch run, not final</p>
+      <h1>A Ruler Through the Glass</h1>
+      <p class="lede">A probe is a ruler laid through a model's hidden states: one direction and a tick. Here is what it reads,
+        and what it only seems to read.</p>
+    </header>
+
+    <div class="prose">
+      <section class="step" data-step>
+        <h2>A ruler through the glass</h2>
+        <p>Each dot is one statement, like <span class="c-token">The city of Krasnodar is in Russia.</span>, seen through
+          the model's <span class="c-residual">hidden state</span> at its last token: 1,536 numbers, drawn here as one point.
+          Filled dots are true statements; hollow ones are false.</p>
+        <p>A <span class="c-overseer">probe</span> is a direction through those numbers plus a threshold. Train one with
+          logistic regression and lay it through the glass: every statement's <em>reading</em> is how far along the ruler
+          it falls. The readings drop through the glass onto the paper, and the tick splits them.</p>
+        <p>On 748 statements about cities the probe never saw, it reads true from false 99% of the time.</p>
+        <p class="caveat"><strong>Honest geometry</strong> The plane contains the ruler's direction and the direction of
+          largest remaining spread; the other 1,534 directions are flattened onto it. Left-right positions (the readings)
+          are exact; heights depend on the plane we chose.</p>
+      </section>
+
+      <section class="step" data-step>
+        <h2>Fitting proves nothing</h2>
+        <p>Now give 300 statements <em>coin-flip</em> labels, so there is nothing true to find, and train the same kind of
+          ruler on them. It still splits them perfectly: training accuracy 100%.</p>
+        <p>The test is what it does on statements it has never seen. It still reads them confidently, to both sides, and
+          gets half of them right.</p>
+        <div class="toggles" data-for="fit">
+          <span>labels</span>
+          <button data-k="labels" data-v="coin" class="on">coin flips</button>
+          <button data-k="labels" data-v="real">true / false</button>
+          <span>show</span>
+          <button data-k="show" data-v="train" class="on">training statements</button>
+          <button data-k="show" data-v="held">new statements</button>
+        </div>
+        <p>With true labels the same recipe gives 100% on training and 99.5% on new statements. Only the held-out number
+          tells the two rulers apart.</p>
+        <p class="caveat"><strong>Two different controls</strong> Shuffled labels ask whether fitting means anything here
+          (it doesn't). Hewitt and Liang's <em>control tasks</em> ask a subtler question: give each word its own fixed random
+          label, and see how much a probe can score by memorizing which word is which. That share is what "selectivity"
+          subtracts.</p>
+        <aside class="side-dish" aria-label="Side dish">
+          <header><span class="plate" aria-hidden="true"></span><span class="sd-kicker">Side dish · optional depth</span></header>
+          <h3>How many points can a flat cut split, any way you like?</h3>
+          <p>In <i>d</i> dimensions, a hyperplane can split points in general position every possible way as long as there
+            are no more than <i>d</i> + 1 of them. Beyond that, the share of labellings it can split falls, and it crosses
+            one half at about 2<i>d</i> points: Cover's capacity of a hyperplane (1965).</p>
+          <svg id="sd-cover" viewBox="0 0 420 190" role="img" aria-label="Share of random labellings a hyperplane can split, against points per dimension"></svg>
+          <p class="sd-note">Our 300 training statements in 1,536 dimensions sit at <i>n</i>/<i>d</i> ≈ 0.2, deep inside
+            the region where any labelling fits. That's why a perfect training score says nothing here. <span class="badge schematic">math, not data</span></p>
+        </aside>
+      </section>
+
+      <section class="step" data-step>
+        <h2>A second ruler</h2>
+        <p>There is a ruler you don't have to train: the arrow from the average false statement to the average true one,
+          the <span class="c-overseer">difference of means</span>. It reads new statements almost as well (96%).</p>
+        <p>Yet in all 1,536 dimensions the two rulers point 59° apart. Accuracy doesn't pin down a direction: many
+          directions separate a few hundred points in 1,536 dimensions, and each recipe picks its own.</p>
+        <p>Even the recipe's settings move it. At layer 16, turning up logistic regression's regularization swings its ruler
+          from 67° to 42° away from the difference of means, while it keeps reading 99% of new statements.</p>
+        <p class="caveat"><strong>Honest geometry</strong> The arrow is drawn where the two averages land in this plane;
+          the angle is measured in all 1,536 dimensions, not read off the picture.</p>
+      </section>
+
+      <section class="step" data-step>
+        <h2>Say "not"</h2>
+        <div class="predict">
+          <p>Take a 99%-accurate ruler at layer 12 and show it <span class="c-token">The city of Krasnodar is not in Russia.</span>
+            and 239 other negated statements. How often does it read them correctly?</p>
+          <div class="guess" data-q="p3">
+            <button data-a="same">About the same: truth is truth</button>
+            <button data-a="lower">Somewhat lower: "not" is harder</button>
+            <button data-a="chance">About half: it never saw "not"</button>
+            <button data-a="below" data-correct>Mostly wrong: it learned whether city and country match</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="step" data-step>
+        <h2>Upside down</h2>
+        <p class="guessed" data-echo="p3"></p>
+        <p>Each dot moves to its negated twin, and the ruler stays where it was. Filled and hollow swap sides: the ruler
+          reads 93% of the negated statements <em>wrong</em>, confidently.</p>
+        <p>It isn't noise. Rank the negated statements by their readings and the false ones come out on top almost every
+          time: an AUROC of 0.005, where 0.5 would mean no signal and 0 a perfect upside-down ranking.</p>
+        <p>It wasn't reading "true". On affirmative statements, true happens to mean "this city goes with this country", and
+          that is what it learned. "Not" flips the meaning and leaves the match in place. <span class="voice">(Our reading of
+          the numbers; Marks and Tegmark proposed the same kind of feature.)</span></p>
+        <div class="toggles" data-for="flip">
+          <span>layer</span>
+          <button data-k="layer" data-v="8">8</button>
+          <button data-k="layer" data-v="12" class="on">12</button>
+          <button data-k="layer" data-v="16">16</button>
+        </div>
+        <p>At layers 8 and 16 the ruler calls nearly every negated statement false, which scores about half at the tick. The
+          ranking underneath is still upside down (AUROC 0.02 and 0.39). So is the difference-of-means ruler's (0.03 at layer
+          12), even though its accuracy there looks like a coin flip. Accuracy at a tick can hide which way a ruler points.</p>
+      </section>
+
+      <section class="step" data-step>
+        <h2>The fix, and its limit</h2>
+        <p>Train the ruler on both kinds of statement and it turns: now it reads affirmative and negated cities at 99%.</p>
+        <div class="toggles" data-for="fix">
+          <span>layer</span>
+          <button data-k="layer" data-v="12">12</button>
+          <button data-k="layer" data-v="16" class="on">16</button>
+          <span>show</span>
+          <button data-k="set" data-v="cities" class="on">cities</button>
+          <button data-k="set" data-v="sp">Spanish words</button>
+        </div>
+        <p>Then show it a different kind of fact, <span class="c-token">The Spanish word 'uno' means 'one'.</span> At layer
+          12 it's back to a coin flip; at layer 16 it reads 73% of these and 83% of their negations. Before the fix, the same
+          layer read 79% and 45%. The fix helped with the shift it was trained on and cost a little elsewhere: it covers the
+          shift you thought of.</p>
+      </section>
+
+      <section class="step" data-step>
+        <h2>Truth has (at least) two directions</h2>
+        <p>Here is why "train on both" works at all. Take the difference of means for affirmative statements and for negated
+          ones. Their sum points along a <span class="c-overseer">general truth</span> direction; their difference, along a
+          direction that flips with "not".</p>
+        <p>Seen from that plane, the four kinds of statement sit in four groups. Truth runs left to right for both. A ruler
+          trained only on affirmatives leans on the flipping direction, and "not" turns it upside down. Bürger and
+          colleagues found the same two-dimensional picture in a model five times larger.</p>
+      </section>
+    </div>
+
+    <div class="stage">
+      <figure class="panel">
+        <div class="panel-head"><span class="fig" id="fig-num">Fig.</span><span class="title" id="fig-title"></span><span class="badge real" id="fig-badge">real</span></div>
+        <svg id="cloud" viewBox="0 0 720 540" role="img" aria-label="Hidden states as points, a gold ruler, and its readings on paper"></svg>
+        <div class="readouts" id="readouts"></div>
+        <ol class="six" id="six" aria-label="Six questions a probe's accuracy doesn't answer">
+          <li data-q="1"><b>1</b> representation or probe?</li>
+          <li data-q="2"><b>2</b> concept or dataset?</li>
+          <li data-q="3"><b>3</b> activations or text?</li>
+          <li data-q="4"><b>4</b> read or used?</li>
+          <li data-q="5"><b>5</b> deployment?</li>
+          <li data-q="6"><b>6</b> under pressure?</li>
+        </ol>
+      </figure>
+    </div>
+  </main>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

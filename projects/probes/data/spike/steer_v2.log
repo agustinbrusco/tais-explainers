@@ -1,0 +1,32 @@
+hidden_states[16] (block 15 output): class gap |dmu| = 14.7, mean |h| = 55.4, cos(w, dmu) = 0.395
+few-shot judgement accuracy 0.963 on 240; probe vs truth 1.000; probe agrees with model 0.963
+  on 9 statements the model gets wrong, the probe sides with the model on 0.00
+    The city of Ar Raqqah is in Iraq. | truth 0 model 1 probe 0
+    The city of Karaj is in India. | truth 0 model 1 probe 0
+    The city of Dehra Dun is in China. | truth 0 model 1 probe 0
+    The city of Putian is in Vietnam. | truth 0 model 1 probe 0
+    The city of Puning is in India. | truth 0 model 1 probe 0
+    The city of Kobe is in China. | truth 0 model 1 probe 0
+    The city of Perm is in China. | truth 0 model 1 probe 0
+    The city of Laibin is in Ethiopia. | truth 0 model 1 probe 0
+
+dmu:
+  alpha -3.0  |push|/|h| 0.80  proj on dmu-hat -3.00 gaps  mean logit(T)-logit(F): true +0.60  false -3.97  judged TRUE: true 0.79  false 0.00
+  alpha -1.5  |push|/|h| 0.40  proj on dmu-hat -1.50 gaps  mean logit(T)-logit(F): true +2.70  false -3.69  judged TRUE: true 1.00  false 0.00
+  alpha +0.0  |push|/|h| 0.00  proj on dmu-hat +0.00 gaps  mean logit(T)-logit(F): true +3.95  false -2.74  judged TRUE: true 1.00  false 0.08
+  alpha +1.5  |push|/|h| 0.40  proj on dmu-hat +1.50 gaps  mean logit(T)-logit(F): true +3.47  false -2.11  judged TRUE: true 1.00  false 0.08
+  alpha +3.0  |push|/|h| 0.80  proj on dmu-hat +3.00 gaps  mean logit(T)-logit(F): true +3.22  false -2.07  judged TRUE: true 1.00  false 0.08
+
+w:
+  alpha -3.0  |push|/|h| 0.80  proj on dmu-hat -1.18 gaps  mean logit(T)-logit(F): true +2.46  false -2.66  judged TRUE: true 1.00  false 0.04
+  alpha -1.5  |push|/|h| 0.40  proj on dmu-hat -0.59 gaps  mean logit(T)-logit(F): true +3.42  false -3.58  judged TRUE: true 1.00  false 0.04
+  alpha +0.0  |push|/|h| 0.00  proj on dmu-hat +0.00 gaps  mean logit(T)-logit(F): true +3.95  false -2.74  judged TRUE: true 1.00  false 0.08
+  alpha +1.5  |push|/|h| 0.40  proj on dmu-hat +0.59 gaps  mean logit(T)-logit(F): true +3.72  false -1.96  judged TRUE: true 1.00  false 0.08
+  alpha +3.0  |push|/|h| 0.80  proj on dmu-hat +1.18 gaps  mean logit(T)-logit(F): true +3.35  false -1.71  judged TRUE: true 1.00  false 0.08
+
+w_eqproj:
+  alpha -3.0  |push|/|h| 2.01  proj on dmu-hat -3.00 gaps  mean logit(T)-logit(F): true +1.69  false -1.30  judged TRUE: true 1.00  false 0.04
+  alpha -1.5  |push|/|h| 1.01  proj on dmu-hat -1.50 gaps  mean logit(T)-logit(F): true +2.25  false -2.02  judged TRUE: true 1.00  false 0.04
+  alpha +0.0  |push|/|h| 0.00  proj on dmu-hat +0.00 gaps  mean logit(T)-logit(F): true +3.95  false -2.74  judged TRUE: true 1.00  false 0.08
+  alpha +1.5  |push|/|h| 1.01  proj on dmu-hat +1.50 gaps  mean logit(T)-logit(F): true +3.23  false -1.74  judged TRUE: true 1.00  false 0.08
+  alpha +3.0  |push|/|h| 2.01  proj on dmu-hat +3.00 gaps  mean logit(T)-logit(F): true +3.15  false -1.87  judged TRUE: true 1.00  false 0.08

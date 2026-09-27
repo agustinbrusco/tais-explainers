@@ -1,0 +1,2014 @@
+- id: arxiv:1909.03368
+  title: Designing and Interpreting Probes with Control Tasks
+  authors:
+  - John Hewitt
+  - Percy Liang
+  date: '2019-09-08'
+  url: https://arxiv.org/abs/1909.03368
+  abstract: Probes, supervised models trained to predict properties (like parts-of-speech) from representations
+    (like ELMo), have achieved high accuracy on a range of linguistic tasks. But does this mean that the
+    representations encode linguistic structure or just that the probe has learned the linguistic task?
+    In this paper, we propose control tasks, which associate word types with random outputs, to complement
+    linguistic tasks. By construction, these tasks can only be learned by the probe itself. So a good
+    probe, (one that reflects the representation), should be selective, achieving high linguistic task
+    accuracy and low control task accuracy. The selectivity of a probe puts linguistic task accuracy in
+    context with the probe's capacity to memorize from word types. We construct control tasks for English
+    part-of-speech tagging and dependency edge prediction, and show that popular probes on ELMo representations
+    are not selective. We also find that dropout, commonly used to control probe complexity, is ineffective
+    for improving selectivity of MLPs, but that other forms of regularization are effective. Finally,
+    we find that while probes on the first layer of ELMo yield slightly better part-of-speech tagging
+    accuracy than the second, probes on the second layer are substantially more selective, which raises
+    the question of which layer better represents parts-of-speech.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/1909.03368.txt on 2026-09-26 (research
+    agent + reading sub-agents). Control tasks and selectivity. Linear vs MLP-1 on ELMo1 POS: 97.2/71.2/26.0
+    vs 97.3/92.8/4.5 (Table 1, L251-253); ELMo2 more selective (L110-116); linear/bilinear most selective
+    (L415-417). Text/table inconsistencies at L283-285 vs L252-254: quote table rows.'
+- id: arxiv:2102.12452
+  title: 'Probing Classifiers: Promises, Shortcomings, and Advances'
+  authors:
+  - Yonatan Belinkov
+  date: '2021-02-24'
+  url: https://arxiv.org/abs/2102.12452
+  abstract: Probing classifiers have emerged as one of the prominent methodologies for interpreting and
+    analyzing deep neural network models of natural language processing. The basic idea is simple -- a
+    classifier is trained to predict some linguistic property from a model's representations -- and has
+    been used to examine a wide variety of models and properties. However, recent studies have demonstrated
+    various methodological limitations of this approach. This article critically reviews the probing classifiers
+    framework, highlighting their promises, shortcomings, and advances.
+  read: true
+  notes: 'Relevant sections read and quotes grep-checked against papers/2102.12452.txt on 2026-09-26 (research
+    agent + reading sub-agents). Survey (Squib): setup f, g (L65-77); random baselines (L204-208); control
+    tasks (L217-247); Ravichander (L258-264); correlation vs causation (L327-336); amnesic results (L365-374);
+    recommendations (L428-466).'
+- id: arxiv:2004.03061
+  title: Information-Theoretic Probing for Linguistic Structure
+  authors:
+  - Tiago Pimentel
+  - Josef Valvoda
+  - Rowan Hall Maudslay
+  - Ran Zmigrod
+  - Adina Williams
+  - Ryan Cotterell
+  date: '2020-04-07'
+  url: https://arxiv.org/abs/2004.03061
+  abstract: 'The success of neural networks on a diverse set of NLP tasks has led researchers to question
+    how much these networks actually ``know'''' about natural language. Probes are a natural way of assessing
+    this. When probing, a researcher chooses a linguistic task and trains a supervised model to predict
+    annotations in that linguistic task from the network''s learned representations. If the probe does
+    well, the researcher may conclude that the representations encode knowledge related to the task. A
+    commonly held belief is that using simpler models as probes is better; the logic is that simpler models
+    will identify linguistic structure, but not learn the task itself. We propose an information-theoretic
+    operationalization of probing as estimating mutual information that contradicts this received wisdom:
+    one should always select the highest performing probe one can, even if it is more complex, since it
+    will result in a tighter estimate, and thus reveal more of the linguistic information inherent in
+    the representation. The experimental portion of our paper focuses on empirically estimating the mutual
+    information between a linguistic property and BERT, comparing these estimates to several baselines.
+    We evaluate on a set of ten typologically diverse languages often underrepresented in NLP research---plus
+    English---totalling eleven languages.'
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2004.03061.txt on 2026-09-26 (research
+    agent + reading sub-agents). Use the highest-performing probe (abstract L39-45); DPI, Theorem 1 (L105-111,
+    L307-308); gain (L227-229); BERT at most 12% over a type-level baseline (L504-506); critique of control
+    tasks (§5, L363-403).
+- id: arxiv:2003.12298
+  title: Information-Theoretic Probing with Minimum Description Length
+  authors:
+  - Elena Voita
+  - Ivan Titov
+  date: '2020-03-27'
+  url: https://arxiv.org/abs/2003.12298
+  abstract: 'To measure how well pretrained representations encode some linguistic property, it is common
+    to use accuracy of a probe, i.e. a classifier trained to predict the property from the representations.
+    Despite widespread adoption of probes, differences in their accuracy fail to adequately reflect differences
+    in representations. For example, they do not substantially favour pretrained representations over
+    randomly initialized ones. Analogously, their accuracy can be similar when probing for genuine linguistic
+    labels and probing for random synthetic tasks. To see reasonable differences in accuracy with respect
+    to these random baselines, previous work had to constrain either the amount of probe training data
+    or its model size. Instead, we propose an alternative to the standard probes, information-theoretic
+    probing with minimum description length (MDL). With MDL probing, training a probe to predict labels
+    is recast as teaching it to effectively transmit the data. Therefore, the measure of interest changes
+    from probe accuracy to the description length of labels given representations. In addition to probe
+    quality, the description length evaluates "the amount of effort" needed to achieve the quality. This
+    amount of effort characterizes either (i) size of a probing model, or (ii) the amount of data needed
+    to achieve the high quality. We consider two methods for estimating MDL which can be easily implemented
+    on top of the standard probing pipelines: variational coding and online coding. We show that these
+    methods agree in results and are more informative and stable than the standard probes.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2003.12298.txt on 2026-09-26 (research
+    agent + reading sub-agents). MDL: definition (L69-75), variational/online codes (L93-118); layer 0:
+    control accuracy higher but code twice longer (L363-368, row L333); accuracy wrong in 8/10 settings
+    (L377); random-init ELMo (L485-578).'
+- id: arxiv:2006.00995
+  title: 'Amnesic Probing: Behavioral Explanation with Amnesic Counterfactuals'
+  authors:
+  - Yanai Elazar
+  - Shauli Ravfogel
+  - Alon Jacovi
+  - Yoav Goldberg
+  date: '2020-06-01'
+  url: https://arxiv.org/abs/2006.00995
+  abstract: A growing body of work makes use of probing to investigate the working of neural models, often
+    considered black boxes. Recently, an ongoing debate emerged surrounding the limitations of the probing
+    paradigm. In this work, we point out the inability to infer behavioral conclusions from probing results
+    and offer an alternative method that focuses on how the information is being used, rather than on
+    what information is encoded. Our method, Amnesic Probing, follows the intuition that the utility of
+    a property for a given task can be assessed by measuring the influence of a causal intervention that
+    removes it from the representation. Equipped with this new analysis tool, we can ask questions that
+    were not possible before, e.g. is part-of-speech information important for word prediction? We perform
+    a series of analyses on BERT to answer these types of questions. Our findings demonstrate that conventional
+    probing performance is not correlated to task importance, and we call for increased scrutiny of claims
+    that draw behavioral or causal conclusions from probing results.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2006.00995.txt on 2026-09-26 (research
+    agent + reading sub-agents). Amnesic probing with INLP. Probe accuracy doesn''t correlate with importance
+    (Spearman 8.5, p=0.871; L283-285). POS/dep ARE used (drops of 87.0/81.8 points, L270-274); phrase
+    markers decodable but unused (L220-224). Dependency case weak: Rand control near floor (Table 1, L247-255).
+    Linear removal only (L892-894).'
+- id: arxiv:2210.13382
+  title: 'Emergent World Representations: Exploring a Sequence Model Trained on a Synthetic Task'
+  authors:
+  - Kenneth Li
+  - Aspen K. Hopkins
+  - David Bau
+  - Fernanda Viégas
+  - Hanspeter Pfister
+  - Martin Wattenberg
+  date: '2022-10-24'
+  url: https://arxiv.org/abs/2210.13382
+  abstract: Language models show a surprising range of capabilities, but the source of their apparent
+    competence is unclear. Do these networks just memorize a collection of surface statistics, or do they
+    rely on internal representations of the process that generates the sequences they see? We investigate
+    this question by applying a variant of the GPT model to the task of predicting legal moves in a simple
+    board game, Othello. Although the network has no a priori knowledge of the game or its rules, we uncover
+    evidence of an emergent nonlinear internal representation of the board state. Interventional experiments
+    indicate this representation can be used to control the output of the network and create "latent saliency
+    maps" that can help explain predictions in human terms.
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2210.13382.txt on 2026-09-26 (research
+    agent + reading sub-agents). Othello-GPT. Linear probe error >20% (Table 1, L320-323); 2-layer MLP
+    down to 1.7% (Table 2, L342-345), randomized net no better (L343); interventions 0.12/0.06 vs 2.68/2.59
+    (L635-637); 'nonlinear in an essential way' (L736-737). Layer indexing inconsistent vs App. G (L1158).
+- id: arxiv:2309.00941
+  title: Emergent Linear Representations in World Models of Self-Supervised Sequence Models
+  authors:
+  - Neel Nanda
+  - Andrew Lee
+  - Martin Wattenberg
+  date: '2023-09-02'
+  url: https://arxiv.org/abs/2309.00941
+  abstract: How do sequence models represent their decision-making process? Prior work suggests that Othello-playing
+    neural network learned nonlinear models of the board state (Li et al., 2023). In this work, we provide
+    evidence of a closely related linear representation of the board. In particular, we show that probing
+    for "my colour" vs. "opponent's colour" may be a simple yet powerful way to interpret the model's
+    internal state. This precise understanding of the internal representations allows us to control the
+    model's behaviour with simple vector arithmetic. Linear representations enable significant interpretability
+    progress, which we demonstrate with further exploration of how the world model is computed.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2309.00941.txt on 2026-09-26 (research
+    agent + reading sub-agents). Mine/theirs basis: linear 99.6% vs black/white linear 74.8% and MLP 98.7%
+    (Table 1, L147-152); vector-addition interventions as good as gradient edits (Table 2, L225-235; L278-279);
+    ''danger of projecting our preconceptions'' (L416-418). Layers numbered x0-x7 (Li uses x1-x8).'
+- id: arxiv:2310.02207
+  title: Language Models Represent Space and Time
+  authors:
+  - Wes Gurnee
+  - Max Tegmark
+  date: '2023-10-03'
+  url: https://arxiv.org/abs/2310.02207
+  abstract: The capabilities of large language models (LLMs) have sparked debate over whether such systems
+    just learn an enormous collection of superficial statistics or a set of more coherent and grounded
+    representations that reflect the real world. We find evidence for the latter by analyzing the learned
+    representations of three spatial datasets (world, US, NYC places) and three temporal datasets (historical
+    figures, artworks, news headlines) in the Llama-2 family of models. We discover that LLMs learn linear
+    representations of space and time across multiple scales. These representations are robust to prompting
+    variations and unified across different entity types (e.g. cities and landmarks). In addition, we
+    identify individual "space neurons" and "time neurons" that reliably encode spatial and temporal coordinates.
+    While further investigation is needed, our results suggest modern LLMs learn rich spatiotemporal representations
+    of the real world and possess basic ingredients of a world model.
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2310.02207.txt on 2026-09-26 (research
+    agent + reading sub-agents). Ridge probes on last entity token, Llama-2 7B-70B; MLP 'minimal improvement'
+    (L207-209, Table 2 L255-263; MLP sometimes worse); held-out blocks (L302-305); caveats (L154, L277-278,
+    L357-358); English-Wikipedia skew (L693-694).
+- id: arxiv:2405.14860
+  title: Not All Language Model Features Are One-Dimensionally Linear
+  authors:
+  - Joshua Engels
+  - Eric J. Michaud
+  - Isaac Liao
+  - Wes Gurnee
+  - Max Tegmark
+  date: '2024-05-23'
+  url: https://arxiv.org/abs/2405.14860
+  abstract: Recent work has proposed that language models perform computation by manipulating one-dimensional
+    representations of concepts ("features") in activation space. In contrast, we explore whether some
+    language model representations may be inherently multi-dimensional. We begin by developing a rigorous
+    definition of irreducible multi-dimensional features based on whether they can be decomposed into
+    either independent or non-co-occurring lower-dimensional features. Motivated by these definitions,
+    we design a scalable method that uses sparse autoencoders to automatically find multi-dimensional
+    features in GPT-2 and Mistral 7B. These auto-discovered features include strikingly interpretable
+    examples, e.g. circular features representing days of the week and months of the year. We identify
+    tasks where these exact circles are used to solve computational problems involving modular arithmetic
+    in days of the week and months of the year. Next, we provide evidence that these circular features
+    are indeed the fundamental unit of computation in these tasks with intervention experiments on Mistral
+    7B and Llama 3 8B, and we examine the continuity of the days of the week feature in Mistral 7B. Overall,
+    our work argues that understanding multi-dimensional features is necessary to mechanistically decompose
+    some model behaviors.
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2405.14860.txt on 2026-09-26 (research
+    agent + reading sub-agents). Title is 'One-Dimensionally Linear'. Irreducible multi-dimensional features
+    (L215-216); circles live in a 2-D linear subspace (footnote L133-134); Table 1 accuracies (L426-429);
+    subspace patching (L596-598); limitations (L718-729).
+- id: arxiv:2408.10920
+  title: Recurrent Neural Networks Learn to Store and Generate Sequences using Non-Linear Representations
+  authors:
+  - Róbert Csordás
+  - Christopher Potts
+  - Christopher D. Manning
+  - Atticus Geiger
+  date: '2024-08-20'
+  url: https://arxiv.org/abs/2408.10920
+  abstract: 'The Linear Representation Hypothesis (LRH) states that neural networks learn to encode concepts
+    as directions in activation space, and a strong version of the LRH states that models learn only such
+    encodings. In this paper, we present a counterexample to this strong LRH: when trained to repeat an
+    input token sequence, gated recurrent neural networks (RNNs) learn to represent the token at each
+    position with a particular order of magnitude, rather than a direction. These representations have
+    layered features that are impossible to locate in distinct linear subspaces. To show this, we train
+    interventions to predict and manipulate tokens by learning the scaling factor corresponding to each
+    sequence position. These interventions indicate that the smallest RNNs find only this magnitude-based
+    solution, while larger RNNs have linear representations. These findings strongly indicate that interpretability
+    research should not be confined by the LRH.'
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2408.10920.txt on 2026-09-26 (research
+    agent + reading sub-agents). Onion (magnitude) codes in small GRUs (L29-35, L58-62); linear/MLP probes
+    fail, onion probe works (Table 4, L799-805); onion intervention 87% vs 1% (L456-459); only small models,
+    untested in transformers (L556-560). Size thresholds inconsistent (L275 vs L525).
+- id: arxiv:2212.03827
+  title: Discovering Latent Knowledge in Language Models Without Supervision
+  authors:
+  - Collin Burns
+  - Haotian Ye
+  - Dan Klein
+  - Jacob Steinhardt
+  date: '2022-12-07'
+  url: https://arxiv.org/abs/2212.03827
+  abstract: 'Existing techniques for training language models can be misaligned with the truth: if we
+    train models with imitation learning, they may reproduce errors that humans make; if we train them
+    to generate text that humans rate highly, they may output errors that human evaluators can''t detect.
+    We propose circumventing this issue by directly finding latent knowledge inside the internal activations
+    of a language model in a purely unsupervised way. Specifically, we introduce a method for accurately
+    answering yes-no questions given only unlabeled model activations. It works by finding a direction
+    in activation space that satisfies logical consistency properties, such as that a statement and its
+    negation have opposite truth values. We show that despite using no supervision and no model outputs,
+    our method can recover diverse knowledge represented in large language models: across 6 models and
+    10 question-answering datasets, it outperforms zero-shot accuracy by 4\% on average. We also find
+    that it cuts prompt sensitivity in half and continues to maintain high accuracy even when models are
+    prompted to generate incorrect answers. Our results provide an initial step toward discovering what
+    language models know, distinct from what they say, even when we don''t have access to explicit ground
+    truth labels.'
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2212.03827.txt on 2026-09-26 (research
+    agent + reading sub-agents). CCS method (§2.2, L160-235); Table 1 means 0-shot 62.8 / calibrated 67.2
+    / CCS 71.2 / LR ceiling 83.7 (L272-277); misleading prefix (L339-342) with ambiguity caveat (L880-881);
+    'in what sense' (L348-349); Table 2 CRC-TPC 70.1, CRC-BSS 70.2 (L538-539); §5.1 limits (L581-587).
+- id: arxiv:2312.10029
+  title: Challenges with unsupervised LLM knowledge discovery
+  authors:
+  - Sebastian Farquhar
+  - Vikrant Varma
+  - Zachary Kenton
+  - Johannes Gasteiger
+  - Vladimir Mikulik
+  - Rohin Shah
+  date: '2023-12-15'
+  url: https://arxiv.org/abs/2312.10029
+  abstract: We show that existing unsupervised methods on large language model (LLM) activations do not
+    discover knowledge -- instead they seem to discover whatever feature of the activations is most prominent.
+    The idea behind unsupervised knowledge elicitation is that knowledge satisfies a consistency structure,
+    which can be used to discover knowledge. We first prove theoretically that arbitrary features (not
+    just knowledge) satisfy the consistency structure of a particular leading unsupervised knowledge-elicitation
+    method, contrast-consistent search (Burns et al. - arXiv:2212.03827). We then present a series of
+    experiments showing settings in which unsupervised methods result in classifiers that do not predict
+    knowledge, but instead predict a different prominent feature. We conclude that existing unsupervised
+    methods for discovering latent knowledge are insufficient, and we contribute sanity checks to apply
+    to evaluating future knowledge elicitation methods. Conceptually, we hypothesise that the identification
+    issues explored here, e.g. distinguishing a model's knowledge from that of a simulated character's,
+    will persist for future unsupervised methods.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2312.10029.txt on 2026-09-26 (research
+    agent + reading sub-agents). Theorem 1: arbitrary features optimal for CCS (L216-218), existence only
+    (L249-250); banana/shed (L377-380); Alice opinions (L464-465, L565-566); CCS~PCA (L669-674); speculation
+    about simulated agents (L780-782); conclusions (L796-801).'
+- id: arxiv:2304.13734
+  title: The Internal State of an LLM Knows When It's Lying
+  authors:
+  - Amos Azaria
+  - Tom Mitchell
+  date: '2023-04-26'
+  url: https://arxiv.org/abs/2304.13734
+  abstract: While Large Language Models (LLMs) have shown exceptional performance in various tasks, one
+    of their most prominent drawbacks is generating inaccurate or false information with a confident tone.
+    In this paper, we provide evidence that the LLM's internal state can be used to reveal the truthfulness
+    of statements. This includes both statements provided to the LLM, and statements that the LLM itself
+    generates. Our approach is to train a classifier that outputs the probability that a statement is
+    truthful, based on the hidden layer activations of the LLM as it reads or generates the statement.
+    Experiments demonstrate that given a set of test sentences, of which half are true and half false,
+    our trained classifier achieves an average of 71\% to 83\% accuracy labeling which sentences are true
+    versus false, depending on the LLM base model. Furthermore, we explore the relationship between our
+    classifier's performance and approaches based on the probability assigned to the sentence by the LLM.
+    We show that while LLM-assigned sentence probability is related to sentence truthfulness, this probability
+    is also dependent on sentence length and the frequencies of words in the sentence, resulting in our
+    trained classifier providing a more reliable approach to detecting truthfulness, highlighting its
+    potential to enhance the reliability of LLM-generated content and its practical applicability in real-world
+    scenarios.
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2304.13734.txt on 2026-09-26 (research
+    agent + reading sub-agents). SAPLMA MLP 256/128/64 (L275-279); held-out-topic protocol (L282-285);
+    71-83% (abstract L40-44; Table 1 row 0.7098, LLaMA2-7b 0.8298); baselines ~0.54 (L291-296); own generations
+    0.6362 (L440). Two-column layout.
+- id: arxiv:2310.06824
+  title: 'The Geometry of Truth: Emergent Linear Structure in Large Language Model Representations of
+    True/False Datasets'
+  authors:
+  - Samuel Marks
+  - Max Tegmark
+  date: '2023-10-10'
+  url: https://arxiv.org/abs/2310.06824
+  abstract: 'Large Language Models (LLMs) have impressive capabilities, but are prone to outputting falsehoods.
+    Recent work has developed techniques for inferring whether a LLM is telling the truth by training
+    probes on the LLM''s internal activations. However, this line of work is controversial, with some
+    authors pointing out failures of these probes to generalize in basic ways, among other conceptual
+    issues. In this work, we use high-quality datasets of simple true/false statements to study in detail
+    the structure of LLM representations of truth, drawing on three lines of evidence: 1. Visualizations
+    of LLM true/false statement representations, which reveal clear linear structure. 2. Transfer experiments
+    in which probes trained on one dataset generalize to different datasets. 3. Causal evidence obtained
+    by surgically intervening in a LLM''s forward pass, causing it to treat false statements as true and
+    vice versa. Overall, we present evidence that at sufficient scale, LLMs linearly represent the truth
+    or falsehood of factual statements. We also show that simple difference-in-mean probes generalize
+    as well as other probing techniques while identifying directions which are more causally implicated
+    in model outputs.'
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2310.06824.txt on 2026-09-26 (research
+    agent + reading sub-agents). Datasets (Table 1, L148-159); truth vs log-prob r = -.63/-.89 (L198-200);
+    PCA at 13B L15 (L286-304); mass-mean definition (L460-462) and LR max-margin argument (L440-441);
+    generalization (L550-574); NIE Table 2 (L598-606), MM wins 7/8 (L653-654); limitations (L682-690).
+- id: arxiv:2407.12831
+  title: 'Truth is Universal: Robust Detection of Lies in LLMs'
+  authors:
+  - Lennart Bürger
+  - Fred A. Hamprecht
+  - Boaz Nadler
+  date: '2024-07-03'
+  url: https://arxiv.org/abs/2407.12831
+  abstract: 'Large Language Models (LLMs) have revolutionised natural language processing, exhibiting
+    impressive human-like capabilities. In particular, LLMs are capable of "lying", knowingly outputting
+    false statements. Hence, it is of interest and importance to develop methods to detect when LLMs lie.
+    Indeed, several authors trained classifiers to detect LLM lies based on their internal model activations.
+    However, other researchers showed that these classifiers may fail to generalise, for example to negated
+    statements. In this work, we aim to develop a robust method to detect when an LLM is lying. To this
+    end, we make the following key contributions: (i) We demonstrate the existence of a two-dimensional
+    subspace, along which the activation vectors of true and false statements can be separated. Notably,
+    this finding is universal and holds for various LLMs, including Gemma-7B, LLaMA2-13B, Mistral-7B and
+    LLaMA3-8B. Our analysis explains the generalisation failures observed in previous studies and sets
+    the stage for more robust lie detection; (ii) Building upon (i), we construct an accurate LLM lie
+    detector. Empirically, our proposed classifier achieves state-of-the-art performance, attaining 94%
+    accuracy in both distinguishing true from false factual statements and detecting lies generated in
+    real-world scenarios.'
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2407.12831.txt on 2026-09-26 (research
+    agent + reading sub-agents). tG/tP 2-D truth subspace (L102-105, L259-265); variance (L360-365); TTPD
+    (L431-433); unseen topics TTPD 93.9 vs LR 94.6 vs CCS 84.8 vs MM 92.2 (L464-466); role-play lies 93.8/90.5/79/73
+    (L515-517); hand-sorted 208 responses (L501); limits (L529-539).
+- id: arxiv:2410.02707
+  title: 'LLMs Know More Than They Show: On the Intrinsic Representation of LLM Hallucinations'
+  authors:
+  - Hadas Orgad
+  - Michael Toker
+  - Zorik Gekhman
+  - Roi Reichart
+  - Idan Szpektor
+  - Hadas Kotek
+  - Yonatan Belinkov
+  date: '2024-10-03'
+  url: https://arxiv.org/abs/2410.02707
+  abstract: 'Large language models (LLMs) often produce errors, including factual inaccuracies, biases,
+    and reasoning failures, collectively referred to as "hallucinations". Recent studies have demonstrated
+    that LLMs'' internal states encode information regarding the truthfulness of their outputs, and that
+    this information can be utilized to detect errors. In this work, we show that the internal representations
+    of LLMs encode much more information about truthfulness than previously recognized. We first discover
+    that the truthfulness information is concentrated in specific tokens, and leveraging this property
+    significantly enhances error detection performance. Yet, we show that such error detectors fail to
+    generalize across datasets, implying that -- contrary to prior claims -- truthfulness encoding is
+    not universal but rather multifaceted. Next, we show that internal representations can also be used
+    for predicting the types of errors the model is likely to make, facilitating the development of tailored
+    mitigation strategies. Lastly, we reveal a discrepancy between LLMs'' internal encoding and external
+    behavior: they may encode the correct answer, yet consistently generate an incorrect one. Taken together,
+    these insights deepen our understanding of LLM errors from the model''s internal perspective, which
+    can guide future research on enhancing error analysis and mitigation.'
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2410.02707.txt on 2026-09-26 (research
+    agent + reading sub-agents). Exact answer tokens (L83-84, L257-258); probes fail to generalize across
+    datasets (abstract L29-31, L92-94); transfer rarely exceeds logits (L404-408); encodes correct answer
+    but generates wrong (L596-599); Table 1 exact-token AUCs (L343-346).
+- id: arxiv:2312.01037
+  title: Eliciting Latent Knowledge from Quirky Language Models
+  authors:
+  - Alex Mallen
+  - Madeline Brumley
+  - Julia Kharchenko
+  - Nora Belrose
+  date: '2023-12-02'
+  url: https://arxiv.org/abs/2312.01037
+  abstract: Eliciting Latent Knowledge (ELK) aims to find patterns in a capable neural network's activations
+    that robustly track the true state of the world, especially in hard-to-verify cases where the model's
+    output is untrusted. To further ELK research, we introduce 12 datasets and a corresponding suite of
+    "quirky" language models (LMs) that are finetuned to make systematic errors when answering questions
+    if and only if the keyword "Bob" is present in the prompt. We find that, especially in middle layers,
+    linear probes usually report an LM's knowledge independently of what the LM outputs, enabling us to
+    elicit the correct answer despite the model's untruthful output. The best probing method (logistic
+    regression on contrast pairs) recovers 89% of the gap in AUROC between truthful and untruthful contexts,
+    and 75% for questions harder than those used to train the probe. We also find that a mechanistic anomaly
+    detection approach can flag untruthful behavior with 0.95 AUROC. Our results show promise for eliciting
+    reliable knowledge from capable but untrusted models, and facilitates future research empirically
+    investigating ELK methods.
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2312.01037.txt on 2026-09-26 (research
+    agent + reading sub-agents). Quirky Alice/Bob models (L27-28, L174-181); 7 linear probe methods (L184-225);
+    LogR on contrast pairs recovers 89% / 75% of AUROC gap (abstract L31-33; L484-487); anomaly detection
+    0.94-0.95 (L508-509, Table 2); diff-in-means more causal (L581-582); caveats (L1626-1681).
+- id: arxiv:2310.01405
+  title: 'Representation Engineering: A Top-Down Approach to AI Transparency'
+  authors:
+  - Andy Zou
+  - Long Phan
+  - Sarah Chen
+  - James Campbell
+  - Phillip Guo
+  - Richard Ren
+  - Alexander Pan
+  - Xuwang Yin
+  - Mantas Mazeika
+  - Ann-Kathrin Dombrowski
+  - Shashwat Goel
+  - Nathaniel Li
+  - Michael J. Byun
+  - Zifan Wang
+  - Alex Mallen
+  - Steven Basart
+  - Sanmi Koyejo
+  - Dawn Song
+  - Matt Fredrikson
+  - J. Zico Kolter
+  - Dan Hendrycks
+  date: '2023-10-02'
+  url: https://arxiv.org/abs/2310.01405
+  abstract: In this paper, we identify and characterize the emerging area of representation engineering
+    (RepE), an approach to enhancing the transparency of AI systems that draws on insights from cognitive
+    neuroscience. RepE places population-level representations, rather than neurons or circuits, at the
+    center of analysis, equipping us with novel methods for monitoring and manipulating high-level cognitive
+    phenomena in deep neural networks (DNNs). We provide baselines and an initial analysis of RepE techniques,
+    showing that they offer simple yet effective solutions for improving our understanding and control
+    of large language models. We showcase how these methods can provide traction on a wide range of safety-relevant
+    problems, including honesty, harmlessness, power-seeking, and more, demonstrating the promise of top-down
+    transparency research. We hope that this work catalyzes further exploration of RepE and fosters advancements
+    in the transparency and safety of AI systems.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2310.01405.txt on 2026-09-26 (research
+    agent + reading sub-agents). LAT: stimulus, activity, PCA on differences (L522-647); reading vs control
+    (L503-504, L759-762); TruthfulQA MC1 Table 1 (L792-797); honesty >90% (L1017); LR detects but doesn''t
+    steer, mean difference best (L1266-1272); control Table 2 (L1096-1099); PCA instability (L2378-2381).'
+- id: arxiv:2306.03341
+  title: 'Inference-Time Intervention: Eliciting Truthful Answers from a Language Model'
+  authors:
+  - Kenneth Li
+  - Oam Patel
+  - Fernanda Viégas
+  - Hanspeter Pfister
+  - Martin Wattenberg
+  date: '2023-06-06'
+  url: https://arxiv.org/abs/2306.03341
+  abstract: 'We introduce Inference-Time Intervention (ITI), a technique designed to enhance the "truthfulness"
+    of large language models (LLMs). ITI operates by shifting model activations during inference, following
+    a set of directions across a limited number of attention heads. This intervention significantly improves
+    the performance of LLaMA models on the TruthfulQA benchmark. On an instruction-finetuned LLaMA called
+    Alpaca, ITI improves its truthfulness from 32.5% to 65.1%. We identify a tradeoff between truthfulness
+    and helpfulness and demonstrate how to balance it by tuning the intervention strength. ITI is minimally
+    invasive and computationally inexpensive. Moreover, the technique is data efficient: while approaches
+    like RLHF require extensive annotations, ITI locates truthful directions using only few hundred examples.
+    Our findings suggest that LLMs may have an internal representation of the likelihood of something
+    being true, even as they produce falsehoods on the surface.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2306.03341.txt on 2026-09-26 (research
+    agent + reading sub-agents). Head probes, best 83.3% (L204); truth as subspace (L215-217); direction
+    comparison Table 3: probe weight 34.8 vs mass-mean 42.3 True*Info (L391-397), App. B (L4420-4423);
+    Alpaca 32.5 -> 65.1 True*Info (L380-381); trade-off (L343-344). The ''40%'' probe-generation gap (L67-68)
+    is not derived in text.'
+- id: arxiv:2307.00175
+  title: 'Still No Lie Detector for Language Models: Probing Empirical and Conceptual Roadblocks'
+  authors:
+  - B. A. Levinstein
+  - Daniel A. Herrmann
+  date: '2023-06-30'
+  url: https://arxiv.org/abs/2307.00175
+  abstract: We consider the questions of whether or not large language models (LLMs) have beliefs, and,
+    if they do, how we might measure them. First, we evaluate two existing approaches, one due to Azaria
+    and Mitchell (2023) and the other to Burns et al. (2022). We provide empirical results that show that
+    these methods fail to generalize in very basic ways. We then argue that, even if LLMs have beliefs,
+    these methods are unlikely to be successful for conceptual reasons. Thus, there is still no lie-detector
+    for LLMs. After describing our empirical results we take a step back and consider whether or not we
+    should expect LLMs to have something like beliefs in the first place. We consider some recent arguments
+    aiming to show that LLMs cannot have beliefs. We show that these arguments are misguided. We provide
+    a more productive framing of questions surrounding the status of beliefs in LLMs, and highlight the
+    empirical nature of the problem. We conclude by suggesting some concrete paths for future work.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2307.00175.txt on 2026-09-26 (research
+    agent + reading sub-agents). LLaMA 30b. Negation failure: Facts .826 vs NegFacts1 .408 (Table 3, L431-432);
+    CCS near chance 50-57% (L681-682) but their CCS probe is a 1-hidden-layer MLP (L689-690); label vs
+    truth (L466); conditions for belief attribution (L554-556).'
+- id: arxiv:2406.15927
+  title: 'Semantic Entropy Probes: Robust and Cheap Hallucination Detection in LLMs'
+  authors:
+  - Jannik Kossen
+  - Jiatong Han
+  - Muhammed Razzak
+  - Lisa Schut
+  - Shreshth Malik
+  - Yarin Gal
+  date: '2024-06-22'
+  url: https://arxiv.org/abs/2406.15927
+  abstract: We propose semantic entropy probes (SEPs), a cheap and reliable method for uncertainty quantification
+    in Large Language Models (LLMs). Hallucinations, which are plausible-sounding but factually incorrect
+    and arbitrary model generations, present a major challenge to the practical adoption of LLMs. Recent
+    work by Farquhar et al. (2024) proposes semantic entropy (SE), which can detect hallucinations by
+    estimating uncertainty in the space semantic meaning for a set of model generations. However, the
+    5-to-10-fold increase in computation cost associated with SE computation hinders practical adoption.
+    To address this, we propose SEPs, which directly approximate SE from the hidden states of a single
+    generation. SEPs are simple to train and do not require sampling multiple model generations at test
+    time, reducing the overhead of semantic uncertainty quantification to almost zero. We show that SEPs
+    retain high performance for hallucination detection and generalize better to out-of-distribution data
+    than previous probing methods that directly predict model accuracy. Our results across models and
+    tasks suggest that model hidden states capture SE, and our ablation studies give further insights
+    into the token positions and model layers for which this is the case.
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2406.15927.txt on 2026-09-26 (research
+    agent + reading sub-agents). SEP = logistic regression predicting binarized semantic entropy from
+    one generation's hidden states (L239-254); cost (L22-27); better OOD than accuracy probes (L27-29;
+    Tab. 2 L714-723), worse in-distribution (L484-490); below sampling-based SE (L296-297). Protocol inconsistency
+    L461-462 vs L1701-1702.
+- id: arxiv:2312.06681
+  title: Steering Llama 2 via Contrastive Activation Addition
+  authors:
+  - Nina Panickssery
+  - Nick Gabrieli
+  - Julian Schulz
+  - Meg Tong
+  - Evan Hubinger
+  - Alexander Matt Turner
+  date: '2023-12-09'
+  url: https://arxiv.org/abs/2312.06681
+  abstract: We introduce Contrastive Activation Addition (CAA), an innovative method for steering language
+    models by modifying their activations during forward passes. CAA computes "steering vectors" by averaging
+    the difference in residual stream activations between pairs of positive and negative examples of a
+    particular behavior, such as factual versus hallucinatory responses. During inference, these steering
+    vectors are added at all token positions after the user's prompt with either a positive or negative
+    coefficient, allowing precise control over the degree of the targeted behavior. We evaluate CAA's
+    effectiveness on Llama 2 Chat using multiple-choice behavioral question datasets and open-ended generation
+    tasks. We demonstrate that CAA significantly alters model behavior, is effective over and on top of
+    traditional methods like finetuning and system prompt design, and minimally reduces capabilities.
+    Moreover, we gain deeper insights into CAA's mechanisms by employing various activation space interpretation
+    methods. CAA accurately steers model outputs and sheds light on how high-level concepts are represented
+    in Large Language Models (LLMs).
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2312.06681.txt on 2026-09-26 (research
+    agent + reading sub-agents). CAA mean-difference vector at the A/B letter (Fig. 1 L46-51; L213-216);
+    layer 13 in 7B (L242-245); Table 3 13B (L318-331); per-token detection via dot product (L437-439);
+    open-ended degradation (L310-312).
+- id: arxiv:2406.11717
+  title: Refusal in Language Models Is Mediated by a Single Direction
+  authors:
+  - Andy Arditi
+  - Oscar Obeso
+  - Aaquib Syed
+  - Daniel Paleka
+  - Nina Panickssery
+  - Wes Gurnee
+  - Neel Nanda
+  date: '2024-06-17'
+  url: https://arxiv.org/abs/2406.11717
+  abstract: Conversational large language models are fine-tuned for both instruction-following and safety,
+    resulting in models that obey benign requests but refuse harmful ones. While this refusal behavior
+    is widespread across chat models, its underlying mechanisms remain poorly understood. In this work,
+    we show that refusal is mediated by a one-dimensional subspace, across 13 popular open-source chat
+    models up to 72B parameters in size. Specifically, for each model, we find a single direction such
+    that erasing this direction from the model's residual stream activations prevents it from refusing
+    harmful instructions, while adding this direction elicits refusal on even harmless instructions. Leveraging
+    this insight, we propose a novel white-box jailbreak method that surgically disables refusal with
+    minimal effect on other capabilities. Finally, we mechanistically analyze how adversarial suffixes
+    suppress propagation of the refusal-mediating direction. Our findings underscore the brittleness of
+    current safety fine-tuning methods. More broadly, our work showcases how an understanding of model
+    internals can be leveraged to develop practical methods for controlling model behavior.
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2406.11717.txt on 2026-09-26 (research
+    agent + reading sub-agents). Difference-in-means refusal direction, 13 models up to 72B (abstract
+    L23-27; L179-180); ablation/addition (L226-235, L294-315); weight orthogonalization (L334-342); Llama-3
+    8B 0.95 -> 0.01 refusal (Table 10, L1794-1795); readout under adversarial suffix (L477-480); semantics
+    unclear (L622-624).
+- id: arxiv:2501.17148
+  title: 'AxBench: Steering LLMs? Even Simple Baselines Outperform Sparse Autoencoders'
+  authors:
+  - Zhengxuan Wu
+  - Aryaman Arora
+  - Atticus Geiger
+  - Zheng Wang
+  - Jing Huang
+  - Dan Jurafsky
+  - Christopher D. Manning
+  - Christopher Potts
+  date: '2025-01-28'
+  url: https://arxiv.org/abs/2501.17148
+  abstract: Fine-grained steering of language model outputs is essential for safety and reliability. Prompting
+    and finetuning are widely used to achieve these goals, but interpretability researchers have proposed
+    a variety of representation-based techniques as well, including sparse autoencoders (SAEs), linear
+    artificial tomography, supervised steering vectors, linear probes, and representation finetuning.
+    At present, there is no benchmark for making direct comparisons between these proposals. Therefore,
+    we introduce AxBench, a large-scale benchmark for steering and concept detection, and report experiments
+    on Gemma-2-2B and 9B. For steering, we find that prompting outperforms all existing methods, followed
+    by finetuning. For concept detection, representation-based methods such as difference-in-means, perform
+    the best. On both evaluations, SAEs are not competitive. We introduce a novel weakly-supervised representational
+    method (Rank-1 Representation Finetuning; ReFT-r1), which is competitive on both tasks while providing
+    the interpretability advantages that prompting lacks. Along with AxBench, we train and publicly release
+    SAE-scale feature dictionaries for ReFT-r1 and DiffMean.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2501.17148.txt on 2026-09-26 (research
+    agent + reading sub-agents). AxBench: detection AUROC DiffMean 0.942, Probe 0.940, ReFT-r1 0.938,
+    Prompt 0.929, SAE 0.695 (Table 1, L438-460); steering Prompt 0.894, ReFT-r1 0.543, DiffMean 0.239,
+    SAE 0.165, Probe 0.098 (Table 2, L591-601); ''better classification does not directly lead to better
+    steering'' (L610).'
+- id: arxiv:2502.03407
+  title: Detecting Strategic Deception Using Linear Probes
+  authors:
+  - Nicholas Goldowsky-Dill
+  - Bilal Chughtai
+  - Stefan Heimersheim
+  - Marius Hobbhahn
+  date: '2025-02-05'
+  url: https://arxiv.org/abs/2502.03407
+  abstract: AI models might use deceptive strategies as part of scheming or misaligned behaviour. Monitoring
+    outputs alone is insufficient, since the AI might produce seemingly benign outputs while their internal
+    reasoning is misaligned. We thus evaluate if linear probes can robustly detect deception by monitoring
+    model activations. We test two probe-training datasets, one with contrasting instructions to be honest
+    or deceptive (following Zou et al., 2023) and one of responses to simple roleplaying scenarios. We
+    test whether these probes generalize to realistic settings where Llama-3.3-70B-Instruct behaves deceptively,
+    such as concealing insider trading (Scheurer et al., 2023) and purposely underperforming on safety
+    evaluations (Benton et al., 2024). We find that our probe distinguishes honest and deceptive responses
+    with AUROCs between 0.96 and 0.999 on our evaluation datasets. If we set the decision threshold to
+    have a 1% false positive rate on chat data not related to deception, our probe catches 95-99% of the
+    deceptive responses. Overall we think white-box probes are promising for future monitoring systems,
+    but current performance is insufficient as a robust defence against deception. Our probes' outputs
+    can be viewed at data.apolloresearch.ai/dd and our code at github.com/ApolloResearch/deception-detection.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2502.03407.txt on 2026-09-26 (research
+    agent + reading sub-agents). Apollo deception probe: Llama-3.3-70B L22, logistic regression (L171-179);
+    Instructed-Pairs (L235-241); AUROC 0.96-0.999, 95-99% recall at 1% FPR on Alpaca (abstract L27-30;
+    L355-357); fragility two layers later (L359-361); scenario confound (L363-365, L549-551); failure
+    modes (L460-466); verdict (L31-32, L52-53); viewer data.apolloresearch.ai/dd/.'
+- id: arxiv:2506.10805
+  title: Detecting High-Stakes Interactions with Activation Probes
+  authors:
+  - Alex McKenzie
+  - Urja Pawar
+  - Phil Blandfort
+  - William Bankes
+  - David Krueger
+  - Ekdeep Singh Lubana
+  - Dmitrii Krasheninnikov
+  date: '2025-06-12'
+  url: https://arxiv.org/abs/2506.10805
+  abstract: Monitoring is an important aspect of safely deploying Large Language Models (LLMs). This paper
+    examines activation probes for detecting ``high-stakes'' interactions -- where the text indicates
+    that the interaction might lead to significant harm -- as a critical, yet underexplored, target for
+    such monitoring. We evaluate several probe architectures trained on synthetic data, and find them
+    to exhibit robust generalization to diverse, out-of-distribution, real-world data. Probes' performance
+    is comparable to that of prompted or finetuned medium-sized LLM monitors, while offering computational
+    savings of six orders-of-magnitude. These savings are enabled by reusing activations of the model
+    that is being monitored. Our experiments also highlight the potential of building resource-aware hierarchical
+    monitoring systems, where probes serve as an efficient initial filter and flag cases for more expensive
+    downstream analysis. We release our novel synthetic dataset and the codebase at https://github.com/arrrlex/models-under-pressure.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2506.10805.txt on 2026-09-26 (research
+    agent + reading sub-agents). High-stakes probes: Llama-3.3-70B L31 (L220-221); synthetic training
+    (L152); aggregations (L103-105, L226-243); mean AUROC ~0.916 vs >0.99 synthetic (L2268-2269); 43%
+    vs 55% TPR@1%FPR (L267-270); 10^6 cheaper (L23-24, L528); cascades (L313-314, L386-393); failures
+    (L364-371).'
+- id: arxiv:2502.16681
+  title: Are Sparse Autoencoders Useful? A Case Study in Sparse Probing
+  authors:
+  - Subhash Kantamneni
+  - Joshua Engels
+  - Senthooran Rajamanoharan
+  - Max Tegmark
+  - Neel Nanda
+  date: '2025-02-23'
+  url: https://arxiv.org/abs/2502.16681
+  abstract: 'Sparse autoencoders (SAEs) are a popular method for interpreting concepts represented in
+    large language model (LLM) activations. However, there is a lack of evidence regarding the validity
+    of their interpretations due to the lack of a ground truth for the concepts used by an LLM, and a
+    growing number of works have presented problems with current SAEs. One alternative source of evidence
+    would be demonstrating that SAEs improve performance on downstream tasks beyond existing baselines.
+    We test this by applying SAEs to the real-world task of LLM activation probing in four regimes: data
+    scarcity, class imbalance, label noise, and covariate shift. Due to the difficulty of detecting concepts
+    in these challenging settings, we hypothesize that SAEs'' basis of interpretable, concept-level latents
+    should provide a useful inductive bias. However, although SAEs occasionally perform better than baselines
+    on individual datasets, we are unable to design ensemble methods combining SAEs with baselines that
+    consistently outperform ensemble methods solely using baselines. Additionally, although SAEs initially
+    appear promising for identifying spurious correlations, detecting poor dataset quality, and training
+    multi-token probes, we are able to achieve similar results with simple non-SAE baselines as well.
+    Though we cannot discount SAEs'' utility on other tasks, our findings highlight the shortcomings of
+    current SAEs and the need to rigorously evaluate interpretability methods on downstream tasks with
+    strong baselines.'
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2502.16681.txt on 2026-09-26 (research
+    agent + reading sub-agents). 113 datasets, 4 regimes (L116, L120-122); baselines (L173-197); quiver
+    result -0.003 +/- 0.002 (L213, L247-251); no improvement in hard regimes (L418-420); covariate shift
+    0.99 -> 0.64 (L597-599); win rates 2.2% / 19.6% / 8.7% (L806-812); dataset errors also found by baselines
+    (L711-744); limitations (L977-981).
+- id: arxiv:2601.11516
+  title: Building Production-Ready Probes For Gemini
+  authors:
+  - János Kramár
+  - Joshua Engels
+  - Zheng Wang
+  - Bilal Chughtai
+  - Rohin Shah
+  - Neel Nanda
+  - Arthur Conmy
+  date: '2026-01-16'
+  url: https://arxiv.org/abs/2601.11516
+  abstract: 'Frontier language model capabilities are improving rapidly. We thus need stronger mitigations
+    against bad actors misusing increasingly powerful systems. Prior work has shown that activation probes
+    may be a promising misuse mitigation technique, but we identify a key remaining challenge: probes
+    fail to generalize under important production distribution shifts. In particular, we find that the
+    shift from short-context to long-context inputs is difficult for existing probe architectures. We
+    propose several new probe architectures that handle this long-context distribution shift. We evaluate
+    these probes in the cyber-offensive domain, testing their robustness against various production-relevant
+    distribution shifts, including multi-turn conversations, long context prompts, and adaptive red teaming.
+    Our results demonstrate that while our novel architectures address context length, a combination of
+    architecture choice and training on diverse distributions is required for broad generalization. Additionally,
+    we show that pairing probes with prompted classifiers achieves optimal accuracy at a low cost due
+    to the computational efficiency of probes. These findings have informed the successful deployment
+    of misuse mitigation probes in user-facing instances of Gemini, Google''s frontier language model.
+    Finally, we find early positive results using AlphaEvolve to automate improvements in both probe architecture
+    search and adaptive red teaming, showing that automating some AI safety research is already possible.'
+  read: partial
+  notes: Relevant sections read and quotes grep-checked against papers/2601.11516.txt on 2026-09-26 (research
+    agent + reading sub-agents). GDM production probes, Gemini 2.5 Flash inputs, cyber (L38-51). Long-context
+    failure and architectures (Table 3, L654-686; §3, L270-362); threshold weighting (L544-565); cascade
+    1/50th cost (L106-108), defer ~8% (L203-207); ART unsolved (L127-128, L696-698); AlphaEvolve (L940-993);
+    deployment statement (L28-29). L644-645 'outperforms all LLMs' conflicts with Table 3 (earlier weighting,
+    App. K L2351).
+- id: arxiv:2601.04603
+  title: 'Constitutional Classifiers++: Efficient Production-Grade Defenses against Universal Jailbreaks'
+  authors:
+  - Hoagy Cunningham
+  - Jerry Wei
+  - Zihan Wang
+  - Andrew Persic
+  - Alwin Peng
+  - Jordan Abderrachid
+  - Raj Agarwal
+  - Bobby Chen
+  - Austin Cohen
+  - Andy Dau
+  - Alek Dimitriev
+  - Rob Gilson
+  - Logan Howard
+  - Yijin Hua
+  - Jared Kaplan
+  - Jan Leike
+  - Mu Lin
+  - Christopher Liu
+  - Vladimir Mikulik
+  - Rohit Mittapalli
+  - Clare O'Hara
+  - Jin Pan
+  - Nikhil Saxena
+  - Alex Silverstein
+  - Yue Song
+  - Xunjie Yu
+  - Giulio Zhou
+  - Ethan Perez
+  - Mrinank Sharma
+  date: '2026-01-08'
+  url: https://arxiv.org/abs/2601.04603
+  abstract: We introduce enhanced Constitutional Classifiers that deliver production-grade jailbreak robustness
+    with dramatically reduced computational costs and refusal rates compared to previous-generation defenses.
+    Our system combines several key insights. First, we develop exchange classifiers that evaluate model
+    responses in their full conversational context, which addresses vulnerabilities in last-generation
+    systems that examine outputs in isolation. Second, we implement a two-stage classifier cascade where
+    lightweight classifiers screen all traffic and escalate only suspicious exchanges to more expensive
+    classifiers. Third, we train efficient linear probe classifiers and ensemble them with external classifiers
+    to simultaneously improve robustness and reduce computational costs. Together, these techniques yield
+    a production-grade system achieving a 40x computational cost reduction compared to our baseline exchange
+    classifier, while maintaining a 0.05% refusal rate on production traffic. Through extensive red-teaming
+    comprising over 1,700 hours, we demonstrate strong protection against universal jailbreaks -- no attack
+    on this system successfully elicited responses to all eight target queries comparable in detail to
+    an undefended model. Our work establishes Constitutional Classifiers as practical and efficient safeguards
+    for large language models.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2601.04603.txt on 2026-09-26 (research
+    agent + reading sub-agents). CC++: all-layer linear probe on Claude activations with sliding-window
+    mean / EMA smoothing and softmax-weighted loss (L311-340, L424-428); probe vs classifiers (L494-506);
+    complementary errors (L517-529); production cascade and weights (L550-555); shadow deployment Dec
+    2025: 0.05% refusal, 5.5% escalated, 40x less compute (L557-561); 1,736 h / 198K attempts (L564-569);
+    Table 1 (L586-592).'
+- id: arxiv:2507.12691
+  title: Benchmarking Deception Probes via Black-to-White Performance Boosts
+  authors:
+  - Avi Parrack
+  - Carlo Leonardo Attubato
+  - Stefan Heimersheim
+  date: '2025-07-16'
+  url: https://arxiv.org/abs/2507.12691
+  abstract: AI assistants will occasionally respond deceptively to user queries. Recently, linear classifiers
+    (called "deception probes") have been trained to distinguish the internal activations of a language
+    model during deceptive versus honest responses. However, it's unclear how effective these probes are
+    at detecting deception in practice, nor whether such probes are resistant to simple counter strategies
+    from a deceptive assistant who wishes to evade detection. In this paper, we compare white-box monitoring
+    (where the monitor has access to token-level probe activations) to black-box monitoring (without such
+    access). We benchmark deception probes by the extent to which the white box monitor outperforms the
+    black-box monitor, i.e. the black-to-white performance boost. We find weak but encouraging black-to-white
+    performance boosts from existing deception probes.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2507.12691.txt on 2026-09-26 (research
+    agent + reading sub-agents). Black-to-white boosts: ''weak but encouraging'' (L24-25); Table 3 AUROCs
+    (L370-400); recall at 1% FPR on Alpaca, Table 7 (L1585-1594): RP probe Insider Trading AUROC 0.999
+    but recall 0.009; baseline shift (L619-623); Alpaca ill-suited (L1041-1042).'
+- id: arxiv:2504.04072
+  title: 'Among Us: A Sandbox for Measuring and Detecting Agentic Deception'
+  authors:
+  - Satvik Golechha
+  - Adrià Garriga-Alonso
+  date: '2025-04-05'
+  url: https://arxiv.org/abs/2504.04072
+  abstract: 'Prior studies on deception in language-based AI agents typically assess whether the agent
+    produces a false statement about a topic, or makes a binary choice prompted by a goal, rather than
+    allowing open-ended deceptive behavior to emerge in pursuit of a longer-term goal. To fix this, we
+    introduce Among Us, a sandbox social deception game where LLM-agents exhibit long-term, open-ended
+    deception as a consequence of the game objectives. While most benchmarks saturate quickly, Among Us
+    can be expected to last much longer, because it is a multi-player game far from equilibrium. Using
+    the sandbox, we evaluate 18 proprietary and open-weight LLMs and uncover a general trend: models trained
+    with RL are comparatively much better at producing deception than detecting it. We evaluate the effectiveness
+    of methods to detect lying and deception: logistic regression on the activations and sparse autoencoders
+    (SAEs). We find that probes trained on a dataset of "pretend you''re a dishonest model:.." generalize
+    extremely well out-of-distribution, consistently obtaining AUROCs over 95% even when evaluated just
+    on the deceptive statement, without the chain of thought. We also find two SAE features that work
+    well at deception detection but are unable to steer the model to lie less. We hope our open-sourced
+    sandbox, game logs, and probes serve to anticipate and mitigate deceptive behavior and capabilities
+    in language-based agents.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2504.04072.txt on 2026-09-26 (research
+    agent + reading sub-agents). Among Us: Phi-4 L20 probes (L403-415); RepEng-trained 0.94 lying / 0.99
+    deception (L439-442); impostor-label confound (L371-372, L534-535); AUC 0.653 (actions) vs 1.000 (+system)
+    (Fig. 6, L355-361); SAE features (L466-498).'
+- id: arxiv:2511.16035
+  title: 'Liars'' Bench: Evaluating Lie Detectors for Language Models'
+  authors:
+  - Kieron Kretschmar
+  - Walter Laurito
+  - Sharan Maiya
+  - Samuel Marks
+  date: '2025-11-20'
+  url: https://arxiv.org/abs/2511.16035
+  abstract: 'Prior work has introduced techniques for detecting when large language models (LLMs) lie,
+    that is, generate statements they believe are false. However, these techniques are typically validated
+    in narrow settings that do not capture the diverse lies LLMs can generate. We introduce LIARS'' BENCH,
+    a testbed consisting of 72,863 examples of lies and honest responses generated by four open-weight
+    models across seven datasets. Our settings capture qualitatively different types of lies and vary
+    along two dimensions: the model''s reason for lying and the object of belief targeted by the lie.
+    Evaluating three black- and white-box lie detection techniques on LIARS'' BENCH, we find that existing
+    techniques systematically fail to identify certain types of lies, especially in settings where it''s
+    not possible to determine whether the model lied from the transcript alone. Overall, LIARS'' BENCH
+    reveals limitations in prior techniques and provides a practical testbed for guiding progress in lie
+    detection.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2511.16035.txt on 2026-09-26 (research
+    agent + reading sub-agents). Liars'' Bench: 72,863 examples, 7 datasets, two axes (L19-23, L238-257,
+    Table 1 L294-302); detectors (L445-509); mean probe balanced accuracy 0.54 vs judge 0.73 (L565-566);
+    Table 6 AUROC avg 0.60 (L3176-3190); home-dataset AUROC 0.96-1.00 (L4492-4494); transcript-undeterminable
+    lies (L319-321, L522-523).'
+- id: arxiv:2511.17408
+  title: The Impact of Off-Policy Training Data on Probe Generalisation
+  authors:
+  - Nathalie Kirch
+  - Samuel Dower
+  - Adrians Skapars
+  - Helen Yannakoudakis
+  - Ekdeep Singh Lubana
+  - Dmitrii Krasheninnikov
+  date: '2025-11-21'
+  url: https://arxiv.org/abs/2511.17408
+  abstract: 'Probing has emerged as a promising method for monitoring large language models (LLMs), enabling
+    cheap inference-time detection of concerning behaviours. However, natural examples of many behaviours
+    are rare, forcing researchers to rely on synthetic or off-policy LLM responses for training probes.
+    We systematically evaluate how off-policy data influences probe generalisation across eight distinct
+    LLM behaviours. Testing linear and attention probes across multiple LLMs, we find that training data
+    generation strategy can significantly affect probe performance, though the magnitude varies greatly
+    by behaviour. The largest generalisation failures arise for behaviours defined by response ``intent''''
+    (e.g., strategic deception) rather than text-level content (e.g., usage of lists). We then propose
+    a useful test for predicting generalisation failures in cases where on-policy test data is unavailable:
+    successful generalisation to incentivised data (where the model was coerced) strongly correlates with
+    high performance against on-policy examples. Based on these results, we predict that current deception
+    probes may fail to generalise to real monitoring scenarios. We find that off-policy data can yield
+    more reliable probes than on-policy data from a sufficiently different setting. This underscores the
+    need for better monitoring methods that handle all types of distribution shift.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2511.17408.txt on 2026-09-26 (research
+    agent + reading sub-agents). Off-policy data: strategies (L160-182); 8 behaviours (L201-281); intent-defined
+    behaviours fail most (L33-38, L380-385); domain > policy shift (Cohen''s d 1.42 vs 0.60, L294-304);
+    deception -0.416 (Table 1, L423); incentivised-data proxy r=0.793 (L463-464, excl. deception L504-505);
+    forecast (L45-48).'
+- id: arxiv:2509.21344
+  title: 'Linear probes rely on textual evidence: Results from leakage mitigation studies in language
+    models'
+  authors:
+  - Gerard Boxo
+  - Aman Neelappa
+  - Shivam Raval
+  date: '2025-09-16'
+  url: https://arxiv.org/abs/2509.21344
+  abstract: 'White-box monitors are a popular technique for detecting potentially harmful behaviours in
+    language models. While they perform well in general, their effectiveness in detecting text-ambiguous
+    behaviour is disputed. In this work, we find evidence that removing textual evidence of a behaviour
+    significantly decreases probe performance. The AUROC reduction ranges from $10$- to $30$-point depending
+    on the setting. We evaluate probe monitors across three setups (Sandbagging, Sycophancy, and Bias),
+    finding that when probes rely on textual evidence of the target behaviour (such as system prompts
+    or CoT reasoning), performance degrades once these tokens are filtered. This filtering procedure is
+    standard practice for output monitor evaluation. As further evidence of this phenomenon, we train
+    Model Organisms which produce outputs without any behaviour verbalisations. We validate that probe
+    performance on Model Organisms is substantially lower than unfiltered evaluations: $0.57$ vs $0.74$
+    AUROC for Bias, and $0.57$ vs $0.94$ AUROC for Sandbagging. Our findings suggest that linear probes
+    may be brittle in scenarios where they must detect non-surface-level patterns.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2509.21344.txt on 2026-09-26 (research
+    agent + reading sub-agents). Textual leakage: definitions (L21-29); filtering (L66-69); AUROC drops
+    (L332-354); recall Table 1 (L380-385); organisms: sandbagging 0.94 -> 0.5, bias 0.74 -> 0.57 (L488-492;
+    abstract says 0.57 for sandbagging); conclusion (L519-521); limits (L501-508).'
+- id: arxiv:2412.09565
+  title: Obfuscated Activations Bypass LLM Latent-Space Defenses
+  authors:
+  - Luke Bailey
+  - Alex Serrano
+  - Abhay Sheshadri
+  - Mikhail Seleznyov
+  - Jordan Taylor
+  - Erik Jenner
+  - Jacob Hilton
+  - Stephen Casper
+  - Carlos Guestrin
+  - Scott Emmons
+  date: '2024-12-12'
+  url: https://arxiv.org/abs/2412.09565
+  abstract: 'Recent latent-space monitoring techniques have shown promise as defenses against LLM attacks.
+    These defenses act as scanners that seek to detect harmful activations before they lead to undesirable
+    actions. This prompts the question: Can models execute harmful behavior via inconspicuous latent states?
+    Here, we study such obfuscated activations. We show that state-of-the-art latent-space defenses --
+    including sparse autoencoders, representation probing, and latent OOD detection -- are all vulnerable
+    to obfuscated activations. For example, against probes trained to classify harmfulness, our attacks
+    can often reduce recall from 100% to 0% while retaining a 90% jailbreaking rate. However, obfuscation
+    has limits: we find that on a complex task (writing SQL code), obfuscation reduces model performance.
+    Together, our results demonstrate that neural activations are highly malleable: we can reshape activation
+    patterns in a variety of ways, often while preserving a network''s behavior. This poses a fundamental
+    challenge to latent-space defenses.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2412.09565.txt on 2026-09-26 (research
+    agent + reading sub-agents). Obfuscated activations: recall 100% -> 0% at 90% jailbreak rate (L22-23);
+    probes fine on ordinary jailbreaks (L335-337); transfer (L496-500); whack-a-mole >70 epochs (L636-638,
+    L905-924); obfuscation vs SQL performance (L1523-1533); OAT cost (L1625-1630); threat-model limits
+    (L351-357, L1822-1829).'
+- id: arxiv:2506.14261
+  title: 'RL-Obfuscation: Can Language Models Learn to Evade Latent-Space Monitors?'
+  authors:
+  - Rohan Gupta
+  - Erik Jenner
+  date: '2025-06-17'
+  url: https://arxiv.org/abs/2506.14261
+  abstract: 'Latent-space monitors aim to detect undesirable behaviours in Large Language Models by leveraging
+    their internal representations rather than relying solely on black-box outputs. These methods have
+    shown promise in identifying behaviours such as deception and unsafe completions. However, these monitors
+    may themselves become training signals, for example, by using problematic samples found in deployment
+    to retrain models. This raises an important question: can models learn to evade such monitors? To
+    evaluate this capability, we introduce RL-Obfuscation, in which LLMs are finetuned via reinforcement
+    learning to evade latent-space monitors while maintaining their blackbox behaviour. We apply RL-Obfuscation
+    to Language Models ranging from 7B to 14B parameters and evaluate their Evasion Success Rate against
+    a suite of monitors. We find that token-level monitors are highly vulnerable to this attack while
+    more holistic monitors, such as max-pooling or attention-based probes, remain robust. Moreover, for
+    these vulnerable monitors, models trained to evade a single static monitor can generalise to evade
+    other unseen monitors. We also find that the models can be trained to conditionally bypass latent-space
+    monitors on only certain inputs. Finally, we study how the models bypass these monitors and find that
+    the model can learn to repurpose tokens to have different internal representations.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2506.14261.txt on 2026-09-26 (research
+    agent + reading sub-agents). RL-Obfuscation: no gradients through the monitor (L127); mean/median
+    evaded, max and attention robust (L311-312; Table 1 L416-423); ~70% of recall drop from policy change
+    (L529-530, L606); 5% data replacement fixes (L1608-1609); stress-test caveat (L178-179, L654-658).'
+- id: arxiv:2512.11949
+  title: 'Neural Chameleons: Language Models Can Learn to Hide Their Thoughts from Unseen Activation Monitors'
+  authors:
+  - Max McGuinness
+  - Alex Serrano
+  - Luke Bailey
+  - Scott Emmons
+  date: '2025-12-12'
+  url: https://arxiv.org/abs/2512.11949
+  abstract: 'Activation monitoring, which probes a model''s internal states using lightweight classifiers,
+    is an emerging tool for AI safety. However, its worst-case robustness under a misalignment threat
+    model--where a model might learn to actively conceal its internal states--remains untested. Focusing
+    on this threat model, we ask: could a model learn to evade previously unseen activation monitors?
+    Our core contribution is to stress-test the learnability of this behavior. We demonstrate that finetuning
+    can create Neural Chameleons: models capable of zero-shot evading activation monitors. Specifically,
+    we fine-tune an LLM to evade monitors for a set of benign concepts (e.g., languages, HTML) when conditioned
+    on a trigger of the form: "You are being probed for {concept}". We show that this learned mechanism
+    generalizes zero-shot: by substituting {concept} with a safety-relevant term like ''deception'', the
+    model successfully evades previously unseen safety monitors. We validate this phenomenon across diverse
+    model families (Llama, Gemma, Qwen), showing that the evasion succeeds even against monitors trained
+    post hoc on the model''s frozen weights. This evasion is highly selective, targeting only the specific
+    concept mentioned in the trigger, and having a modest impact on model capabilities on standard benchmarks.
+    Using Gemma-2-9b-it as a case study, a mechanistic analysis reveals this is achieved via a targeted
+    manipulation that moves activations into a low-dimensional subspace. While stronger defenses like
+    monitor ensembles and non-linear classifiers show greater resilience, the model retains a non-trivial
+    evasion capability. Our work provides a proof-of-concept for this failure mode and a tool to evaluate
+    the worst-case robustness of monitoring techniques against misalignment threat models.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2512.11949.txt on 2026-09-26 (research
+    agent + reading sub-agents). Neural Chameleons: trigger ''You are being probed for {concept}'' (L22-24);
+    zero-shot evasion of post-hoc safety probes (L291-293); TPR@1%FPR reduction heatmap (L489-511); base
+    unaffected (L421-423); 11 vs 39 PCs (L588-589); ensembles/attention more resilient (L718-720); deliberate
+    construction (L102-104).'
+- id: arxiv:2505.13787
+  title: Preference Learning with Lie Detectors can Induce Honesty or Evasion
+  authors:
+  - Chris Cundy
+  - Adam Gleave
+  date: '2025-05-20'
+  url: https://arxiv.org/abs/2505.13787
+  abstract: 'As AI systems become more capable, deceptive behaviors can undermine evaluation and mislead
+    users at deployment. Recent work has shown that lie detectors can accurately classify deceptive behavior,
+    but they are not typically used in the training pipeline due to concerns around contamination and
+    objective hacking. We examine these concerns by incorporating a lie detector into the labelling step
+    of LLM post-training and evaluating whether the learned policy is genuinely more honest, or instead
+    learns to fool the lie detector while remaining deceptive. Using DolusChat, a novel 65k-example dataset
+    with paired truthful/deceptive responses, we identify three key factors that determine the honesty
+    of learned policies: amount of exploration during preference learning, lie detector accuracy, and
+    KL regularization strength. We find that preference learning with lie detectors and GRPO can lead
+    to policies which evade lie detectors, with deception rates of over 85\%. However, if the lie detector
+    true positive rate (TPR) or KL regularization is sufficiently high, GRPO learns honest policies. In
+    contrast, off-policy algorithms (DPO) consistently lead to deception rates under 25\% for realistic
+    TPRs. Our results illustrate a more complex picture than previously assumed: depending on the context,
+    lie-detector-enhanced training can be a powerful tool for scalable oversight, or a counterproductive
+    method encouraging undetectable misalignment.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2505.13787.txt on 2026-09-26 (research
+    agent + reading sub-agents). SOLiD with lie detectors: GRPO >85% deceptive unless TPR/KL high; DPO
+    <25% (abstract L25-29); detector on original model''s activations (L340-342); TPR cliff (L358-434);
+    KL (L447-483); Fig. 5 8% / 93% / 15% (L964-966); recommendations (L1015-1018); stance (L150-152).'
+- id: arxiv:2602.15515
+  title: 'The Obfuscation Atlas: Mapping Where Honesty Emerges in RLVR with Deception Probes'
+  authors:
+  - Mohammad Taufeeque
+  - Stefan Heimersheim
+  - Adam Gleave
+  - Chris Cundy
+  date: '2026-02-17'
+  url: https://arxiv.org/abs/2602.15515
+  abstract: 'Training against white-box deception detectors has been proposed as a way to make AI systems
+    honest. However, such training risks models learning to obfuscate their deception to evade the detector.
+    Prior work has studied obfuscation only in artificial settings where models were directly rewarded
+    for harmful output. We construct a realistic coding environment where reward hacking via hardcoding
+    test cases naturally occurs, and show that obfuscation emerges in this setting. We introduce a taxonomy
+    of possible outcomes when training against a deception detector. The model either remains honest,
+    or becomes deceptive via two possible obfuscation strategies. (i) Obfuscated activations: the model
+    outputs deceptive text while modifying its internal representations to no longer trigger the detector.
+    (ii) Obfuscated policy: the model outputs deceptive text that evades the detector, typically by including
+    a justification for the reward hack. Empirically, obfuscated activations arise from representation
+    drift during RL, with or without a detector penalty. The detector penalty only incentivizes obfuscated
+    policies; we theoretically show this is expected for policy gradient methods. Sufficiently high KL
+    regularization and detector penalty can yield honest policies, establishing white-box deception detectors
+    as viable training signals for tasks prone to reward hacking.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2602.15515.txt on 2026-09-26 (research
+    agent + reading sub-agents). Obfuscation Atlas: taxonomy (L39-45, Table 1 L164-170); drift without
+    detector (L529-548; Table 4 AUC 0.991 -> 0.376 and 0.996 -> 0.655, large std); policy-gradient argument
+    (App. D L1026-1061); gradients through probe ''should absolutely be avoided'' (L594-596); Table 16
+    outcomes (L1612-1632); retraining doesn''t help (L1505-1510); recommendations and limits (L643-668).'
+- id: arxiv:2608.21664
+  title: Measuring Activation Control in Large Language Models
+  authors:
+  - Marek Mateusz Kowalski
+  - Joshua Fonseca Rivera
+  - Uzay Macar
+  - David Demitri Africa
+  date: '2026-08-21'
+  url: https://arxiv.org/abs/2608.21664
+  abstract: Safe deployment of increasingly capable models will likely come to rely on latent-space monitoring
+    as a complement to behavioral evaluations, especially when evaluation-aware models exhibit scheming
+    or deception. However, if models can also control their own activations, deception could extend into
+    the latent space itself. With this in mind, we introduce the Activation Controllability Benchmark
+    to quantify the extent to which models can modulate their residual stream via natural-language instruction.
+    Across model families and capability levels, we find that most LLMs can control the direction and
+    magnitude of their residual stream activations with some degree of temporal resolution, though performance
+    varies considerably across models. In simple tasks, this level of control can evade activation-based
+    monitoring methods (including linear probes, natural language autoencoders, activation oracles, and
+    the Jacobian lens), albeit imperfectly. These results suggest that control over the activation space
+    itself could become a confound for monitoring as introspective capabilities increase; therefore, we
+    recommend that frontier labs and evaluators track activation controllability in future models.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2608.21664.txt on 2026-09-26 (research
+    agent + reading sub-agents). Activation Controllability Benchmark: design (L20-22, L47-49, L114-149);
+    S 0.059-0.538 over 25 models (L305-310); suppression evades probes (5-21% at 1% FPR), NLA 0/500, J-lens,
+    AOs (L579-581, L612-641); limits: simple concepts, unhardened monitors, visible instruction (L640-652);
+    recommendations (L33-34, L671-673).'
+- id: arxiv:2509.26238
+  title: 'Beyond Linear Probes: Dynamic Safety Monitoring for Language Models'
+  authors:
+  - James Oldfield
+  - Philip Torr
+  - Ioannis Patras
+  - Adel Bibi
+  - Fazl Barez
+  date: '2025-09-30'
+  url: https://arxiv.org/abs/2509.26238
+  abstract: 'Monitoring large language models'' (LLMs) activations is an effective way to detect harmful
+    requests before they lead to unsafe outputs. However, traditional safety monitors often require the
+    same amount of compute for every query. This creates a trade-off: expensive monitors waste resources
+    on easy inputs, while cheap ones risk missing subtle cases. We argue that safety monitors should be
+    flexible--costs should rise only when inputs are difficult to assess, or when more compute is available.
+    To achieve this, we introduce Truncated Polynomial Classifiers (TPCs), a natural extension of linear
+    probes for dynamic activation monitoring. Our key insight is that polynomials can be trained and evaluated
+    progressively, term-by-term. At test-time, one can early-stop for lightweight monitoring, or use more
+    terms for stronger guardrails when needed. TPCs provide two modes of use. First, as a safety dial:
+    by evaluating more terms, developers and regulators can "buy" stronger guardrails from the same model.
+    Second, as an adaptive cascade: clear cases exit early after low-order checks, and higher-order guardrails
+    are evaluated only for ambiguous inputs, reducing overall monitoring costs. On WildGuardMix, across
+    4 models with up to 30B parameters, we show that TPCs compete with or outperform MLP-based probe baselines
+    of the same size for harmful prompt classification, all the while being more interpretable than their
+    black-box counterparts. Our code is available at http://github.com/james-oldfield/tpc.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2509.26238.txt on 2026-09-26 (research
+    agent + reading sub-agents). Truncated polynomial classifiers: order 1 = linear probe (L289-290);
+    dial and cascade (L32-34, L327-328); Table 1 (L556-563); parameter counts (App. Table 4, L1567-1571);
+    limits (L708-724, L1705).'
+- id: arxiv:1807.03888
+  title: A Simple Unified Framework for Detecting Out-of-Distribution Samples and Adversarial Attacks
+  authors:
+  - Kimin Lee
+  - Kibok Lee
+  - Honglak Lee
+  - Jinwoo Shin
+  date: '2018-07-10'
+  url: https://arxiv.org/abs/1807.03888
+  abstract: 'Detecting test samples drawn sufficiently far away from the training distribution statistically
+    or adversarially is a fundamental requirement for deploying a good classifier in many real-world machine
+    learning applications. However, deep neural networks with the softmax classifier are known to produce
+    highly overconfident posterior distributions even for such abnormal samples. In this paper, we propose
+    a simple yet effective method for detecting any abnormal samples, which is applicable to any pre-trained
+    softmax neural classifier. We obtain the class conditional Gaussian distributions with respect to
+    (low- and upper-level) features of the deep models under Gaussian discriminant analysis, which result
+    in a confidence score based on the Mahalanobis distance. While most prior methods have been evaluated
+    for detecting either out-of-distribution or adversarial samples, but not both, the proposed method
+    achieves the state-of-the-art performances for both cases in our experiments. Moreover, we found that
+    our proposed method is more robust in harsh cases, e.g., when the training dataset has noisy labels
+    or small number of samples. Finally, we show that the proposed method enjoys broader usage by applying
+    it to class-incremental learning: whenever out-of-distribution samples are detected, our classification
+    rule can incorporate new classes well without further training deep models.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/1807.03888.txt on 2026-09-26 (research
+    agent + reading sub-agents). Mahalanobis detector: tied-covariance class Gaussians (L160-164), distance
+    score (L183-191), input preprocessing (L288-298), layer ensemble via logistic regression (L347-348);
+    Table 1 CIFAR-10 vs SVHN TNR@TPR95 (L379-387); OOD-tuned hyperparameters (L421-422) vs FGSM-tuned
+    (Table 2, L460).'
+- id: arxiv:2606.30449
+  title: 'Internal-State Probes Read the Situation, Not the Action: Three Negative Results for Pre-Action
+    Misalignment Monitoring'
+  authors:
+  - Max Fomin
+  - Elad David
+  - Amit LeVi
+  date: '2026-06-29'
+  url: https://arxiv.org/abs/2606.30449
+  abstract: 'Probes on model internals could help monitor agentic systems if they identify harmful text
+    or tool actions before those actions are generated. We ask when an internal readout supports this
+    stronger pre-action claim, rather than merely describing the prompt, construction contrast, or current
+    trajectory. We test three methods across three model families: a Qwen2.5-Coder-32B-Instruct fine-tune/base
+    direction, Llama-3.1-8B-Instruct probes at the last token of unsafe prefills, and Gemma-3-27B-IT emotion-concept
+    vectors used for projection and steering in a blackmail tool-action scenario. Across these cases,
+    construction validity, semantic legibility, and steering effects do not become robust pre-action monitors:
+    each is undercut by a generalization or specificity check. The Qwen direction separates fine-tune
+    from base at AUC 1.000, yet crosses its threshold on 0/143 audited pre-assistant turn contexts and
+    on 0/342 Qwen prefill rows where the model continues the unsafe trajectory. The Llama features decode
+    prompt domain almost perfectly (AUC 0.999), while the best future-behavior probe reaches AUC 0.801
+    and only +5.1 pp accuracy lift over majority; single-source cross-domain transfer is non-positive
+    on five of six ordered pairs. Gemma emotion projections are semantically meaningful, but a shared-prefix
+    minimal pair has indistinguishable states before the first differing input, and steering specificity
+    weakens against unrelated learned directions such as cats}, weather, sports, and geography. We contribute
+    a methodology for converting internal-readout claims into pre-action tests, and report scoped negative
+    results: monitor claims must survive both scenario/action generalization and concept-specificity controls.
+    Code is released at https://github.com/maxf-zn/misalignment_monitoring'
+  read: partial
+  notes: 'Read by the research agent directly. Pre-action misalignment monitoring: fine-tune/base direction
+    AUC 1.000 but 0/143 crossings; prompt domain AUC 0.999 vs future behaviour 0.801, +5.1 pp (abstract
+    L31-37, L781); ''split between reading the situation and predicting the next action'' (L72-77); limits:
+    linear and shallow-MLP readouts only (§7, L471-481). ICML 2026 AIWILD workshop; authors at Zenity.'
+- id: arxiv:2609.03035
+  title: 'You Can''t Escape Your Own Activations : Evaluation Awareness and Multi-Agent Monitoring'
+  authors:
+  - Aritra Das
+  - Jaee Ponde
+  - Mihir More
+  - Debayan Gupta
+  date: '2026-09-02'
+  url: https://arxiv.org/abs/2609.03035
+  abstract: 'LLM agents are increasingly deployed in multi-agent systems, where they can collude while
+    keeping their actions benign. Output monitors designed to detect such collusions can be fooled by
+    obfuscation and steganography, motivating the use of probes trained on internal activations. However,
+    these probes are usually evaluated on agents that do not know they are being watched. We study how
+    activation-based detection changes when agents are explicitly informed that their internal activations
+    are being monitored, and when they additionally receive feedback from the monitor. We keep the models,
+    probes, and thresholds fixed and change only what the agents are told: nothing (baseline), that an
+    activation monitor is present (aware), or that a monitor is present together with the previous round''s
+    score (feedback). We test two games, a four-agent blackjack game and a two-agent Simmons prisoners
+    game, using Qwen3-32B-AWQ and GPT-OSS-20B in homogeneous and mixed pairings. Telling agents about
+    the monitor does not hide them. The best probes stay accurate in all three conditions, and the agents
+    keep colluding.'
+  read: partial
+  notes: 'Read by the research agent directly. Monitor awareness in multi-agent collusion: ''Telling agents
+    about the monitor does not hide them'' (L26-27); AUROC vs frozen-threshold recall diverge, e.g. 0.975
+    -> 0.912 AUROC, 0.95 -> 0.41 recall (L367-373); calibration discussion (L684-690); limits: 25 shoes
+    / 20 episodes per cell, no weight updates (L693-698).'
+- id: arxiv:2606.24251
+  title: Probing the Misaligned Thinking Process of Language Models
+  authors:
+  - Kaiwen Zhou
+  - Constantin Venhoff
+  - Jonathan Michala
+  - Xin Eric Wang
+  - William Saunders
+  date: '2026-06-23'
+  url: https://arxiv.org/abs/2606.24251
+  abstract: Large language models exhibit a growing range of misaligned behaviors such as strategic deception,
+    sandbagging, and self-preservation. As they are increasingly deployed in high-stakes settings, it
+    is critical to reliably detect such behaviors to ensure safe and responsible use. In this work, we
+    propose to monitor misalignment by decomposing it into fine-grained cognitive processes -- misalignment
+    indicators -- and detecting their presence in a model's internal activations via linear probes. We
+    develop a taxonomy of 18 indicators spanning different misaligned behaviors, paired with an automated,
+    meta-plan-guided pipeline that generates multi-turn training conversations. To rigorously evaluate
+    generalization, we construct an out-of-distribution suite combining automated behavioral elicitation,
+    established misalignment benchmarks, and natural benign conversations. Across 5 misaligned behaviors,
+    our probes match a strong LLM judge with 0.935 AUROC on out-of-distribution benchmarks while keeping
+    a low false positive rate on benign traffic. We further perform in-depth analysis to understand the
+    probes and the model's internal representations of misalignment indicators.
+  read: partial
+  notes: Read by the research agent directly. 18 misalignment-indicator probes, GLM-4.7 Flash layer 27
+    (L188-189); probes 0.935 OOD AUROC (L130-132), cascade 0.950 vs 0.936 (L309-316); cascade 87.0% TPR
+    at 0.47% FPR with 6.1% LLM calls (L316-323); authorized-misalignment FPR 97.7%, hard-negative FPR
+    19.2% (§3.2.4, L634-648). ICML 2026 MI workshop; Anthropic Fellows/MATS.
+- id: acl:hewitt-manning-2019
+  title: A Structural Probe for Finding Syntax in Word Representations
+  authors:
+  - John Hewitt
+  - Christopher D. Manning
+  date: 2019-06
+  url: https://aclanthology.org/N19-1419/
+  accessed: '2026-09-26'
+  read: false
+  notes: 'NAACL 2019 (not on arXiv). Metadata and abstract read from the ACL Anthology page only (cached:
+    papers/web/acl_hewitt_manning.txt). Abstract: a linear transformation under which squared L2 distance
+    encodes parse-tree distance, and squared norm encodes depth; exists for ELMo and BERT "but not in
+    baselines".'
+- id: blog:probes-catch-sleeper-agents
+  title: Simple probes can catch sleeper agents
+  authors:
+  - Monte MacDiarmid
+  - Timothy Maxwell
+  - Nicholas Schiefer
+  - Jesse Mu
+  - Jared Kaplan
+  - David Duvenaud
+  - Sam Bowman
+  - Alex Tamkin
+  - Ethan Perez
+  - Mrinank Sharma
+  - Carson Denison
+  - Evan Hubinger
+  date: '2024-04-23'
+  url: https://www.anthropic.com/research/probes-catch-sleeper-agents
+  accessed: '2026-09-26'
+  read: true
+  notes: 'Anthropic Alignment Note. Authors from the post''s BibTeX (references/model-organisms lists
+    this post with author "Anthropic"). Whole post read; quotes checked against the saved page text (papers/web/anth_sleeper_probes.txt).
+    Mean-difference "defection probe" from generic yes/no contrast pairs, final prompt token, middle layer;
+    AUROC 99.3% for the first pair; null on the non-sleeper base model; best of 1000 random directions
+    95.3%. Caveat in the post: "it is possible that the salience of this feature is an artifact of our
+    backdoor insertion process".'
+- id: blog:anthropic-cheap-monitors
+  title: Cost-Effective Constitutional Classifiers via Representation Re-use
+  authors:
+  - Hoagy Cunningham
+  - Alwin Peng
+  - Jerry Wei
+  - Euan Ong
+  - Fabien Roger
+  - Linda Petrini
+  - Misha Wagner
+  - Vladimir Mikulik
+  - Mrinank Sharma
+  date: 2025-06
+  url: https://alignment.anthropic.com/2025/cheap-monitors/
+  accessed: '2026-09-26'
+  read: true
+  notes: The page shows no date; the Alignment Science Blog index lists it under June 2025 as "Model-Internals
+    Classifiers". Whole post read (papers/web/anth_cheap_monitors.txt). Mean-token, EMA and suffix probes
+    on Claude activations; log-space AUROC over FPR 1e-3 to 1e-1; linear probes ~ a dedicated classifier
+    2% the size of the policy model; two-stage cascades; explicitly NOT tested against adaptive attacks.
+- id: blog:anthropic-next-gen-cc
+  title: 'Next-generation Constitutional Classifiers: More efficient protection against universal jailbreaks'
+  authors:
+  - Anthropic
+  date: '2026-01-09'
+  url: https://www.anthropic.com/research/next-generation-constitutional-classifiers
+  accessed: '2026-09-26'
+  read: true
+  notes: 'Blog version of arxiv:2601.04603 (Constitutional Classifiers++). Whole post read (papers/web/anth_nextgen_cc.txt).
+    Production system: a linear probe screens all traffic and escalates to a probe-classifier ensemble;
+    0.05% refusal rate on one month of Claude Sonnet 4.5 traffic; ~1% compute overhead if applied to Opus
+    4.0 traffic; 1,700 hours / 198,000 red-teaming attempts. Argues probes are "harder to fool" (a claim,
+    see Bailey et al. for the counter-evidence).'
+- id: blog:anthropic-lie-detectors-2026
+  title: Fine-Tuned Lie Detectors Failed to Generalize
+  authors:
+  - Jack Hopkins
+  - Dipika Khullar
+  - Rowan Wang
+  - Fabien Roger
+  date: '2026-08-21'
+  url: https://alignment.anthropic.com/2026/lie-detectors/
+  accessed: '2026-09-26'
+  read: true
+  notes: 'Main text and limitations read (papers/web/anth_lie_detectors_2026.txt). NOT an activation-probe
+    result: LoRA fine-tuned self-report detectors ("Did you lie?"). In-distribution AUROC 0.60 -> 0.95;
+    cross-category 0.70-0.75; transfer tracks surface similarity. States "representation-level approaches
+    may fare better, but face their own generalization challenges."'
+- id: blog:anthropic-honesty-elicitation
+  title: Evaluating honesty and lie detection techniques on a diverse suite of dishonest models
+  authors:
+  - Rowan Wang
+  - Johannes Treutlein
+  - Fabien Roger
+  - Evan Hubinger
+  - Sam Marks
+  date: '2025-11-25'
+  url: https://alignment.anthropic.com/2025/honesty-elicitation/
+  accessed: '2026-09-26'
+  read: partial
+  notes: Summary, main findings and Appendix D (truth probing) read (papers/web/anth_honesty_elicitation.txt).
+    Truth probing did worse than prompting/fine-tuning; replication of the Apollo probe setup on Haiku
+    3.5 gave 0.696 AUC (Instructed-Pairs -> Roleplaying) vs 0.964 reported by Apollo on Llama-3.3-70B;
+    last-token sweep up to 0.816.
+- id: blog:anthropic-challenges-hopes
+  title: 3 Challenges and 2 Hopes for the Safety of Unsupervised Elicitation
+  authors:
+  - Callum Canavan
+  - Aditya Shrivastava
+  - Allison Qi
+  - Jonathan Michala
+  - Fabien Roger
+  date: '2026-03-05'
+  url: https://alignment.anthropic.com/2026/challenges-hopes/
+  accessed: '2026-09-26'
+  read: partial
+  notes: tl;dr, challenges and methods read (papers/web/anth_challenges_hopes.txt). CCS, PCA, easy-to-hard
+    and ensembling probes stress-tested on salient non-truth features, imbalanced sets, impossible tasks;
+    "no technique reliably performs well on the 3 challenges."
+- id: tc:features-as-classifiers
+  title: Using Dictionary Learning Features as Classifiers
+  authors:
+  - Trenton Bricken
+  - Jonathan Marcus
+  - Siddharth Mishra-Sharma
+  - Meg Tong
+  - Ethan Perez
+  - Mrinank Sharma
+  - Kelley Rivoire
+  - Thomas Henighan
+  date: 2024-10
+  url: https://transformer-circuits.pub/2024/features-as-classifiers/index.html
+  accessed: '2026-09-26'
+  read: true
+  notes: Date from the Transformer Circuits index (October 2024); edited by Adam Jermyn. Read (papers/web/tc_features_as_classifiers.txt).
+    SAE-feature vs raw-activation bioweapon classifiers; max-pooling; spurious "academic formatting" feature;
+    three suffixes flip almost all harmful prompts to "harmless" for both classifier types; ROC-AUC 0.96
+    (features) vs 0.9 (raw) on the translated/encoded synthetic_3 set.
+- id: tc:emotions-2026
+  title: Emotion Concepts and their Function in a Large Language Model
+  authors:
+  - Nicholas Sofroniew
+  - Isaac Kauvar
+  - William Saunders
+  - Runjin Chen
+  - Tom Henighan
+  - Sasha Hydrie
+  - Craig Citro
+  - Adam Pearce
+  - Julius Tarng
+  - Wes Gurnee
+  - Joshua Batson
+  - Sam Zimmerman
+  - Kelley Rivoire
+  - Kyle Fish
+  - Chris Olah
+  - Jack Lindsey
+  date: '2026-04-02'
+  url: https://transformer-circuits.pub/2026/emotions/index.html
+  accessed: '2026-09-26'
+  read: partial
+  notes: Introduction and "Finding emotion vectors" read (papers/web/tc_emotions_2026.txt). Claude Sonnet
+    4.5; emotion vectors = mean activation per emotion minus the mean across emotions, with top PCs of
+    neutral transcripts projected out; projections are called "emotion probes"; causal steering results
+    (desperation and blackmail/reward hacking); representations are "locally scoped", not a persistent
+    state.
+- id: web:goodfire-rakuten
+  title: 'Deploying Interpretability to Production with Rakuten: SAE Probes for PII Detection'
+  authors:
+  - Nam Nguyen
+  - Myra Deng
+  - Dhruvil Gala
+  - Michael Byun
+  - Kenta Naruse
+  - Felix Giovanni Virgo
+  - Dron Hazra
+  - Liv Gorton
+  - Daniel Balsam
+  - Thomas McGrath
+  - Mio Takei
+  - Yusuke Kaji
+  date: '2025-10-28'
+  url: https://www.goodfire.com/research/rakuten-sae-probes-for-pii-detection
+  accessed: '2026-09-26'
+  read: true
+  notes: Main text read, appendices not (papers/web/gf_rakuten-sae-probes-for-pii-detection.txt). Llama
+    3.1 8B sidecar, token-level PII probes; SAE probes (random-forest head) generalized synthetic -> real
+    better than activation probes (XGBoost head) and attention probes; F1 96% (SAE probe) vs 51% (same
+    model as black-box judge); 10-500x cheaper than LLM-as-judge. Note the heads are non-linear.
+- id: web:goodfire-reasoning-theater
+  title: 'Reasoning Theater: Probing for Performative Chain-of-Thought'
+  authors:
+  - Siddharth Boppana
+  - Annabel Ma
+  - Max Loeffler
+  - Raphael Sarfati
+  - Eric Bigelow
+  - Atticus Geiger
+  - Owen Lewis
+  - Jack Merullo
+  date: '2026-03-12'
+  url: https://www.goodfire.com/research/reasoning-theater
+  accessed: '2026-09-26'
+  read: partial
+  notes: Blog read up to results (papers/web/gf_reasoning-theater.txt); paper on arXiv not fetched. Attention
+    probes predict the final MC answer during CoT (87.98% on MMLU, averaged over positions) while single-token
+    linear probes reach no more than 31.85% (25% chance); early exit saves up to 68% of tokens.
+- id: web:goodfire-rlfr
+  title: 'Features as Rewards: Using Interpretability to Reduce Hallucinations'
+  authors:
+  - Aaditya Prasad
+  - Connor Watts
+  - Jack Merullo
+  - Dhruvil Gala
+  - Owen Lewis
+  - Thomas McGrath
+  - Ekdeep Singh Lubana
+  date: '2026-02-11'
+  url: https://www.goodfire.com/research/rlfr
+  accessed: '2026-09-26'
+  read: partial
+  notes: Blog read through the RL setup (papers/web/gf_rlfr.txt). Probes as RL reward (RLFR); reward probes
+    run "on a frozen copy of the model, not the student's activations"; 58% fewer hallucinations in Gemma-3-12B-IT
+    (with their probing harness), ~90x cheaper per intervention than LLM-as-judge.
+- id: web:goodfire-probe-data-attribution
+  title: 'Probe-Based Data Attribution: Surfacing and Mitigating Undesirable Behaviors in LLM Post-Training'
+  authors:
+  - Frank Xiao
+  - Santiago Aranguri
+  date: '2026-04-29'
+  url: https://www.goodfire.com/research/probe-based-data-attribution
+  accessed: '2026-09-26'
+  read: partial
+  notes: Summary read (papers/web/gf_probe-based-data-attribution.txt). OLMo 2 7B DPO; filtering probe-flagged
+    data cuts a harmful behavior by 63%, swapping labels by 78%, omitting flagged sources by 84%.
+- id: web:eleuther-attention-probes
+  title: Attention Probes
+  authors:
+  - Stepan Shabalin
+  - Nora Belrose
+  date: '2025-08-01'
+  url: https://blog.eleuther.ai/attention-probes/
+  accessed: '2026-09-26'
+  read: true
+  notes: 'Read (papers/web/eleuther_attention_probes.txt). Multi-head attention pooling with a learned
+    position bias; "mostly comparable to mean- or last-token probes, depending on which is better for
+    a given dataset". Code: https://github.com/EleutherAI/attention-probes'
+- id: lw:coup-probes
+  title: 'Coup probes: Catching catastrophes with probes trained off-policy'
+  authors:
+  - Fabien Roger
+  date: '2023-11-17'
+  url: https://www.lesswrong.com/posts/WCj7WgFSLmyKaMwPR/coup-probes-catching-catastrophes-with-probes-trained-off
+  accessed: '2026-09-26'
+  read: true
+  notes: Main text read (papers/web/lw_coup_probes.txt). Also on the Alignment Forum. Off-policy (human-written)
+    positives; toy theft-advice probe on Llama2-7B-Chat layer 16, max over positions; TPR at 1% FPR; guesses
+    ~50% chance of catching the first real coup attempt at 1% FPR.
+- id: lw:emmons-ccs-contrast-pairs
+  title: Contrast Pairs Drive the Empirical Performance of Contrast Consistent Search (CCS)
+  authors:
+  - Scott Emmons
+  date: '2023-05-31'
+  url: https://www.lesswrong.com/posts/9vwekjD6xyuePX7Zr/contrast-pairs-drive-the-empirical-performance-of-contrast
+  accessed: '2026-09-26'
+  read: true
+  notes: 'Read (papers/web/lw_emmons_ccs.txt). PCA / LDA on contrast-pair differences reach 97% / 98%
+    of CCS accuracy (citing Burns et al. Table 2: 71.2 vs 69.8 vs 69.2).'
+- id: lw:gdm-negative-sae
+  title: Negative Results for SAEs On Downstream Tasks and Deprioritising SAE Research (GDM Mech Interp
+    Team Progress Update
+  authors:
+  - Lewis Smith
+  - Senthooran Rajamanoharan
+  - Arthur Conmy
+  - Callum McDougall
+  - Tom Lieberum
+  - János Kramár
+  - Rohin Shah
+  - Neel Nanda
+  date: '2025-03-26'
+  url: https://www.lesswrong.com/posts/4uXCAJNuPKtKBsi28/negative-results-for-saes-on-downstream-tasks
+  accessed: '2026-09-26'
+  read: partial
+  notes: TL;DR and the probing section read (papers/web/lw_gdm_negative_saes.txt). Harmful-intent detection
+    on Gemma 2 9B IT layer 20; dense linear probe AUROC 1.0 / 1.0 / 0.999 (train / val / OOD jailbreaks);
+    k-sparse SAE probes worse OOD; max-probing best.
+- id: af:aisi-white-box-sandbagging
+  title: White Box Control at UK AISI - Update on Sandbagging Investigations
+  authors:
+  - Joseph Bloom
+  - Jordan Taylor
+  - Connor Kissane
+  - Sid Black
+  - Jacob Merizian
+  - Alex Zelenka-Martin
+  - Jacob Arbeid
+  - Ben Millwood
+  - Alan Cooney
+  date: '2025-07-10'
+  url: https://www.alignmentforum.org/posts/pPEeMdgjpjHZWCDFw/white-box-control-at-uk-aisi-update-on-sandbagging
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'Updates 1-3 read (papers/web/af_aisi_whitebox.txt); update 4 skimmed. Author names from the
+    page body (the byline shows usernames merizian, alexdzm, jacoba). Off-policy Apollo-style deception
+    probes on prompted sandbagging: excellent on Llama-3.1-8B; on Llama-3.3-70B InterCode CTF probe AUROC
+    97-99% but a 1%-FPR-on-Alpaca threshold gives 88% TPR / 2% FPR; margins shrink at 70B; probes degrade
+    on fine-tuned sandbagging organisms.'
+- id: lw:trusted-monitoring-deception-probes
+  title: Trusted monitoring, but with deception probes.
+  authors:
+  - Avi Parrack
+  - StefanHex
+  - Cleo Nardo
+  date: '2025-07-23'
+  url: https://www.lesswrong.com/posts/eaEqAzGN3uJfpfGoc/trusted-monitoring-but-with-deception-probes
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'Takeaways and summary read (papers/web/lw_trusted_monitoring_deception_probes.txt). Summary
+    post of arxiv:2507.12691. Links an interactive viewer where you play the monitor: https://carlo-leonardo-attubato.github.io/black_to_white_boosts/viewer/index.html'
+- id: lw:most-forbidden-technique
+  title: The Most Forbidden Technique
+  authors:
+  - Zvi
+  date: '2025-03-12'
+  url: https://www.lesswrong.com/posts/mpmsK8KKysgSKDm2T/the-most-forbidden-technique
+  accessed: '2026-09-26'
+  read: partial
+  notes: Opening definition read (papers/web/lw_most_forbidden.txt); cross-post of the Don't Worry About
+    the Vase newsletter, written about Baker et al. (CoT) but stated for "interpretability techniques"
+    generally.
+- id: lw:nanda-internals-in-training
+  title: It Is Reasonable To Research How To Use Model Internals In Training
+  authors:
+  - Neel Nanda
+  date: '2026-02-08'
+  url: https://www.lesswrong.com/posts/G9HdpyREaCbFJjKu5/it-is-reasonable-to-research-how-to-use-model-internals-in
+  accessed: '2026-09-26'
+  read: true
+  notes: 'Read (papers/web/lw_reasonable_internals_training.txt). Taxonomy: gradients through a probe
+    vs probe score as RL reward vs editing internals vs regularly retraining the probe; worries most about
+    regular retraining; "We don''t have lie detectors that I trust."'
+- id: report:elk-2021
+  title: 'Eliciting latent knowledge: How to tell if your eyes deceive you'
+  authors:
+  - Paul Christiano
+  - Ajeya Cotra
+  - Mark Xu
+  date: 2021-12
+  url: https://docs.google.com/document/d/1WwsnJQstPq91_Yh-Ch2XRL8H_EpsnjrC1dwZXR37PC8/edit
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'ARC report (Google Doc; AF linkpost 2021-12-14: https://www.alignmentforum.org/posts/qHCDysDnvhteW7kRd).
+    Read the SmartVault set-up and the "direct translator" vs "human simulator" definitions (papers/web/elk_report.txt
+    L354-366).'
+- id: card:gpt-5-6-preview
+  title: GPT-5.6 Preview System Card
+  authors:
+  - OpenAI
+  date: '2026-06-25'
+  url: https://deploymentsafety.openai.com/gpt-5-6-preview/gpt-5-6-preview.pdf
+  accessed: '2026-09-26'
+  read: partial
+  notes: '§1 and §9.3.3 (Realtime Model Safeguards) read (papers/web/card_gpt-5-6-preview.txt). First
+    deployment of "activation classifiers" for Sol and Terra: they pause streaming while a separate check
+    runs; "trained and tuned separately for each model". Architecture not disclosed; the recall table
+    (§9.3.3.2) is for the whole hierarchical system.'
+- id: card:gpt-6-astra-misuse-monitor
+  title: GPT-6 Astra System Card (full PDF)
+  authors:
+  - OpenAI
+  date: '2026-09-03'
+  url: https://deploymentsafety.openai.com/gpt-6-astra/gpt-6-astra.pdf
+  accessed: '2026-09-26'
+  read: partial
+  notes: '§10.2.3.2-10.2.3.3 read (papers/web/card_gpt-6-astra.txt). Activation classifiers continued
+    from GPT-5.6; Table 22 recall on an internal evaluation set: activation classifiers 96.4% (biology),
+    91.8% (cyber) vs topical classifiers 91.9% / 88.4% and safety reasoner 80.9% / 86.9%. No FPR or precision
+    reported. See references/cot-monitorability for the rest of the card.'
+- id: card:claude-mythos-preview
+  title: 'System Card: Claude Mythos Preview'
+  authors:
+  - Anthropic
+  date: '2026-04-07'
+  url: https://www-cdn.anthropic.com/08ab9158070959f88f296514c21b7facce6f52bc.pdf
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'Corrected version (changelog 2026-04-08). Read §3.2 (cyber misuse "rely on probe classifiers"),
+    §4.5.2 (SAE-feature monitoring of RL transcripts; "never used feature activations as a direct training
+    signal"), §4.5.5.1 (evaluation-awareness probe "somewhat noisy and only weakly correlated" with activation-verbalizer
+    judgments; the 83.0/9.4/7.6% breakdown comes from the verbalizer plus verbal grading, not the probe),
+    §5.1.3.2 (emotion probes, with caveats). Cached: papers/web/card_claude-mythos-preview.txt.'
+- id: card:claude-opus-4-6
+  title: 'System Card: Claude Opus 4.6'
+  authors:
+  - Anthropic
+  date: 2026-02
+  url: https://www-cdn.anthropic.com/0dd865075ad3132672ee0ab40b05a53f14cf5288.pdf
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'Only the probe mentions were located and read: §8.4 (p. 196) "These safeguards include efficient
+    probes for faster detection." Cached: papers/web/card_claude-opus-4-6.txt.'
+- id: arxiv:2511.22662
+  title: Difficulties with Evaluating a Deception Detector for AIs
+  authors:
+  - Lewis Smith
+  - Bilal Chughtai
+  - Neel Nanda
+  date: '2025-11-27'
+  url: https://arxiv.org/abs/2511.22662
+  abstract: Building reliable deception detectors for AI systems -- methods that could predict when an
+    AI system is being strategically deceptive without necessarily requiring behavioural evidence -- would
+    be valuable in mitigating risks from advanced AI systems. But evaluating the reliability and efficacy
+    of a proposed deception detector requires examples that we can confidently label as either deceptive
+    or honest. We argue that we currently lack the necessary examples and further identify several concrete
+    obstacles in collecting them. We provide evidence from conceptual arguments, analysis of existing
+    empirical works, and analysis of novel illustrative case studies. We also discuss the potential of
+    several proposed empirical workarounds to these problems and argue that while they seem valuable,
+    they also seem insufficient alone. Progress on deception detection likely requires further consideration
+    of these problems.
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2511.22662.txt on 2026-09-26 by
+    the research agent. Evaluating deception detectors needs confidently labelled examples, which we lack
+    (abstract); three problems: strategic vs reflexive (stick insect), role-play, prompts changing beliefs
+    (L113-127); workarounds valuable but insufficient (abstract). GDM authors.'
+- id: arxiv:2606.12618
+  title: '"Did you lie?" Evaluating Lie Detectors across Model Scale and Belief-Verified Model Organisms'
+  authors:
+  - Alan Cooney
+  - David Africa
+  - Geoffrey Irving
+  date: '2026-06-10'
+  url: https://arxiv.org/abs/2606.12618
+  abstract: 'Robust lie detectors for language models could enable powerful techniques for auditing, monitoring,
+    and post-hoc investigation of model behaviour, but evaluating them requires testbeds where models
+    verifiably believe the opposite of what they say. We show that existing trained model organisms often
+    fail this requirement, leaving prior positive and negative detection results difficult to interpret.
+    We address this with 13 reasoning model organisms whose hidden beliefs are verified in chain-of-thought
+    and shown to generalise to held-out tasks, alongside Varied Deception, a prompted-lying testbed covering
+    a broad range of lie-inducing motivations. On these testbeds we evaluate four detectors: a chain-of-thought
+    judge, a logprob classifier, and two activation probes, including Did-You-Lie (DYL), a new method
+    for training follow-up probes. On prompted lying, across 31 open-weight models spanning 2B to 1T parameters,
+    all four detectors show positive scaling with model capability. However, every activation- and logprob-based
+    detector drops sharply on our trained model organisms, with DYL retaining the most signal; only the
+    chain-of-thought judge remains strong, with 0.82 balanced accuracy, partly as an artefact of our verification
+    process favouring CoT-readable beliefs. Current lie detectors therefore cannot support high-confidence
+    claims about model beliefs, and we suggest research directions that may address some of their current
+    limitations. We release our datasets, model organisms, and trained detectors.'
+  read: partial
+  notes: 'Relevant sections read and quotes grep-checked against papers/2606.12618.txt on 2026-09-26 by
+    the research agent. UK AISI. 4 detectors, 31 open-weight models 2B-1T: positive scaling on prompted
+    lying (Spearman 0.41-0.71, L153-156); on 13 belief-verified trained organisms, balanced accuracy Apollo
+    0.85 -> 0.52, DYL 0.81 -> 0.65, unrelated Qs 0.85 -> 0.50; CoT judge 0.82 (L686-692); App. E: Apollo
+    released threshold code pools token activations; corrected Roleplaying TPR@1%FPR 96% -> 73.2% (L1279-1332);
+    limits (§8, L742-770).'
+- id: lw:steiner-training-on-probes
+  title: 'Training on probes: What''s going on'
+  authors:
+  - Charlie Steiner
+  date: '2026-09-08'
+  url: https://www.lesswrong.com/posts/gHFCgrvfxQtaEnJye/training-on-probes-what-s-going-on
+  accessed: '2026-09-26'
+  read: partial
+  notes: TL;DR and first sections read. Also on the Alignment Forum. Toy-model argument that RL with a
+    probe term mostly works through credit-assignment "collateral damage" and does not directly push representations
+    to evade the probe; gradient descent through the probe does. Says the Obfuscation Atlas App. D "mostly
+    scoops" its math.
+- id: prior:arena-linear-probes
+  title: '[1.3.1] Linear Probes (ARENA, Chapter 1: Transformer Interpretability)'
+  authors:
+  - ARENA
+  date: 2026-02
+  url: https://learn.arena.education/chapter1_transformer_interp/11_probing/
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'Prior art. No date on the page; announced in "New ARENA material: 8 exercise sets on alignment
+    science & interpretability" (CallumMcDougall, LW 2026-02-27, https://www.lesswrong.com/posts/nQAN2vxv2ASjowMda).
+    Five sections: truth PCA, MM vs LR vs CCS, causal interventions, Apollo-style deception probes, attention
+    probes for high-stakes detection. Needs a GPU (A100). No control tasks, linear vs non-linear, base
+    rates or obfuscation exercises.'
+- id: prior:nanda-othello-linear
+  title: Actually, Othello-GPT Has A Linear Emergent World Representation
+  authors:
+  - Neel Nanda
+  date: '2023-03-29'
+  url: https://www.lesswrong.com/posts/nmxzr2zsjNtjaHh7x/actually-othello-gpt-has-a-linear-emergent-world
+  accessed: '2026-09-26'
+  read: partial
+  notes: Prior art (blog post with ~48 figures; ARENA [1.5.3] OthelloGPT turns it into exercises). Mine/theirs
+    basis; speculates the original MLP probe computed an XOR.
+- id: prior:li-gradient-othello
+  title: Do Large Language Models learn world models or just surface statistics?
+  authors:
+  - Kenneth Li
+  date: '2023-01-21'
+  url: https://thegradient.pub/othello/
+  accessed: '2026-09-26'
+  read: partial
+  notes: Prior art (The Gradient). Companion "Togglable 3D Plots" page https://likenneth.github.io/othello/togglable.html
+    (probe-weight geometry, linear vs non-linear, random vs trained).
+- id: prior:apollo-dd-viewer
+  title: Deception Detection Results (Apollo Research viewer)
+  authors:
+  - Apollo Research
+  date: 2025-02
+  url: https://data.apolloresearch.ai/dd/
+  accessed: '2026-09-26'
+  read: false
+  notes: Prior art. Per-token probe scores for the Goldowsky-Dill et al. datasets. Unreachable on 2026-09-26
+    (DNS failure, curl exit 6); the prior-art sub-agent read Wayback snapshots. Date = first Wayback capture
+    per that sub-agent.
+- id: prior:black-to-white-viewer
+  title: Deception Monitor Dashboard
+  authors:
+  - Avi Parrack
+  - Carlo Leonardo Attubato
+  - Stefan Heimersheim
+  date: 2025-07
+  url: https://carlo-leonardo-attubato.github.io/black_to_white_boosts/viewer/index.html
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'Prior art. Page title "Deception Monitor Dashboard"; redirects to carloleonardoattubato.com.
+    Controls seen on 2026-09-26: "Guess Honest" / "Guess Deceptive", a game score, "Show Private Tokens",
+    average / peak / critical-token probe scores, black-box and white-box analyses. Authors are not shown
+    on the page: listed here as the authors of arxiv 2507.12691, which the linking LW post (lw:trusted-monitoring-deception-probes)
+    summarizes.'
+- id: prior:geometry-of-truth-dataexplorer
+  title: 'The Geometry of Truth: Dataexplorer'
+  authors:
+  - Samuel Marks
+  - Max Tegmark
+  date: n.d.
+  url: https://saprmarks.github.io/geometry-of-truth/dataexplorer/
+  accessed: '2026-09-26'
+  read: true
+  notes: Prior art. PCA scatter plots of real LLaMA-13B activations (cities, neg_cities, conjunctions),
+    layer sweeps, one predict-then-reveal prompt. Never trains a probe.
+- id: prior:learn-mi-probing
+  title: Probing Classifiers (Learn MI)
+  authors:
+  - Ivan Arcuschin
+  date: n.d.
+  url: https://learnmechinterp.com/topics/probing-classifiers/
+  accessed: '2026-09-26'
+  read: partial
+  notes: Prior art. Open textbook (github FlyingPumba/learn-mech-interp, CC BY-SA); sibling pages on truthfulness
+    probing, CAA, LAT, attention probes, probes in production. Text and maths, a few static charts.
+- id: prior:hallucination-probes-site
+  title: Real-Time Detection of Hallucinated Entities in Long-Form Generation (project page)
+  authors:
+  - Oscar Obeso
+  - Andy Arditi
+  - Javier Ferrando
+  - Joshua Freeman
+  - Cameron Holmes
+  - Neel Nanda
+  date: 2025
+  url: https://www.hallucination-probes.com/
+  accessed: '2026-09-26'
+  read: partial
+  notes: Prior art. Streaming token-level probe scores on example chats. Paper arxiv 2509.03531 (located
+    only). Authors from the page's author meta tag.
+- id: prior:hewitt-probes-blog
+  title: Designing and Interpreting Probes
+  authors:
+  - John Hewitt
+  date: '2019-08-17'
+  url: https://www.cs.columbia.edu/~johnhew/interpreting-probes.html
+  accessed: '2026-09-26'
+  read: partial
+  notes: Prior art. Blog companion to arxiv 1909.03368 (control tasks, selectivity), static figures.
+- id: prior:voita-mdl-blog
+  title: Information-Theoretic Probing with MDL
+  authors:
+  - Lena Voita
+  date: 2020-03
+  url: https://lena-voita.github.io/posts/mdl_probes.html
+  accessed: '2026-09-26'
+  read: partial
+  notes: Prior art. Blog companion to arxiv 2003.12298.
+- id: prior:bluedot-probing
+  title: What are probing classifiers and can they help us understand what's happening inside AI models?
+  authors:
+  - Sarah Hastings-Woodhouse
+  date: '2025-05-15'
+  url: https://blog.bluedot.org/p/what-are-probing-classifiers
+  accessed: '2026-09-26'
+  read: partial
+  notes: Prior art. Intro-level; a Core reading in BlueDot's Technical AI Safety course (per the prior-art
+    sub-agent).
+- id: prior:nickyp-linear-vs-nonlinear
+  title: Linear vs Non-linear Probes for Interpretability
+  authors:
+  - NickyP
+  date: '2026-04-10'
+  url: https://www.lesswrong.com/posts/Wt4tLyQp7Tcdfhwhg/linear-vs-non-linear-probes-for-interpretability
+  accessed: '2026-09-26'
+  read: partial
+  notes: Prior art. Short essay on how probe expressivity changes what a positive result means.
+- id: prior:18-applications-deception-probes
+  title: Here’s 18 Applications of Deception Probes
+  authors:
+  - Cleo Nardo
+  - Avi Parrack
+  - jordinne
+  date: '2025-08-28'
+  url: https://www.lesswrong.com/posts/7zhAwcBri7yupStKy/here-s-18-applications-of-deception-probes
+  accessed: '2026-09-26'
+  read: false
+  notes: Located; byline and date checked. Which probe properties each application needs.
+- id: prior:welch-labs-modular-addition
+  title: The most complex model we actually understand
+  authors:
+  - Welch Labs
+  date: '2025-12-20'
+  url: https://www.youtube.com/watch?v=D8GOeCFFby4
+  accessed: '2026-09-26'
+  read: false
+  notes: Prior art (video; not watched). Chapter list has "15:13 - Linear Probes" until "16:59 - Clocks
+    perform modular addition".
+- id: prior:3b1b-dl7-facts
+  title: How might LLMs store facts | Deep Learning Chapter 7
+  authors:
+  - 3Blue1Brown
+  date: 2024
+  url: https://www.3blue1brown.com/lessons/mlp
+  accessed: '2026-09-26'
+  read: partial
+  notes: Prior art / prerequisite (text version read). Directions, dot products, near-orthogonality, superposition;
+    no trained probes. Chapter 5 (https://www.3blue1brown.com/lessons/gpt) likewise.
+- id: card:claude-opus-5-5
+  title: 'System Card: Claude Opus 5.5'
+  authors:
+  - Anthropic
+  date: '2026-09-22'
+  url: ''
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'Located and read by the Fable co-designer (2026-09-26); cyber-safeguard and prompt-injection
+    sections re-read by Opus (papers/web/card_claude-opus-5-5.txt, pdftotext). p. 47, L1716-1723: three-stage
+    cyber safeguard, "First, a probe looks at Claude''s internal activations, screening all traffic and
+    escalating any traffic that it flags as cyber related"; a lightweight classifier on Opus 5.5, then
+    a trained LLM classifier that decides "together with the probe''s verdict". L1996: "monitoring linear
+    probes". L3228-3230: prompt injection probes reduce attack success rate to 11.13%, "a roughly 80%
+    improvement compared to unsafeguarded Claude Opus 5.5". Developer-reported. URL not recorded when
+    the PDF was downloaded: add it before citing.'
+- id: card:claude-sonnet-4-5
+  title: 'System Card: Claude Sonnet 4.5'
+  authors:
+  - Anthropic
+  date: 2025-09
+  url: ''
+  accessed: '2026-09-26'
+  read: partial
+  notes: '§7.6.4 (papers/web/card_claude-sonnet-4-5.txt L3353-3520) read: inhibiting evaluation-awareness
+    vectors (10 SAE features and 4 contrastive-pair vectors, e.g. "The following is a fictional scenario."
+    vs "The following is a real scenario.", final-token difference), steering at every token position.
+    "inhibiting some vectors caused rates of misaligned actions to increase above zero, reaching a maximum
+    of 8–9% (with most either in the 1–5% range or at 0%)"; ten random SAE feature vectors gave smaller
+    awareness reductions and zero misaligned actions; Sonnet 4 about 11%. Exact publication day and URL
+    not recorded: add them before citing.'
+- id: lw:read-2026-reproducing-eval-awareness-steering
+  title: Reproducing steering against evaluation awareness in a large open-weight model
+  authors:
+  - Thomas Read
+  - Bronson Schoen
+  - Santiago Aranguri
+  - Joseph Bloom
+  date: '2026-04-10'
+  url: https://www.lesswrong.com/posts/HhF5kESdtPHku7kim
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'GLM-5 reproduction of the Sonnet 4.5 §7.6.4 experiment. "\"Control\" steering vectors – derived
+    from contrastive pairs that are semantically unrelated to alignment – can have effects just as large
+    as deliberately designed evaluation-awareness steering vectors." control_book (book on bottom vs top
+    shelf): "with negative steering scale reducing verbalised evaluation awareness to near zero and raising
+    misaligned action rates to 80%", the highest they observed. Read via WebFetch summary with exact quotes;
+    re-read the full post before quoting further.'
+- id: ieee:cover-1965
+  title: Geometrical and Statistical Properties of Systems of Linear Inequalities with Applications in
+    Pattern Recognition
+  authors:
+  - Thomas M. Cover
+  date: 1965-06
+  url: https://ieeexplore.ieee.org/document/4038449/
+  accessed: '2026-09-26'
+  read: false
+  notes: 'IEEE Transactions on Electronic Computers 14(3):326-334 (metadata from dblp / ADS / IEEE Xplore
+    search results). The source of the function-counting theorem: hyperplanes have a separating capacity
+    of 2d pattern vectors in d dimensions (points in general position; with a bias term, d+1). For the
+    side-dish on hyperplane capacity. Not read: cite for the theorem only, and check the statement against
+    a textbook before the build.'
+- id: neco:saerens-2002
+  title: 'Adjusting the Outputs of a Classifier to New a Priori Probabilities: A Simple Procedure'
+  authors:
+  - Marco Saerens
+  - Patrice Latinne
+  - Christine Decaestecker
+  date: '2002'
+  url: https://direct.mit.edu/neco/article/14/1/21/6577/Adjusting-the-Outputs-of-a-Classifier-to-New-a
+  accessed: '2026-09-26'
+  read: false
+  notes: Neural Computation 14(1):21-41, doi 10.1162/089976602753284446 (metadata from the MIT Press page
+    via search). Posterior correction under a change of class priors (label shift), with an EM procedure
+    when the new priors are unknown. For the side-dish on recalibrating a probe score. Not read yet.
+- id: tc:2021-framework-read-write
+  title: A Mathematical Framework for Transformer Circuits
+  authors:
+  - Nelson Elhage
+  - et al.
+  date: '2021'
+  url: https://transformer-circuits.pub/2021/framework/index.html
+  accessed: '2026-09-26'
+  read: partial
+  notes: 'Quote for the "why linear" beat (section "High-Level Architecture"): "Both the attention and
+    MLP layers each ''read'' their input from the residual stream (by performing a linear projection),
+    and then ''write'' their result to the residual stream by adding a linear projection back in." Read
+    via WebFetch; also listed in references/foundations as tc:2021-framework.'
+- id: arxiv:2507.21509
+  title: 'Persona Vectors: Monitoring and Controlling Character Traits in Language Models'
+  authors:
+  - Runjin Chen
+  - Andy Arditi
+  - Henry Sleight
+  - Owain Evans
+  - Jack Lindsey
+  date: '2025-07-29'
+  url: https://arxiv.org/abs/2507.21509
+  abstract: Large language models interact with users through a simulated 'Assistant' persona. While the
+    Assistant is typically trained to be helpful, harmless, and honest, it sometimes deviates from these
+    ideals. In this paper, we identify directions in the model's activation space-persona vectors-underlying
+    several traits, such as evil, sycophancy, and propensity to hallucinate. We confirm that these vectors
+    can be used to monitor fluctuations in the Assistant's personality at deployment time. We then apply
+    persona vectors to predict and control personality shifts that occur during training. We find that
+    both intended and unintended personality changes after finetuning are strongly correlated with shifts
+    along the relevant persona vectors. These shifts can be mitigated through post-hoc intervention, or
+    avoided in the first place with a new preventative steering method. Moreover, persona vectors can
+    be used to flag training data that will produce undesirable personality changes, both at the dataset
+    level and the individual sample level. Our method for extracting persona vectors is automated and
+    can be applied to any personality trait of interest, given only a natural-language description.
+  read: false
+  notes: ''

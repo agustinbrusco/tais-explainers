@@ -1,0 +1,105 @@
+/* Piece-specific styles for "A Ruler Through the Glass". Shared layout lives in kit/web/base.css. */
+
+.proto-note { font: 500 .72rem/1.4 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--training-ink); margin: 0 0 1rem; }
+.voice { color: var(--ink3); font-style: italic; }
+
+/* ---- the figure ---- */
+.stage .panel { max-width: 860px; }
+#cloud { width: 100%; height: auto; max-height: 56vh; display: block; }
+.stage .panel-head { flex-wrap: wrap; row-gap: .35rem; }
+.stage .panel-head .title { flex: 1 1 16rem; }
+.stage .panel-head .badge { font-size: .56rem; letter-spacing: .08em; white-space: normal; line-height: 1.35; max-width: 100%; }
+#cloud .glass-bg { fill: var(--bg); }
+#cloud .glass-edge { fill: none; stroke: var(--grid); }
+#cloud .pt { stroke-width: 1.6; }
+#cloud .pt.true { fill: var(--residual); stroke: var(--residual); }
+#cloud .pt.false { fill: var(--bg); stroke: var(--residual); }
+#cloud .pt.dim { opacity: .18; }
+#cloud .ruler { stroke: var(--overseer); stroke-width: 3; stroke-linecap: round; }
+#cloud .ruler-ticks line { stroke: var(--overseer); stroke-width: 1.5; }
+#cloud .tick { stroke: var(--overseer); stroke-width: 3; }
+#cloud .boundary { stroke: var(--overseer); stroke-width: 1.2; stroke-dasharray: 5 6; opacity: .55; }
+#cloud .drop { stroke: var(--overseer); stroke-width: .9; opacity: .5; }
+#cloud .glass-label { fill: var(--muted); font: 500 22px var(--font-mono); letter-spacing: .04em; }
+#cloud .glass-label.stretch { font-size: 22px; fill: var(--faint); paint-order: stroke; stroke: var(--bg); stroke-width: 6px; }
+#cloud .ruler-label { fill: var(--overseer); font: 600 22px var(--font-mono); paint-order: stroke; stroke: var(--bg); stroke-width: 6px; stroke-linejoin: round; }
+#cloud .legend { fill: var(--text); font: 500 22px var(--font-mono); paint-order: stroke; stroke: var(--bg); stroke-width: 6px; stroke-linejoin: round; }
+#cloud .legend .gold { fill: var(--overseer); }
+#cloud .paper-label { fill: var(--ink2); font: 500 22px var(--font-mono); letter-spacing: 0; }
+#cloud .hist-true { fill: var(--overseer-ink); opacity: .85; }
+#cloud .hist-false { fill: none; stroke: var(--overseer-ink); stroke-width: 1.3; }
+#cloud .axis-note { fill: var(--ink3); font: 400 22px var(--font-sans); }
+#cloud .arrow { stroke: var(--overseer); stroke-width: 3; fill: none; }
+#cloud .mean { fill: var(--overseer); }
+#cloud .angle-label { fill: var(--overseer); font: 600 24px var(--font-mono); }
+#cloud .group-label { fill: var(--text); font: 500 22px var(--font-mono); paint-order: stroke; stroke: var(--bg); stroke-width: 6px; stroke-linejoin: round; }
+#cloud .pt.sq { }
+
+/* readouts under the figure: numbers computed from the data file */
+.readouts { display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; min-height: 1.6rem; font: 500 .8rem/1.4 var(--font-mono); color: var(--ink2); }
+.readouts b { color: var(--ink); font-weight: 600; }
+.readouts .gold { color: var(--overseer-ink); }
+.readouts .bad { color: var(--ink); background: linear-gradient(transparent 55%, rgba(243, 205, 91, .55) 55%); }
+
+/* ---- the six questions: a strip of paper chips that fill in as the piece answers them ---- */
+.six { list-style: none; margin: .1rem 0 0; padding: .45rem 0 0; border-top: 1px dashed var(--rule);
+  display: flex; flex-wrap: wrap; gap: .3rem .35rem; font: 500 .6rem/1.2 var(--font-mono); color: var(--ink3); }
+.six li { border: 1px solid var(--rule); border-radius: 999px; padding: .22rem .5rem .22rem .25rem; background: var(--card); transition: all var(--t-normal); }
+.six li b { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; margin-right: .3rem; border-radius: 50%;
+  border: 1px solid var(--rule); font-weight: 600; color: var(--ink3); }
+.six li.now { color: var(--ink); border-color: var(--overseer-ink); background: #FFF6DA; }
+.six li.now b { border-color: var(--overseer-ink); color: var(--overseer-ink); }
+.six li.done { color: var(--ink2); }
+.six li.done b { background: var(--overseer-ink); border-color: var(--overseer-ink); color: var(--card); }
+
+/* ---- toggles inside a step: operate the figure ---- */
+.toggles { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin: .2rem 0 1.05rem; font: 500 .8rem var(--font-sans); }
+.toggles > span { font: 500 .66rem/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink3); margin: 0 .15rem 0 .35rem; }
+.toggles > span:first-child { margin-left: 0; }
+.toggles button { font: 500 .82rem var(--font-sans); color: var(--ink); background: var(--card); border: 1px solid var(--rule);
+  border-radius: 999px; padding: .32rem .8rem; cursor: pointer; transition: background var(--t-quick), border-color var(--t-quick); }
+.toggles button:hover { border-color: var(--overseer-ink); }
+.toggles button.on { background: var(--highlight); border-color: var(--overseer-ink); }
+
+/* ---- side-dish: optional depth served beside the main course, open by default ----
+   A different material from the prose (card stock on a tray), its own small figure, and a label that says it's optional.
+   It sits inside its step, so scrolling past it never changes the stage. */
+.side-dish {
+  position: relative; margin: 1.6rem 0 .6rem -.4rem; padding: 1.05rem 1.2rem 1rem;
+  background: linear-gradient(180deg, #FBF7EC, #F6F0E1);
+  border: 1px solid var(--rule); border-radius: 14px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .9) inset, 0 14px 30px -22px rgba(60, 45, 20, .45);
+  font: 400 .95rem/1.58 var(--font-sans); color: var(--ink2);
+}
+.side-dish::before { /* the tray's rim */
+  content: ""; position: absolute; inset: 5px; border: 1px dashed rgba(143, 137, 126, .38); border-radius: 10px; pointer-events: none;
+}
+.side-dish header { display: flex; align-items: center; gap: .55rem; margin: 0 0 .45rem; padding: 0; }
+.side-dish .plate { width: 1.35rem; height: 1.35rem; border-radius: 50%; flex: none;
+  background: radial-gradient(circle at 50% 50%, var(--card) 0 42%, var(--rule) 43% 48%, var(--card) 49% 100%);
+  border: 1px solid var(--ink3); }
+.side-dish .sd-kicker { font: 600 .64rem/1.2 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--feature-ink); }
+.side-dish h3 { font: 500 1.16rem/1.25 var(--font-display); color: var(--ink); margin: 0 0 .5rem; letter-spacing: -0.01em; }
+.side-dish p { margin: 0 0 .7rem; max-width: 58ch; }
+.side-dish svg { display: block; width: 100%; max-width: 440px; height: auto; margin: .2rem 0 .5rem; }
+.side-dish .sd-note { font-size: .88rem; color: var(--ink2); margin-bottom: 0; }
+.side-dish .badge { font-size: .56rem; margin-left: .3rem; vertical-align: .1em; }
+.side-dish svg .curve { fill: none; stroke: var(--feature-ink); stroke-width: 2.4; }
+.side-dish svg .axis line, .side-dish svg .axis path { stroke: var(--ink3); }
+.side-dish svg .axis text { fill: var(--ink2); font: 400 12px var(--font-mono); }
+.side-dish svg .mark { stroke: var(--overseer-ink); stroke-width: 1.6; stroke-dasharray: 3 3; }
+.side-dish svg .mark-label { fill: var(--overseer-ink); font: 600 12px var(--font-mono); }
+.side-dish svg .note { fill: var(--ink3); font: 400 11.5px var(--font-sans); }
+
+/* wide screens: the side-dish hangs a little into the gutter, so it reads as served beside the text */
+@media (min-width: 1280px) {
+  .side-dish { margin-right: -2.2rem; }
+}
+
+@media (max-width: 860px) {
+  .stage .panel { max-width: none; }
+  #cloud { max-height: 34vh; }
+  .readouts { font-size: .68rem; gap: .2rem .8rem; }
+  .six { display: none; }  /* phones: the chips live in the prose instead (TODO in the build) */
+  .side-dish { margin-left: 0; padding: .9rem .95rem; }
+}

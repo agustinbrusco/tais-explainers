@@ -21,6 +21,7 @@ means it's located but not yet read.
 | [natural-language-autoencoders](natural-language-autoencoders/) | activation → text → activation, trained unsupervised with RL (2026-05); faithfulness critiques | 6 |
 | [model-organisms](model-organisms/) | building misaligned models on purpose, and auditing them: sleeper agents → AuditBench | 17 |
 | [cot-monitorability](cot-monitorability/) | reading the chain of thought; obfuscation; latent / looped / diffusion architectures; GPT-6 Astra; the Hugging Face incident | 43 |
+| [probes](probes/) | linear and non-linear activation probes: methodology (control tasks, MDL, amnesic probing), world models, truth / lie probes and CCS, probing vs steering, safety monitors and 2025-26 production deployments (Anthropic, GDM, OpenAI), evaluation pitfalls, obfuscation under pressure; compiled 2026-09-26 | 89 |
 | [craft](craft/) | how the best explainers *show* things (Goodfire, …): lessons to reuse | n/a |
 
 ## Sources to watch

@@ -1,0 +1,37 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  16%|█▌        | 53/338 [00:00<00:00, 517.87it/s]Loading weights:  31%|███       | 105/338 [00:00<00:00, 367.26it/s]Loading weights:  43%|████▎     | 145/338 [00:00<00:00, 298.84it/s]Loading weights:  52%|█████▏    | 177/338 [00:00<00:00, 286.75it/s]Loading weights:  61%|██████    | 207/338 [00:00<00:00, 262.63it/s]Loading weights:  69%|██████▉   | 234/338 [00:00<00:00, 252.45it/s]Loading weights:  77%|███████▋  | 260/338 [00:00<00:00, 245.77it/s]Loading weights:  84%|████████▍ | 285/338 [00:01<00:00, 244.05it/s]Loading weights:  92%|█████████▏| 310/338 [00:01<00:00, 235.33it/s]Loading weights: 100%|██████████| 338/338 [00:01<00:00, 271.81it/s]
+token ids [8214] [7833]
+block 8: |dmu| = 3.3, cos(w, dmu) = 0.30
+block 10: |dmu| = 7.3, cos(w, dmu) = 0.56
+block 12: |dmu| = 7.9, cos(w, dmu) = 0.45
+
+model's few-shot judgment accuracy on 748 held-out: 0.961
+probe (L16) accuracy vs truth: 0.999; agreement with model's judgment: 0.963
+on the 29 statements the model judges wrongly, probe sides with the model on 0.03 of them
+    The city of Mombasa is in India. truth 0 model 1 probe 0
+    The city of Perm is in China. truth 0 model 1 probe 0
+    The city of Dehra Dun is in China. truth 0 model 1 probe 0
+    The city of Orumiyeh is in Saudi Arabia. truth 0 model 1 probe 0
+    The city of Taiz is in Burkina Faso. truth 0 model 1 probe 0
+    The city of Bursa is in Bosnia and Herzegovina. truth 0 model 1 probe 0
+    The city of Laibin is in Ethiopia. truth 0 model 1 probe 0
+    The city of Matola is in India. truth 0 model 1 probe 0
+    The city of Ar Raqqah is in Iraq. truth 0 model 1 probe 0
+    The city of Zaria is in India. truth 0 model 1 probe 0
+    The city of Kharkiv is in Moldova. truth 0 model 1 probe 0
+    The city of Anyang-si is in South Korea. truth 1 model 0 probe 0
+
+direction = dmu (added at the final '.' of the statement, blocks [8, 10, 12], total norm alpha*|dmu|)
+alpha -1.0: mean logit(TRUE)-logit(FALSE): true stmts +4.16, false stmts -2.48; judged TRUE: 0.55; acc 0.95
+alpha -0.5: mean logit(TRUE)-logit(FALSE): true stmts +4.17, false stmts -2.47; judged TRUE: 0.55; acc 0.95
+alpha +0.0: mean logit(TRUE)-logit(FALSE): true stmts +4.18, false stmts -2.44; judged TRUE: 0.55; acc 0.95
+alpha +0.5: mean logit(TRUE)-logit(FALSE): true stmts +4.19, false stmts -2.41; judged TRUE: 0.55; acc 0.95
+alpha +1.0: mean logit(TRUE)-logit(FALSE): true stmts +4.19, false stmts -2.36; judged TRUE: 0.55; acc 0.95
+
+direction = w (added at the final '.' of the statement, blocks [8, 10, 12], total norm alpha*|dmu|)
+alpha -1.0: mean logit(TRUE)-logit(FALSE): true stmts +4.20, false stmts -2.52; judged TRUE: 0.55; acc 0.95
+alpha -0.5: mean logit(TRUE)-logit(FALSE): true stmts +4.19, false stmts -2.48; judged TRUE: 0.55; acc 0.95
+alpha +0.0: mean logit(TRUE)-logit(FALSE): true stmts +4.18, false stmts -2.44; judged TRUE: 0.55; acc 0.95
+alpha +0.5: mean logit(TRUE)-logit(FALSE): true stmts +4.17, false stmts -2.40; judged TRUE: 0.55; acc 0.95
+alpha +1.0: mean logit(TRUE)-logit(FALSE): true stmts +4.16, false stmts -2.35; judged TRUE: 0.55; acc 0.95
