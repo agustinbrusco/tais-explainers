@@ -43,4 +43,5 @@ graph LR
 | activation injection → activation oracles | · | patching, probes, SFT | `readers-that-talk` |
 | NLAs | · | AOs, autoencoders/FVE, RL+KL | `readers-that-talk` |
 | model organisms, auditing games | · | SFT/RL/SDF, the readers | `model-organisms` |
+| linear probes: data points (which layer, which token, pooling), direction + threshold, what a fit proves, estimators and regularization, distribution shift (negation), truth as ≥ 2 directions | ~ (chapters I–III seen 2026-09-27; understanding not yet checked) | residual stream, logistic regression | `probes` |
 | CoT monitorability, opaque serial depth, latent architectures | ~ (whole piece seen 2026-09-26; understanding not yet checked) | reasoning models, RL basics | `cot-monitorability` |

@@ -77,7 +77,8 @@ only from `kit.style.S` (semantic) and `C` (neutral), and no raw hex in scenes.
 
 ## 6. Review
 Run the `review` skill: visual self-review, then the `technical-reviewer` and `rigor-reviewer` (Fable) and `learner-sim`
-(Opus) agents. Fix, and re-review what changed. Record findings and their resolution in `review.md`.
+(Opus) agents. Fix, and re-review what changed. Record findings and their resolution in `review.md`. Once the piece has
+settled, and before sharing it, run `performance-reviewer` (Sonnet) on it as deployed (`review` skill, §3b).
 
 ## 7. Deliver
 Show it to the learner with a report they can act on: what changed, what the reviews found and fixed, what was *not*

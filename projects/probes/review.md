@@ -5,6 +5,16 @@ Newest first. Each entry: what was reviewed, by whom, what was found, what was d
 
 
 
+
+## The learner's reaction to chapters I–III (2026-09-27)
+- The where-to-read steps ("which token?", "every token, pooled?"): "these are cool", and they stay at the start of the
+  piece: "the explanation is more constructive".
+- The histogram paper and the adaptive level-set spacing: "really good work with those variants".
+- Checks that hold back their answer: "Seems good! It's better that it's not spoiled."
+- Their suggestion: a performance agent that checks, at the end, that the explainer runs smoothly as deployed (GitHub
+  Pages). Added: `.claude/agents/performance-reviewer.md` (Sonnet), the `review` skill's §3b, and CLAUDE.md's "Who does
+  what".
+
 ## Review round on the built chapters I–III (2026-09-27): technical (Fable), rigor (Fable), learner-sim (Opus)
 
 Verdicts: technical "needs changes" (1 blocker, 7 shoulds, script re-check clean with 5 shoulds); rigor "no blockers"

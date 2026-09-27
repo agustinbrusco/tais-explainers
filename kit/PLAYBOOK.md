@@ -1,8 +1,9 @@
 # Playbook: what building explainers has taught us
 
-Distilled from the first piece, `projects/cot-monitorability` (four iterations, 2026-09-25 → 26). It records the patterns
-that landed with the learner, the review findings that kept recurring, and the pitfalls that cost time. That project is
-the reference implementation for everything below. **Update this file at the end of every piece**, with its own
+Distilled from the first piece, `projects/cot-monitorability` (four iterations, 2026-09-25 → 26), and the second,
+`projects/probes` (chapters I–III, 2026-09-26 → 27). It records the patterns that landed with the learner, the review
+findings that kept recurring, and the pitfalls that cost time. The two projects are the reference implementations for
+everything below. **Update this file at the end of every piece**, with its own
 lessons and without repeating what's already here.
 
 ## 1. The loop that worked
@@ -34,8 +35,17 @@ lessons and without repeating what's already here.
    - Two or three specific questions (e.g. "do the real squares help after step 2, or feel decorative?").
 6. **Since 2026-09-26, reviews are split by model** (the learner's request; see "Who does what" in `CLAUDE.md`). Fable
    checks the technical content, independently of the author: `technical-reviewer` gates the script before building and
-   reviews the built piece, and `rigor-reviewer` audits claims against sources. `learner-sim` stays on Opus. Not yet
-   exercised on a whole piece: record here what the split catches that one model missed.
+   reviews the built piece, and `rigor-reviewer` audits claims against sources. `learner-sim` stays on Opus. First round
+   on built steps (probes, 2026-09-27), each caught what the others didn't:
+   - `technical-reviewer`: a "cost" that was calibration (the ranking improved while the accuracy fell), and a figure
+     whose "evidence" was true by construction (p defined as match minus mismatch). It also re-derived every angle and
+     count.
+   - `rigor-reviewer`: a hypothesis stated as a finding, and a two-lab contrast the papers don't support.
+   - `learner-sim`: answer leaks, an overloaded beat, counts that didn't add up on phones, and words that disagreed with
+     the picture.
+7. **Performance at the end** (added 2026-09-27, the learner's suggestion). Once a piece settles, `performance-reviewer`
+   (Sonnet) measures it as deployed, under CPU throttling and on phones, and proposes same-pixel fixes; it implements
+   them only in a worktree, with pixel diffs (`review` skill, §3b).
 
 ## 2. Visual grammar that landed
 
@@ -66,6 +76,31 @@ Readability is a separate assumption.
 - **Scales are per layer; say so.** The residual stream's norm grows with depth.
 - **The learner's simulation found the squares turn into "atmosphere" after their introduction.** Next time, give real
   data a job the reader has to look at: compare two states, or find what changed.
+
+### The paper is the glass's projection (probes)
+- **A chart under a figure shares its axis and units** (the learner's rule, 2026-09-26). The paper under the probes
+  figure is the projection of the glass above it: the same x and the same units (distance from the boundary, in the
+  hidden state's units). It shows one histogram per class (true filled, false outlined with a paper halo so it shows over
+  the fill), each normalized to sum to 1, with a bin edge at the boundary.
+  - The histogram is recomputed every frame from where the points are drawn, so flips, rotations and sliders morph it for
+    free.
+  - One height scale per view, interpolated through transitions.
+  - Dot piles saturated; the normalized histogram doesn't. Landed: "really good work with those variants".
+- **Units vs logits:** the axis is in hidden-state units, and logits appear only as the probe's level sets continuing
+  onto the paper. Their spacing adapts (1, 2, 5, 10… logits, whatever stays ≥ ~9 px) and is written beside the grid ("grid
+  5 units · ↔ ×8.6 · level sets 1 logit apart"). At one shared scale, an overconfident probe shows as level sets 10 logits
+  apart where a healthy one's are 2.
+- **Honest projections:** every drawn state is its coordinates in a small per-layer orthonormal basis that contains every
+  direction the page names (the exporter asserts it), so each view is an exact orthogonal projection. Transitions slerp
+  the frame, so every in-between frame is one too, and views of different spaces cross-fade instead. When each layer
+  has its own plane, scrub it as a flipbook of projections. Orient SVD signs in the exporter and anchor them to the view
+  the prose describes, or a sign flip will silently falsify a sentence ("the upper cluster is Chinese cities").
+- **A second scene in the same SVG** (`pipeline.js`): a sketch of the model (one column per token, one row per layer) in
+  the same glass window, so the transition to the point figure keeps its place.
+  - A gold tap reads a state out; it becomes a chip of glass holding the real numbers, then a paper row of X with its label.
+  - The per-position chart sits on paper directly under the token chips: the shared-axis rule again.
+- **One meaning per glyph:** gold ring = fitted to; double gold ring = where a probe reads; half-filled marker = both
+  statements, identical. The learner-sim confused the three when two shared a shape.
 
 ### The counted route (the pattern that made the idea click)
 - A pulse rides the route, and each hidden state lights up with its running count: 1, 2, 3…
@@ -165,6 +200,19 @@ The whole argument in one cinematic shot, before any words:
 - **Define before use.** Where jargon clusters (the evidence board), give it a glossary sentence. Watch out for garden-
   path sentences with nested parentheticals.
 - **Phones:** don't say "on the right". It's wrong there.
+- **No spoilers** (the learner, 2026-09-27: "better that it's not spoiled"):
+  - A quick check holds back the number it asks about ("?" in the readout, a held arc label) and any paragraph that states
+    it (`data-after="q-…"`, hidden until answered); answering re-renders the figure with the answer.
+  - A reveal's heading must not give its predict away ("Upside down" did). At the reveal, show every option's feedback,
+    the reader's own marked: the best explanation often sits under an option they didn't pick.
+- **Ask the surprising question, not the one a data scientist answers instantly.** "Training accuracy on coin flips?" is
+  Cover's theorem to this learner. "It's at chance on new statements: how sure is it?" (a median of 7 logits) is the
+  lesson.
+- **Constructive order:** what decides what a probe *can* measure (the data point, which token, pooling, which layer)
+  goes first. The learner: "ok they are at the start so the explanation is more constructive".
+- **Prefer an exact fact to a statistic when the design gives you one:** a city's true and false statements share every
+  token up to "in", so their states there are identical and a probe reading them scores exactly 50%. Causality made
+  visible, with no error bars.
 - **Only the learner can mark a concept as understood.** Log "presented" until they answer the check-yourself
   questions. Their standing request is "check with me instead of assuming".
 
@@ -180,6 +228,18 @@ The whole argument in one cinematic shot, before any words:
   point at JSON keys. Re-run the script and confirm it's byte-identical before trusting a refactor.
 - **Calibrate in both directions** on every board: stated, measured, reported/rumored, checked-and-not-found.
 - **When a number is ours, not the paper's, say so:** "49% in our re-plot".
+- **Rebuild data you can't redistribute.** Marks & Tegmark's repo has no license, so the probes statements were rebuilt from
+  GeoNames (CC BY 4.0) with their published recipe (`data/statements.py`), credited on the page. The derived data file is
+  committed so the Pages site works.
+- **After a data change, re-derive every sentence, not just the numbers.** With the new statements the flip moved from
+  8% to 31% correct (still AUROC 0.010), layer 8 changed behaviour, and a retraining "cost" became calibration. Bind every
+  number with `data-n`; then read each sentence against the new data.
+- **Tests take their expected values from the exporter**, so they survive regeneration. Readouts and counts come from
+  the same drawn coordinates; give narrow slivers more decimals, or counts drift by one from the readout.
+- **Watch for threshold artifacts.** A pooled score needs its own threshold: max pooling at the per-token threshold read
+  50.0%, and 87.8% with its own. Accuracy falling while AUROC rises is calibration, not a worse direction.
+- **Name what's true by construction.** p = ½(Δ_aff − Δ_neg) *is* the match-minus-mismatch direction, so "the matched
+  groups sit up along p" is not evidence; its length and the probe's loading on it are.
 
 ## 5. Web pitfalls and their fixes
 - **Filters inside a `display:none` SVG vanish (Chrome).** Keep defs in an always-rendered 0×0 SVG
@@ -212,6 +272,18 @@ The whole argument in one cinematic shot, before any words:
 - **Measure before optimizing:** CPU profile plus a trace aggregated by event (Paint, Layerize), under
   `Emulation.setCPUThrottlingRate`. Scroll to each step so an on-screen hero doesn't pollute the numbers. Check sameness
   with a pixel diff of every step against shots taken before the change.
+- **The first figure's choreography never played.** The first render at load is a cut, and the stage sits below the
+  hero, so readers arrived at a finished figure. Hold the first render until the stage is on screen (an empty glass
+  first, so the show has a previous state to animate from).
+- **Base styles beat a class on an inline SVG:** `.stage svg { width: 100% }` overrides `.spark`; use `.stage svg.spark`.
+- **Text measured before the web fonts load overlaps later:** measure legends again on `document.fonts.ready`.
+- **A scripted edit with `str.replace(x, y, 1)` hits the first occurrence**, which was inside an event handler: two
+  handlers ended up interleaved. Anchor on unique context, and syntax-check after.
+- **Flipbooks and sliders set their readouts directly** (a view with `readouts: null` tells the figure to leave them
+  alone). Otherwise 29 frames means 29 cross-fades.
+- **Cards that share a side of the glass collide:** lay them out per side in the order of their points.
+- **Logistic regression on raw activations:** L-BFGS hit its evaluation limit on ~20k per-token rows; `newton-cholesky`
+  solves exactly and fast when d ≈ 1.5k.
 - **Headless WebGL, for a future Three.js piece (untested here):** without a GPU, headless Chrome may give no WebGL
   context. ClaudeAnimationBase's `render.mjs` passes `--use-angle=swiftshader --enable-unsafe-swiftshader` for software
   WebGL, and `--use-angle=vulkan` or `gl-egl` on headless NVIDIA machines.
@@ -227,7 +299,10 @@ The whole argument in one cinematic shot, before any words:
 | `kit/interp.py` | load a small real model on CPU, export residual-stream states, record greedy capability checks |
 | `kit/web/states.js` | draw a hidden state as a square of real numbers (`tileURL`, `rampCSS`) |
 | `kit/web/glass.js` | install the paper/glass SVG defs; clip regions and dual strokes for the readability boundary |
-| `projects/<slug>/tests/functional.mjs` | encode every value verified by hand (readouts, counts, badges, guess flow) as a check that fails loudly |
+| `projects/<slug>/tests/functional.mjs` | encode every value verified by hand (readouts, counts, badges, guess flow) as a check that fails loudly; take expected values from the exporter |
+| `projects/probes/web/figure.js` + `lin.js` | the glass/paper projection figure: honest rotations of real states, level sets, the histogram paper, cards, flip/rotate/read choreographies (a candidate for `kit/web/`) |
+| `projects/probes/web/pipeline.js` | a model-sketch scene (tokens × layers) with a tap, a state chip, a data table and per-token charts (a candidate for `kit/web/`) |
+| `performance-reviewer` (agent) | measure load, transitions, sliders, heroes and phones as deployed, under CPU throttling; same-pixel fixes in a worktree |
 
 Reference-study shots stay in the scratchpad. They are the authors' work. Write what you learned in
 `references/craft/README.md`.

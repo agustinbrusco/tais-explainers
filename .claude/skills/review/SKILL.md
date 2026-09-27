@@ -65,6 +65,13 @@ different model from the one that wrote the piece. The experience check runs on 
 - **A finding is a claim too.** Check it against the source or the code before acting on it. When you reject one, write
   why in `review.md`; never drop it silently.
 
+## 3b. Performance, at the end of a piece (and before sharing it)
+Once content and visuals have settled, dispatch `performance-reviewer` (Sonnet; pass `model: "sonnet"`) with the project
+path and, if the site is up, the live GitHub Pages URL. It measures load, every step's transition, sliders, the hero and
+phones under CPU throttling, against the budgets in its definition, and proposes same-pixel fixes. To have it implement
+them, run it with `isolation: "worktree"`; then check its pixel diffs and before/after numbers, run the functional tests
+yourself, and merge. Performance lessons go into `kit/PLAYBOOK.md` §5.
+
 ## 4. Record and fix
 Write `review.md` in the project: each finding, its severity (blocker / should / nit), and its resolution. Fix the
 blockers, re-render, and re-review only what changed. Tell the learner what was found and what was changed,

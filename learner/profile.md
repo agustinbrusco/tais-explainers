@@ -60,6 +60,15 @@
 - **Technical language over metaphors (same day):** analogies are welcome, but don't lean on simplified ones (the
   probes prototype's "ruler" was too present). Talk about projections onto a learned direction, the weight vector a
   logistic regression learns from labelled data, and how it connects to SVD/PCA. They asked for clearer phrasing too.
+- **A chart under a figure shares its axis and units (probes, 2026-09-26):** "the hist below [should] always be a
+  projection of the dots above", and "a common, normalized hist would do the work just fine" rather than dot piles that
+  saturate. Built that way (and the adaptive level-set spacing written beside the grid): "really good work with those
+  variants" (2026-09-27).
+- **No spoilers (probes, 2026-09-27):** a quick check holds back the number it asks about (a "?" in the readout, the
+  paragraph that states it hidden until answered), and a reveal's heading doesn't give the answer away: "better that it's
+  not spoiled".
+- **Constructive order (same day):** mechanisms that set up what a probe can measure go first. The "which token?" and
+  "every token, pooled?" steps belong at the start of the probes piece, "so the explanation is more constructive".
 - **Pace:** they go through a whole piece in one sitting and give feedback in batches. They like large
   autonomous iterations between feedback rounds, then a complete report.
 - **Predict questions** must be genuinely didactic: aimed at a real misconception, not answerable from the figure.

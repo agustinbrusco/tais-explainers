@@ -300,6 +300,9 @@ figure waits as an empty glass until the stage is on screen, so its read is seen
 fixes, logged in `review.md`. Chapter I now runs: a statement becomes a data point → the probe → which token (a probe per
 position) → every token, pooled → which layer (a flipbook). Then chapters II–III as before. 11 steps built.
 
+**The learner's verdict on chapters I–III (2026-09-27):** the where-to-read steps stay in chapter I ("more
+constructive"); the histogram variants and spoiler-free checks are keepers. Keep holding back answers in every new check.
+
 **Next actions, in order:**
 1. The script's re-check is done (no blockers; its shoulds are in `script.md`). Build the remaining ~19 steps with the new engine (`figure.js`):
    prologue and chapter I (two statements → the probe; why linear; which layer); the in-browser trainer (n, L2, shuffle;
@@ -307,7 +310,9 @@ position) → every token, pooled → which layer (a flipbook). Then chapters II
    the cascade, pooling, the evidence board, pressure with magenta trails); chapter V; limits and check-yourself; side
    dishes SD2–SD4 (SD2 now carries the LR ↔ Σ⁻¹Δμ ↔ max-margin derivation).
 2. Full review loop: stills, films, `tests/functional.mjs`, then `technical-reviewer` and `rigor-reviewer` (Fable) and
-   `learner-sim` (Opus).
+   `learner-sim` (Opus). Then, once the piece settles, `performance-reviewer` (Sonnet) on the deployed page: the likely
+   hot spots are the per-frame work on up to 1,026 SVG points (a 24-gon path string per point per frame in `drawPoints`),
+   the drop-shadow filters on the boundary and the taps, and the layer flipbook's full re-render per frame.
 3. At the end: the lessons in `review.md` into `kit/PLAYBOOK.md` (with the learner's rule: a chart under a figure shares its
    axis and units, and a normalized histogram beats a saturating dot pile); move `figure.js`/`lin.js`
    patterns that generalize into `kit/web/`.

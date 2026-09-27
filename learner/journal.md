@@ -2,6 +2,19 @@
 
 Newest first. After each piece or session: what was explored, what clicked, what didn't, questions raised, and follow-ups.
 
+## 2026-09-27: probes, chapters I–III (hero + 11 steps)
+- Their two asks from the style frame, built: the paper is always the glass's projection (normalized histograms in the
+  grid's units, level sets continuing onto it at an adaptive spacing), and the data-collection viz (a statement's tokens →
+  a sketch of the model → the state over "." read out as h → a row of X with its label), which grew into "which token?"
+  (a probe per position: exactly 50% before the country) and "every token, pooled?" (mean vs max, why prefix scores sit
+  at zero), plus "which layer?" (a flipbook).
+- Their verdicts: the where-to-read steps "are cool", and they belong at the start ("more constructive"); the histogram
+  and level-set variants: "really good work"; checks that hold back their answer: "better that it's not spoiled".
+- Not yet known: check-yourself answers (none built yet) and which specific beats clicked beyond these. Nothing in
+  `concept-map.md` moves past "exposed" until they answer questions.
+- Also this session: the statements were rebuilt from GeoNames (our own data, publishable), and the piece went through a
+  full review round (technical, rigor, learner-sim). They suggested a performance agent for the end of each piece.
+
 ## 2026-09-26: cot-monitorability iteration 4 (visual redesign)
 - Went through the whole piece: "you did an amazing work, this is great".
 - Asked for, and got, full autonomy on the visuals ("go full visual designer", Goodfire and Welch Labs as inspiration,
