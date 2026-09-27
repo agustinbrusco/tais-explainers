@@ -48,25 +48,28 @@ export function startHero(svgEl, DATA, { reduced = false, narrow = false } = {})
   const V2 = { ...base, pts: pts(true), frame: f1, sc: sc1, probe, paper: false, choreo: "move" };
   const V3 = { ...base, pts: pts(true), frame: f1, sc: sc1, probe, choreo: "read", _order: order };
 
-  const sleep = (ms) => new Promise((r) => d3.timeout(r, reduced ? 0 : ms));
-  let running = false;
+  // a reader who scrolls on mid-play hurries it: the remaining moves land as cuts, so the hero stops animating off screen
+  // and the finished picture waits for them (the replay control plays it again)
+  let running = false, hurry = false;
+  const sleep = (ms) => new Promise((r) => d3.timeout(r, reduced || hurry ? 0 : ms));
+  const show = (v) => fig.show(hurry ? { ...v, choreo: "cut" } : v);
   async function play() {
     if (running) return;
-    running = true;
+    running = true; hurry = false;
     paper.interrupt().style("opacity", 0);
     fig.cur = null; fig.pts.forEach((s) => { s.el?.remove(); s.dotEl?.remove(); s.ringEl?.remove(); }); fig.pts.clear();
-    await fig.show(V0);
+    await show(V0);
     say(`${idx.length.toLocaleString("en-US")} statements about cities, as 1,536 numbers each, seen in a view chosen so that true and false overlap`);
     await sleep(1300);
-    await fig.show(V1);
+    await show(V1);
     say("filled: true · hollow: false · this view ignores the probe's direction, and they overlap");
     await sleep(900);
-    await fig.show({ ...V2, choreo: "move" });
+    await show({ ...V2, choreo: "move" });
     say("the view turns until the probe's direction lies flat");
     await sleep(400);
-    paper.transition().duration(reduced ? 0 : 500).style("opacity", 0.96);
+    paper.transition().duration(reduced || hurry ? 0 : 500).style("opacity", 0.96);
     say("each statement's position along the probe's direction falls onto the paper");
-    await fig.show(V3);
+    await show(V3);
     say(final);
     running = false;
   }
@@ -75,6 +78,7 @@ export function startHero(svgEl, DATA, { reduced = false, narrow = false } = {})
     // start when the hero is on screen; pause-free (it plays once), with a replay control
     const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { io.disconnect(); play(); } }, { threshold: 0.3 });
     io.observe(svgEl);
+    new IntersectionObserver((es) => { if (!es[0].isIntersecting && running) { hurry = true; fig.jumpToEnd?.(); } }).observe(svgEl);
   }
   const btn = document.createElement("button");
   btn.className = "hero-replay"; btn.type = "button"; btn.textContent = "↻ replay";

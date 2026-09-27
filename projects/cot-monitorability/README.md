@@ -207,6 +207,8 @@ badges, dark-past counts, guess flow, free-play answers)
    agents; log in `review.md`.
 6. Deliver: the learner uses it, answers the check-yourself questions, and it all gets logged in `learner/journal.md`.
    Then decide on the video.
+7. ~~The step counter read 1 / 26 on load, so → skipped step 1~~ (fixed 2026-09-28 in `kit/web/steps.js`, with a test;
+   `review.md`).
 
 ## Pipeline
 - [x] Brief drafted

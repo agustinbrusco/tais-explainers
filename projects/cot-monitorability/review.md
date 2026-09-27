@@ -146,3 +146,15 @@ readers as instruments with two wires; charts restyled on paper. Craft notes fro
 Not done: an interactive "build your own route" for the step-4 predict; a stack-height knob for the 4-hop question ("with 6
 layers, which name surfaces?"); badges and glow on the tiny squares of the 8-row looped figure; the evidence board is
 still dense.
+
+## 2026-09-28: the step counter on load (a shared kit fix, reported by the learner)
+
+On load the page shows the hero, but the counter already read 1 / 26, so → went to step 2 and skipped step 1. The same
+bug was in the probes piece, since both use `kit/web/steps.js`. The step engine now keeps a position before step 1 while
+the first step is below the reading band:
+- the counter reads 0 / 26, and → goes to step 1;
+- ← from step 1 returns to the hero;
+- scrolling back up to the hero restores that position.
+
+The stage still draws step 1 at load, so it is ready when the reader arrives. `tests/functional.mjs` checks this from a
+fresh load, on desktop and phone. Nothing else in this piece changed.

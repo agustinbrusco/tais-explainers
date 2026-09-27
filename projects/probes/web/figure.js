@@ -31,6 +31,36 @@ function shapePath(r, m) {
   return `M${pts.map((p) => p.join(",")).join("L")}Z`;
 }
 
+// Caches for the per-frame drawing (the performance review, perf/REPORT.md): up to 4,104 points are redrawn every frame,
+// so a shape's path string, a CSS colour, a colour interpolator and a label's width are computed once, not per frame.
+const SHAPES = new Map();
+function shapePathCached(r, m) {
+  const k = r + "|" + m;
+  let s = SHAPES.get(k);
+  if (s === undefined) { if (SHAPES.size > 50000) SHAPES.clear(); s = shapePath(r, m); SHAPES.set(k, s); }
+  return s;
+}
+const CSSV = new Map();
+function cssCached(name) { let v = CSSV.get(name); if (v === undefined) { v = css(name); CSSV.set(name, v); } return v; }
+const INTERP = new Map();
+function interpRgb(a, b) {
+  const k = a + "|" + b;
+  let f = INTERP.get(k);
+  if (!f) { f = d3.interpolateRgb(a, b); INTERP.set(k, f); }
+  return f;
+}
+/** A label's width, measured once per (class, text); a font that finishes loading or a resize measures again. */
+const TEXTW = new Map();
+document.fonts?.addEventListener("loadingdone", () => TEXTW.clear());
+addEventListener("resize", () => TEXTW.clear());
+function textWidth(node, text) {
+  const k = node.getAttribute("class") + "\u0000" + text;
+  let w = TEXTW.get(k);
+  if (w === undefined) { w = node.getComputedTextLength?.(); if (w == null) return null; TEXTW.set(k, w); }
+  return w;
+}
+function setText(node, text) { if (node.textContent !== text) node.textContent = text; return node; }
+
 export const LAYOUT = {
   desktop: { W: 720, H: 592, glass: { x0: 10, y0: 58, x1: 710, y1: 370, rx: 12 }, pileTop: 384, floor: 498,
              ptR: 3.4, dotR: 2.5, binW: 7, lvlPx: 9, cardY: 10, font: 22 },
@@ -188,7 +218,7 @@ export class Figure {
     const G = this.L.glass;
     const f = view.frame;
     const xs = rows.map((c) => dot(c, f.u)), ys = rows.map((c) => dot(c, f.v));
-    const q = (a, p) => d3.quantile(a.slice().sort(d3.ascending), p);
+    const q = (a, p) => d3.quantile(a, p);            // d3.quantile selects in a copy: no need to sort first
     const centreX = view.centreX ?? (view.probe ? view.probe.thr * dot(view.probe.coef, f.u) : (q(xs, 0.5)));
     const halfX = Math.max(Math.abs(q(xs, 0.004) - centreX), Math.abs(q(xs, 0.996) - centreX)) * 1.05;
     const [ylo, yhi] = [q(ys, 0.004), q(ys, 0.996)];
@@ -213,7 +243,7 @@ export class Figure {
    * Returns a promise that settles when the choreography has landed (d3.timeout follows the page clock).
    */
   show(view) {
-    if (this.timer) { this.timer.stop(); this.timer = null; this.settle(); }
+    if (this.timer) { this.timer.stop(); this.timer = null; this.jumpToEnd = null; this.settle(); }
     const L = this.L;
     const prev = this.cur;
     const choreo = !prev || this.reduced ? "cut" : (view.choreo ?? "move");
@@ -337,8 +367,10 @@ export class Figure {
     if (this.reduced || choreo === "cut") { this.finish(); return Promise.resolve(); }
     return new Promise((res) => {
       this.timer = d3.timer((el) => {
-        if (step(Math.min(el, T.total))) { this.timer.stop(); this.timer = null; this.finish(); res(); }
+        if (step(Math.min(el, T.total))) { this.timer.stop(); this.timer = null; this.jumpToEnd = null; this.finish(); res(); }
       });
+      // hidden mid-choreography: land on the final frame at once instead of animating an invisible figure
+      this.jumpToEnd = () => { if (!this.timer) return; this.timer.stop(); this.timer = null; this.jumpToEnd = null; step(T.total); this.finish(); res(); };
       void start;
     });
   }
@@ -477,8 +509,9 @@ export class Figure {
       const cands = [G.y1 - 44 - (d.i ?? 0) * 28, G.y0 + 60 + (d.i ?? 0) * 28];
       const yT = cands.sort((p, q) => Math.abs(at(p) - mid) - Math.abs(at(q) - mid))[0];
       const x = at(yT);
-      const el = d3.select(this).text(d.label ?? "");
-      const w = el.node().getComputedTextLength?.() ?? 160;
+      setText(this, d.label ?? "");
+      const el = d3.select(this);
+      const w = textWidth(this, d.label ?? "") ?? 160;
       const right = x < mid;
       const xx = right ? clamp(x + 10, G.x0 + 12, G.x1 - 12 - w) : clamp(x - 10, G.x0 + 12 + w, G.x1 - 12);
       el.attr("x", xx).attr("y", yT).attr("text-anchor", right ? "start" : "end");
@@ -528,37 +561,54 @@ export class Figure {
 
   drawPoints(st, T, elapsed) {
     const r = this.L.ptR;
-    const residual = css("residual"), bg = "#0b1019";
+    const residual = cssCached("residual"), bg = "#0b1019";
     const fillC = (f) => (f == null ? "rgba(91,156,245,.45)" : f ? residual : bg);
     const all = [...this.pts.values()];
     let ringsNeeded = false;
+    const ptr = T.phase("travel", elapsed), ptrE = ptr >= 0 ? ease(ptr) : 0;
+    const pEx = T.phase("exit", elapsed), pEn = T.phase("enter", elapsed), pSt = T.phase("stay", elapsed), pR = T.phase("rings", elapsed);
     for (const s of all) {
+      // a leaving point whose fade has ended is invisible (opacity 0) for the rest of the choreography: drop its elements
+      if (s.leaving && pEx >= 1) {
+        if (s.el) { s.el.remove(); s.el = null; s._tf = s._d = s._fill = s._op = s._stroke = undefined; }
+        if (s.ringEl) { s.ringEl.remove(); s.ringEl = null; s._rx = s._ry = s._ro = undefined; }
+        s.op = 0; s.ringNow = 0; continue;
+      }
       if (!s.el) {
         s.el = this.gPts.append("path").attr("class", "pt").node();
       }
-      const pm = ease(T.phase("move", elapsed));
-      const pd = T.phase(s.leaving ? "exit" : s.isNew ? "enter" : "stay", elapsed);
+      const pd = s.leaving ? pEx : s.isNew ? pEn : pSt;
       const fillP = T.stagger("fill", elapsed, s);
       const c = s.fill0 === s.fill1 && s.m0 === s.m1 ? null : fillP;
-      const cNow = T.phase("travel", elapsed) >= 0 ? lerpVec(s.c0, s.c1, ease(T.phase("travel", elapsed))) : s.c0;
+      const cNow = ptr >= 0 ? lerpVec(s.c0, s.c1, ptrE) : s.c0;
       s.c = cNow;
       const [X, Y] = s.oldSpace && s.leaveState ? this.toScreen(cNow, s.leaveState) : this.toScreen(cNow, st);
       s.X = X; s.Y = Y;
       s.op = s.leaving ? s.op0 * (1 - pd) : s.isNew ? pd : 1;
       s.fillNow = c == null ? s.fill1 : c < 0.5 ? s.fill0 : s.fill1;
       s.mNow = c == null ? s.m1 : s.m0 + (s.m1 - s.m0) * ease(c);
-      const fillCol = c == null ? fillC(s.fill1) : d3.interpolateRgb(fillC(s.fill0), fillC(s.fill1))(ease(c));
-      const el = d3.select(s.el).attr("transform", `translate(${X.toFixed(1)},${Y.toFixed(1)})`)
-        .attr("d", shapePath(r, s.mNow)).style("fill", fillCol).style("opacity", s.op)
-        .style("stroke", s.fill1 == null && c == null ? "none" : residual);
-      void pm; void el;
-      s.ringNow = s.ring0 + (s.ring1 - s.ring0) * T.phase("rings", elapsed);
+      const fillCol = c == null ? fillC(s.fill1) : interpRgb(fillC(s.fill0), fillC(s.fill1))(ease(c));
+      const el = s.el;
+      const tf = `translate(${X.toFixed(1)},${Y.toFixed(1)})`;
+      if (s._tf !== tf) { el.setAttribute("transform", tf); s._tf = tf; }
+      const d = shapePathCached(r, s.mNow);
+      if (s._d !== d) { el.setAttribute("d", d); s._d = d; }
+      if (s._fill !== fillCol) { el.style.setProperty("fill", fillCol); s._fill = fillCol; }
+      if (s._op !== s.op) { el.style.setProperty("opacity", s.op); s._op = s.op; }
+      const stroke = s.fill1 == null && c == null ? "none" : residual;
+      if (s._stroke !== stroke) { el.style.setProperty("stroke", stroke); s._stroke = stroke; }
+      s.ringNow = s.ring0 + (s.ring1 - s.ring0) * pR;
       if (s.ringNow > 0.01 || s.ringEl) ringsNeeded = true;
     }
     if (ringsNeeded) {
       for (const s of all) {
         if (s.ringNow > 0.01 && !s.ringEl) s.ringEl = this.gRings.append("circle").attr("class", "ring").attr("r", r + 3.2).node();
-        if (s.ringEl) d3.select(s.ringEl).attr("cx", s.X).attr("cy", s.Y).style("opacity", s.ringNow * s.op);
+        if (s.ringEl) {
+          const e = s.ringEl, ro = s.ringNow * s.op;
+          if (s._rx !== s.X) { e.setAttribute("cx", s.X); s._rx = s.X; }
+          if (s._ry !== s.Y) { e.setAttribute("cy", s.Y); s._ry = s.Y; }
+          if (s._ro !== ro) { e.style.setProperty("opacity", ro); s._ro = ro; }
+        }
       }
     }
   }
@@ -593,7 +643,7 @@ export class Figure {
     const m = en.merge(g).attr("class", (d) => `arrow ${d.cls ?? "gold"}`).style("opacity", (d) => d.op);
     m.selectAll("line").attr("x1", (d) => d.A[0]).attr("y1", (d) => d.A[1]).attr("x2", (d) => d.B[0]).attr("y2", (d) => d.B[1]);
     // gold (reading) → violet (writing): the same arrow changes material, interpolated on the figure's own clock
-    const colOf = (c) => css(/violet/.test(c) ? "feature" : "overseer");
+    const colOf = (c) => cssCached(/violet/.test(c) ? "feature" : "overseer");
     m.each(function (d) {
       const was = self.prevArrows?.get(d.id), now = d.cls ?? "gold";
       const col = was && colOf(was) !== colOf(now) ? d3.interpolateRgb(colOf(was), colOf(now))(ease(p)) : null;
@@ -702,6 +752,9 @@ export class Figure {
   drawCounts(view, T) {
     const { glass: G, pileTop } = this.L;
     const old = this.gCounts.selectChildren();
+    // a cut that replaces counts already on screen swaps them at once (the layer flipbook and slider cut every frame, and
+    // a fade restarted each frame flickers); counts appearing from nothing fade in
+    const swap = T.total === 0 && !this.gCounts.selectAll("g.counts-new").empty();
     if (T.readout > 0 && !old.empty()) {
       const ghost = this.gCounts.append("g").attr("class", "counts-old").style("opacity", 1);
       old.each(function () { ghost.node().appendChild(this); });
@@ -721,7 +774,8 @@ export class Figure {
     row(G.x1 - 4, "end", "reads true →", cnt(right, 1), cnt(right, 0));
     row(G.x0 + 4, "start", "← reads false", cnt(left, 1), cnt(left, 0));
     void pileTop;
-    g.transition().delay(T.readout).duration(this.dur(400)).style("opacity", 1);
+    if (swap) g.style("opacity", 1);
+    else g.transition().delay(T.readout).duration(this.dur(400)).style("opacity", 1);
     this.gCounts.style("opacity", 1);
     this.counts = { rightTrue: cnt(right, 1), rightFalse: cnt(right, 0), leftTrue: cnt(left, 1), leftFalse: cnt(left, 0) };
   }
@@ -741,7 +795,8 @@ export class Figure {
     // their points, so that none covers another
     const place = new Map();
     m.each(function (d) {
-      const w = (d3.select(this).select("text").text(d.text).node().getComputedTextLength?.() ?? d.text.length * 11) + 20;
+      const tn = setText(d3.select(this).select("text").node(), d.text);
+      const w = (textWidth(tn, d.text) ?? d.text.length * 11) + 20;
       const left = d.x == null ? d.s.X < (G.x0 + G.x1) / 2 : d.anchor !== "end";
       place.set(d, { w, left });
     });
@@ -824,7 +879,7 @@ export class Figure {
       const step = this.lvlStep ?? 1;
       const text = it.text.replace("{step}", `${step} logit${step === 1 ? "" : "s"}`);
       const t = gi.append("text").attr("class", "lg-text").attr("x", 14).attr("y", 7).text(text);
-      x += 14 + (t.node().getComputedTextLength?.() ?? text.length * 11) + 22;
+      x += 14 + (textWidth(t.node(), text) ?? text.length * 11) + 22;
     }
     const span = x - 22 - (this.L.glass.x0 + 6), room = this.L.glass.x1 - this.L.glass.x0 - 12;
     if (span > room) g.attr("transform", `translate(${this.L.glass.x0 + 6},0) scale(${room / span},1) translate(${-(this.L.glass.x0 + 6)},0)`);
@@ -834,8 +889,12 @@ export class Figure {
   /** Show or hide the whole figure (cross-fades with another scene in the same SVG). */
   setVisible(on, ms = 450) {
     this.hidden = !on;
-    this.root.interrupt().style("pointer-events", on ? null : "none")
-      .transition().duration(this.dur(ms)).style("opacity", on ? 1 : 0);
+    if (!on) this.jumpToEnd?.();
+    // a hidden scene (opacity 0) is also taken out of paint once its fade has ended: same pixels, fewer paint chunks
+    const r = this.root.interrupt().style("pointer-events", on ? null : "none");
+    if (on) r.style("visibility", null);
+    r.transition().duration(this.dur(ms)).style("opacity", on ? 1 : 0)
+      .on("end", () => { if (this.hidden) this.root.style("visibility", "hidden"); });
     if (!on) this.unhover();
   }
 

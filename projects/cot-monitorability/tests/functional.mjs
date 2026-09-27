@@ -44,6 +44,14 @@ for (const phone of [false, true]) {
   const badge = () => page.textContent("#fig-badge");
 
   check(`${tag}: step count`, await page.evaluate(() => window.explainer.steps), 26);
+  // on load the hero shows: the position is before step 1, so → goes to step 1 instead of skipping it (kit/web/steps.js)
+  const pos = () => page.evaluate(() => [window.explainer.before, window.explainer.current, location.hash,
+    document.querySelector(".stepnav span[aria-live]").textContent]);
+  check(`${tag}: on load, before step 1`, await pos(), [true, 0, "", "0 / 26"]);
+  await page.keyboard.press("ArrowRight"); await page.waitForTimeout(1200);
+  check(`${tag}: → from the hero goes to step 1`, await pos(), [false, 0, "#0", "1 / 26"]);
+  await page.keyboard.press("ArrowLeft"); await page.waitForTimeout(1200);
+  check(`${tag}: ← from step 1 goes back to the hero`, [...await pos(), await page.evaluate(() => scrollY)], [true, 0, "", "0 / 26", 0]);
   // badges say where the squares are real (step numbers here are 0-based)
   await go(1); check(`${tag}: anatomy badge`, await badge(), "real · gelu-4l · layer 2");
   await go(2); check(`${tag}: standard arithmetic badge`, await badge(), "schematic · real states: gelu-4l");

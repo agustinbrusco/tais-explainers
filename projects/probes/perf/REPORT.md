@@ -1,6 +1,10 @@
 # Performance review: probes ("What a Probe Reads")
 
-By the `performance-reviewer` agent (Opus 5.5), 2026-09-28. It only measured; no fix has been applied to the page yet.
+By the `performance-reviewer` agent (Opus 5.5), 2026-09-28. It only measured.
+
+**Update, later on 2026-09-28:** fixes 1–4 and part of 5 are now applied to the page, and re-measured (phone 6×: 32 of
+32 steps within budget; the phone's first step drawn at 2.37 s). d3 is self-hosted in `kit/web/vendor/`. See
+`review.md`, "Performance fixes applied".
 Its scripts and raw outputs are in `projects/probes/build/perf/` (gitignored, local only). This folder keeps what a
 future session needs in git:
 - this report;

@@ -952,10 +952,11 @@ async function render(i, prev) {
     return;
   }
   withDrawn(v);
-  if (prev === -1 && !reduced && offscreen()) {
-    // an empty glass first, so the figure's own choreography plays when it arrives
+  if (!fig.cur && !reduced) {
+    // the figure's first view starts from an empty glass, so its own choreography plays (a first show would be a cut);
+    // on page load it also waits until the stage is on screen
     await fig.show({ ...v, pts: [], probe: null, paper: false, cards: [], ghosts: [], means: [], groups: [], readouts: "", choreo: "cut" });
-    await onscreen();
+    if (prev === -1 && offscreen()) await onscreen();
     if (my !== token) return;
   }
   // multi-stage choreography where one read must land before the next
@@ -1012,6 +1013,7 @@ async function render(i, prev) {
       if (my !== token) return;
       const f = trainerView(j);
       await fig.show(f);
+      if (my !== token) return;
       d3.select("#fig-title").text(f.title);
       setCurveOut(j);
       if (my !== token) return;
@@ -1028,6 +1030,7 @@ async function render(i, prev) {
       if (my !== token) return;
       const f = layerView(L);
       await fig.show({ ...f, readouts: null });
+      if (my !== token) return;
       d3.select("#readouts").interrupt().style("opacity", 1).html(f.readouts);
       d3.select("#fig-title").text(f.title);
       d3.select("#fig-badge").html(f.badge);
@@ -1287,7 +1290,8 @@ setTickOut();
 setBaseOut();
 
 // ---- side dish: Cover's function-counting curve, for d = 5, 50 and 1,536 ----
-(function coverCurve() {
+// drawn in idle time: counting labellings for d = 1,536 is ~0.1 s of the phone's load, for a chart far down the page
+(window.requestIdleCallback ?? ((f) => setTimeout(f, 1500)))(function coverCurve() {
   const s = d3.select("#sd-cover");
   const w = 440, h = 210, m = { l: 46, r: 16, t: 14, b: 44 };
   const xa = d3.scaleLinear().domain([0, 4]).range([m.l, w - m.r]);
@@ -1316,7 +1320,18 @@ setBaseOut();
   s.append("text").attr("class", "note").attr("transform", `translate(12,${(m.t + h - m.b) / 2}) rotate(-90)`).attr("text-anchor", "middle").text("labellings it can split");
   s.append("line").attr("class", "mark").attr("x1", xa(300 / 1536)).attr("x2", xa(300 / 1536)).attr("y1", ya(0)).attr("y2", ya(1));
   s.append("text").attr("class", "mark-label").attr("x", xa(300 / 1536) + 6).attr("y", ya(0.62)).text("our 300");
-})();
+}, { timeout: 3000 });
 
 startHero(document.getElementById("hero-svg"), DATA, { reduced, narrow });
 mountSteps({ render });
+
+// Web fonts arrive one subset at a time, when a glyph first needs it: the Greek (Δμ, Σ) and Latin Extended (ĝ, ŵ, ℓ)
+// files used to load mid-page and relay out the whole document (perf/REPORT.md, H5). Ask for them in idle time while the
+// reader is still on the hero: the faces the page uses, a few characters each.
+{
+  const faces = [["JetBrains Mono", "normal", [400, 500, 600, 700]], ["Inter", "normal", [400, 500, 600]],
+    ["Newsreader", "normal", [400, 500]], ["Newsreader", "italic", [300, 400, 500]]];
+  const warm = () => faces.forEach(([family, style, weights]) => weights.forEach((w) =>
+    document.fonts?.load(`${style} ${w} 16px "${family}"`, "ΔΣμĝŵℓ").catch(() => {})));
+  (window.requestIdleCallback ?? ((f) => setTimeout(f, 1500)))(warm, { timeout: 4000 });
+}

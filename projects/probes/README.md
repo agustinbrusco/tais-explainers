@@ -218,13 +218,14 @@ and Opus acted on it. Both chose the same running example and model.
 ## Pipeline
 - [x] Brief (this file) agreed (2026-09-26)
 - [x] Dossier built (`references/probes/`, 89 sources); `claims.md` to draft from it
-- [ ] `script.md` beats written, with reads
+- [x] `script.md` beats written, with reads
 - [x] `technical-reviewer` (Fable) reviewed the script ("fix first"); blockers and shoulds addressed (`review.md`); quick re-check before the full build
-- [x] The money shot prototyped (7 steps of chapters II–III, `web/`), self-reviewed and learner-sim reviewed (fixes pending)
-- [ ] Visuals built
-- [ ] Visual self-review (stills, motion frames, phone)
-- [ ] `rigor-reviewer` and `technical-reviewer` (Fable), `learner-sim` (Opus)
-- [ ] Learner went through it; feedback in `learner/journal.md`
+- [x] The money shot prototyped (7 steps of chapters II–III, `web/`), self-reviewed and learner-sim reviewed
+- [x] Visuals built (32 steps, six chapters)
+- [x] Visual self-review (stills, motion frames, phone)
+- [x] `rigor-reviewer` and `technical-reviewer` (Fable), `learner-sim` (Opus), then a re-review of the revision
+- [x] `performance-reviewer` (Opus) on the deployed page; its fixes applied and re-measured (2026-09-28)
+- [ ] Learner went through it on Pages; feedback in `learner/journal.md`
 
 ## State and next actions (keep current: this is the handoff)
 
@@ -324,6 +325,17 @@ chapters IV–VI built from Fable's memo (the cascade step cut into the dial's p
 returns to the prologue's readers), the mis-scoped numbers and misquotes fixed, and a fast-scroll bug in `figure.js`
 fixed with a regression test. The prose test now also checks the static HTML.
 
+**Done since (2026-09-28, seventh part: the performance fixes applied, the step counter):** with the learner's go-ahead
+("make it available on the GitHub Pages as soon as it's ready"):
+- everything `perf/REPORT.md` ranked worth doing is applied: the bundle (fix 1), loading with a self-hosted, pinned d3
+  (`kit/web/vendor/`, fix 2), the font subsets requested while the hero shows (fix 3), the first glass view staged
+  wherever it's reached from (fix 4), and part of fix 5 (the hero hurries when left mid-play; a side-dish chart drawn in
+  idle time);
+- the learner's step-counter bug is fixed in `kit/web/steps.js`, which also fixes cot-monitorability;
+- the flipbook's flickering counts and a missing token check in two loops are fixed;
+- checked with both pieces' tests (new counter checks), a pixel diff of every step against HEAD with each differing pair
+  looked at, films of the changed motion, and a re-measurement with the agent's harness. Details in `review.md`.
+
 **Next actions, in order:**
 1. ~~Build the remaining steps~~ (done: 32 steps). Side dishes SD3–SD4 were not built (SD3's source is open; SD4 needs
    Saerens et al. read).
@@ -335,18 +347,13 @@ fixed with a regression test. The prose test now also checks the static HTML.
    axis and units, and a normalized histogram beats a saturating dot pile); move `figure.js`/`lin.js`
    patterns that generalize into `kit/web/`.
 4. Questions for the learner (open): is 32 steps too long for one sitting, and did the push step's new conclusion land?
-5. **Bug reported by the learner (2026-09-28), affects this piece and cot-monitorability:** on load the page shows the
-   hero, but the step counter already reads 1 / N (`kit/web/steps.js` calls `goto(0)` at mount), so pressing → jumps to
-   step 2 and skips step 1. Fix in `kit/web/steps.js`: while the first step isn't on screen (the hero is), treat the
-   position as "before step 1" (→ scrolls to step 1; the counter shows the hero state), and add a test to both pieces.
-6. **Performance review (Opus, measure-only, 2026-09-28): done, nothing applied yet.** Report: `perf/REPORT.md`
-   (tracked), with the measured bundle as `perf/figure-bundle.patch` and the loading variant as `perf/loadfix-index.patch`
-   (raw outputs in `build/perf/`, local). Order: the bundle (phone 20 → 30 of 32 steps passing, long tasks over a
-   desktop-4× pass 52.8 → 12.6 s), then loading (self-hosted pinned d3 plus preloads: the phone's first step 3.72 → 2.69
-   s), then preloading the late mono font (step 3's whole-page relayout), all in a worktree, with item 5. Pixel diffs are
-   a guardrail, not the goal; a change that looks just as good and keeps the data is fine after a side-by-side look (the
-   learner, 2026-09-28). Summarize the result in `review.md`.
-7. **Two behaviour bugs the performance review found:** the first glass step's choreography never plays when a reader
-   scrolls down from the top (`Figure.show` treats a first view as a cut; stage an empty glass whenever the figure has no
-   previous view; this changes what the reader sees, so show the learner); and the layer flipbook's counts row flickers
-   (each frame restarts its fade).
+5. ~~The step counter read 1 / N on load, so → skipped step 1~~ (fixed 2026-09-28 in `kit/web/steps.js`, both pieces,
+   with tests).
+6. ~~Apply the performance review's fixes~~ (done 2026-09-28: fixes 1–4 and part of 5; `review.md`). Not done: caching
+   the flipbook's 29 scales (`fitScale` got cheaper instead; the flipbook passes on the phone, not at desktop 4×), and
+   canvas points (not recommended on current evidence). At desktop 4× the glass steps still run at 20–30 fps.
+7. ~~Two behaviour bugs the performance review found~~ (fixed 2026-09-28): the first glass step's choreography now plays
+   when a reader scrolls down from the top, and the flipbook's counts row no longer flickers.
+8. **The learner reviews the piece on GitHub Pages** (the hero says "Draft · complete, under review" until then). Their
+   feedback goes into `learner/journal.md` and the open questions in item 4, then the check-yourself questions, then the
+   concept map (from their answers only).

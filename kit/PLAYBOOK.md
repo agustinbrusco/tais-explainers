@@ -351,6 +351,37 @@ The whole argument in one cinematic shot, before any words:
   biggest wins, such as drawing thousands of points on a canvas.
 - **Static placeholders go stale behind the JavaScript that fills them**, and a test that reads the DOM after the fill
   can't see it. Also compare the HTML as served (`fetch(location.href)`) with the computed numbers; it caught four.
+- **The counter read 1 / N while the hero showed**, so → skipped step 1 (the learner, 2026-09-28; both pieces).
+  `kit/web/steps.js` now keeps a position before step 1 while the first step is below the reading band: the counter reads
+  0 / N, → goes to step 1, ← from step 1 returns to the hero, and scrolling back up restores it (`explainer.before`).
+  Each piece's functional test checks this from a fresh load.
+- **Per-frame SVG work: write only what changed.** Probes' glass redrew up to 4,104 points every frame, rebuilding each
+  point's 24-gon path string (half the script time) and writing every attribute. Caching path strings, colours and
+  interpolators, and writing an attribute only when its value changes, took the phone from 20 to 30 of 32 steps within
+  budget (`perf/REPORT.md`). Related wins:
+  - measure a label's width once per class and text, again when fonts load;
+  - `visibility: hidden` on a scene once it has faded out (opacity 0 is still painted);
+  - a figure hidden mid-choreography jumps to its last frame.
+- **A promise that settles early exposes missing token checks.** Once a hidden figure lands at once, a flipbook's awaited
+  `show()` resolves right away, and the loop wrote its readouts into the next step's panel. After every `await` in a
+  multi-stage render, check the render token before touching shared UI.
+- **Web fonts load one subset at a time**, when a glyph first needs it. Google Fonts splits each family by unicode-range,
+  so a Δ, ŵ or ℓ fetched its subset mid-page and relaid out the whole document. List the page's characters outside basic
+  Latin, and ask for their subsets in idle time while the reader is on the hero
+  (`document.fonts.load('400 16px "JetBrains Mono"', "ΔΣμĝŵℓ")`).
+- **Self-host pinned libraries** (`kit/web/vendor/`, see its README). `d3@7/+esm` from jsDelivr is an unpinned range
+  and a 44-module import graph. Each level of imports waits on the one before, and a CDN outage leaves every figure blank.
+  Preload the data and the page's modules too. Name ES modules `.js`: simple servers (the tests' own, `http.server`
+  before Python 3.12) send `.mjs` without a JavaScript type, and the page doesn't start.
+- **A cut that replaces something already on screen swaps it at once.** Probes' flipbook restarted the counts row's
+  400 ms fade at each of its 45 frames, so the row flickered between 0 and 30% opacity.
+- **Stage a scene's first view whatever step it's reached from**, not only on page load. Probes' first glass step, reached
+  by scrolling down from the paper steps above it, arrived as a cut: the same bug as "the first figure's choreography
+  never played", by another road.
+- **Pixel differences seen and accepted in performance work:**
+  - ±1 level of gradient dithering, plus a few anti-aliased edges, when a hidden scene is taken out of paint (the layers
+    change);
+  - up to 7/255 on text anti-aliasing.
 - **Headless WebGL, for a future Three.js piece (untested here):** without a GPU, headless Chrome may give no WebGL
   context. ClaudeAnimationBase's `render.mjs` passes `--use-angle=swiftshader --enable-unsafe-swiftshader` for software
   WebGL, and `--use-angle=vulkan` or `gl-egl` on headless NVIDIA machines.
@@ -369,6 +400,7 @@ The whole argument in one cinematic shot, before any words:
 | `projects/<slug>/tests/functional.mjs` | encode every value verified by hand (readouts, counts, badges, guess flow) as a check that fails loudly; take expected values from the exporter |
 | `projects/probes/web/figure.js` + `lin.js` | the glass/paper projection figure: honest rotations of real states, level sets, the histogram paper, cards, flip/rotate/read choreographies (a candidate for `kit/web/`) |
 | `projects/probes/web/pipeline.js` | a model-sketch scene (tokens × layers) with a tap, a state chip, a data table and per-token charts (a candidate for `kit/web/`) |
+| `kit/web/vendor/d3-7.9.0.min.js` | d3, self-hosted and pinned, one file: point a new piece's import map at it (README beside it) |
 | `performance-reviewer` (agent) | measure load, transitions, sliders, heroes and phones as deployed, under CPU throttling; same-pixel fixes in a worktree |
 
 Reference-study shots stay in the scratchpad. They are the authors' work. Write what you learned in
@@ -386,6 +418,8 @@ Reference-study shots stay in the scratchpad. They are the authors' work. Write 
 - [ ] Exact motion frames (`--clock`) for each animated beat, with the frames per read counted, and timed shots of the
       hero, checked at 900–1920 px and on a phone.
 - [ ] Functional tests pass.
+- [ ] From a fresh load: the hero shows, the counter reads 0 / N, and → goes to step 1. `performance-reviewer` has run
+      on the deployed page (glass steps within budget on a throttled phone, no font loading mid-page).
 - [ ] Every number on screen traced to `claims.md`, including numbers computed from our own data.
 - [ ] Badges true, including where data is real vs reused. Simplifications named where they happen.
 - [ ] Every predict: not guessable from the figure or wording, fair for all cases, options balanced.

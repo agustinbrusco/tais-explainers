@@ -53,6 +53,28 @@ page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
 await page.goto(`http://localhost:${port}/projects/probes/web/index.html`);
 await page.waitForFunction(() => window.explainer && window.probesNumbers);
 const go = async (i) => { await page.evaluate((j) => window.explainer.goto(j, { scroll: "instant" }), i); await page.waitForTimeout(500); };
+// 1b. On load the hero shows: the position is before step 1, so → goes to step 1 instead of skipping it (kit/web/steps.js)
+{
+  const n = await page.evaluate(() => window.explainer.steps);
+  const pos = () => page.evaluate(() => [window.explainer.before, window.explainer.current, location.hash,
+    document.querySelector(".stepnav span[aria-live]").textContent].join(" | "));
+  check(await pos() === `true | 0 |  | 0 / ${n}`, "on load, the position is before step 1", await pos());
+  await page.keyboard.press("ArrowRight"); await page.waitForTimeout(1200);
+  check(await pos() === `false | 0 | #0 | 1 / ${n}`, "→ from the hero goes to step 1", await pos());
+  check(await page.evaluate(() => { const r = document.querySelector("[data-step]").getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; }),
+    "step 1 is on screen after →");
+  await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" })); await page.waitForTimeout(600);
+  check(await pos() === `true | 0 |  | 0 / ${n}`, "scrolling back up to the hero is before step 1 again", await pos());
+  await page.keyboard.press("ArrowRight"); await page.waitForTimeout(1200);
+  await page.keyboard.press("ArrowLeft"); await page.waitForTimeout(1200);
+  check(await pos() === `true | 0 |  | 0 / ${n}` && await page.evaluate(() => scrollY) === 0, "← from step 1 goes back to the hero", await pos());
+  // a jump to the top from a late step (the Home key) never crosses step 1, and still lands before it
+  await go(5); await page.waitForTimeout(700);
+  await page.keyboard.press("Home"); await page.waitForTimeout(900);
+  check((await pos()).startsWith("true |"), "a jump to the top from step 6 is before step 1 again", await pos());
+  await page.keyboard.press("ArrowRight"); await page.waitForTimeout(1200);
+  check(await pos() === `false | 0 | #0 | 1 / ${n}`, "→ after that jump goes to step 1", await pos());
+}
 const ro = async () => (await page.textContent("#readouts")).replace(/\s+/g, " ").trim();
 const S = Object.fromEntries((await page.evaluate(() => window.probesSteps())).map((k, i) => [k, i]));
 check(await page.evaluate(() => document.querySelectorAll("[data-step]").length) === Object.keys(S).length, "one prose step per view", JSON.stringify(S));

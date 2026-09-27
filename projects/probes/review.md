@@ -6,6 +6,73 @@ Newest first. Each entry: what was reviewed, by whom, what was found, what was d
 
 
 
+## Performance fixes applied, and the step counter (2026-09-28; Opus)
+
+With the learner's go-ahead ("make it available on the GitHub Pages as soon as it's ready"), everything `perf/REPORT.md`
+ranked worth doing, the learner's step-counter bug, and the two behaviour bugs the review found.
+
+**Applied**
+- *The bundle (fix 1):* `perf/figure-bundle.patch` as measured, minus two unused helpers (E3's baked translation, which
+  the report advised against). An interrupted choreography now also clears its `jumpToEnd`.
+- *Loading (fix 2):* d3 7.9.0 self-hosted as one pinned file in `kit/web/vendor/`, built from the npm packages with
+  esbuild, with a README (versions, rebuild command, SHA-256) and the licence texts, so later pieces can use it too.
+  Preloads for the four JSON files and the page's modules. The file is `.js`, not `.mjs`: the functional tests' server
+  sends `.mjs` without a JavaScript type (so does `http.server` before Python 3.12), and the page didn't start.
+- *Fonts (fix 3):* the two files that loaded mid-page were the Latin Extended subsets of JetBrains Mono and Inter (for ĝ,
+  ŵ, ℓ); the page's other glyphs outside basic Latin are Greek (Δ, Σ, μ). All of them are now requested in idle time while
+  the reader is on the hero. In a full pass, no font file loads after the first 0.4 s.
+- *The first glass view (fix 4):* the figure's first view starts from an empty glass wherever it's reached from, so a
+  reader scrolling down from the top sees the probe step's read (level sets, the scores falling onto paper, then the
+  readouts) instead of a finished figure. Filmed (40 frames) against the baseline's cut. The learner sees it on Pages.
+- *Part of fix 5:* the hero hurries to its final picture when the reader scrolls away mid-play (no more animating off
+  screen); the Cover-counting side-dish chart is drawn in idle time. Also `fitScale` no longer sorts before
+  `d3.quantile`, which selects in a copy anyway: the same scales, bit for bit, for less work at load and in every
+  flipbook frame.
+- *The flipbook's counts row:* a cut that replaces counts already on screen swaps them at once. Its opacity during the
+  flipbook was 0–0.30 (a 400 ms fade restarted every frame); now 1.00.
+- *A latent bug the early landing exposed:* the trainer and layer flipbooks wrote their readouts right after
+  `await fig.show(…)` without checking the render token. A reader who moved on mid-flipbook could get a stale readout in
+  the next step's panel; now checked.
+- *The step counter (the learner's bug, both pieces):* `kit/web/steps.js` keeps a position before step 1 while the hero
+  shows:
+  - the counter reads 0 / N, and → goes to step 1;
+  - ← from step 1 returns to the hero;
+  - scrolling back up, or jumping to the top, restores it.
+
+**Checks**
+- Both pieces' functional tests pass. Probes gained 7 checks for the counter (including a jump to the top from step 6),
+  cot-monitorability 6 (desktop and phone).
+- Pixel diffs of all 32 steps' end states against HEAD, desktop and phone. Each differing pair was looked at side by side,
+  with an amplified diff:
+  - the "←" button on step 1 is darker: it's enabled now, since it returns to the hero (intended);
+  - up to 7/255 on the mono text of the six-question legend and the lab cards, identical at 4× zoom (first run only; gone
+    in the final run, once the fonts arrive before the shots);
+  - ±1 level of dithering in the glass gradients, plus a few anti-aliased edges, in the pipeline steps and ten phone
+    steps: the hidden scene is out of paint now, so the layers change;
+  - nothing else. Verdict: no visible change beyond the intended one.
+- Motion: the new first glass show filmed and read frame by frame; the flipbook's counts sampled every 50 ms. A hero
+  hurried by scrolling away ends on a byte-identical picture to a full play, and the deferred chart draws.
+
+**Measured** with the agent's harness, on the same machine and profiles, against the working tree:
+
+| | baseline | bundle (the agent's) | applied |
+|---|---|---|---|
+| phone 6×: steps within budget | 20/32 | 30/32 | 32/32 |
+| phone 6×: long tasks, total · longest | 27.9 s · 211 ms | 2.7 s · 215 ms | 2.1 s · 93 ms |
+| desktop 4×: steps within budget | 16/32 | 17/32 | 18/32 |
+| desktop 4×: long tasks, total · longest | 52.8 s · 332 ms | 12.6 s · 199 ms | 11.6 s · 169 ms |
+| load, Fast 4G, phone 6×: first step drawn (a link to `#0`) | 3.72 s | 2.69 s (its loading fix) | 2.37 s |
+| load, Fast 4G, phone 6×: the hero's first frame | 3.63 s | 2.60 s (its loading fix) | 2.29 s |
+| load, Fast 4G, desktop: first step drawn (`#0`) | 2.61 s | 1.84 s (its loading fix) | 1.81 s |
+
+- Load figures are medians of 3 cold runs. d3 now arrives as one local file, with no jsDelivr requests and no errors. The
+  longest main-thread task during the phone's load fell from 578–627 ms to 497–499 ms.
+- The step passes were measured before the last three small changes (the hurried hero, the deferred chart, `fitScale`),
+  which only remove work; the load runs include them.
+- **What's left:** at desktop 4×, the glass steps still run at 20–30 fps, against the strict target of 50. That is the
+  report's own caveat: headless Chrome rasterizes in software, so paint costs here are pessimistic next to real GPUs.
+  The next lever would be canvas points, and only after measuring on real hardware.
+
 ## Performance review (2026-09-28; Opus, measure-only)
 
 The full report is `perf/REPORT.md`, with the measured fixes as patches beside it; nothing has been applied yet.

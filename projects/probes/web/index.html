@@ -10,9 +10,24 @@
   <link rel="stylesheet" href="../../../kit/web/tokens.css">
   <link rel="stylesheet" href="../../../kit/web/base.css">
   <link rel="stylesheet" href="./probes.css">
+  <!-- everything the first figure needs starts downloading at once, instead of module by module (perf/REPORT.md) -->
+  <link rel="preload" href="./data/probes.json" as="fetch" crossorigin>
+  <link rel="preload" href="./data/find.json" as="fetch" crossorigin>
+  <link rel="preload" href="./data/push.json" as="fetch" crossorigin>
+  <link rel="preload" href="./data/monitor.json" as="fetch" crossorigin>
   <script type="importmap">
-    { "imports": { "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm" } }
+    { "imports": { "d3": "../../../kit/web/vendor/d3-7.9.0.min.js" } }
   </script>
+  <link rel="modulepreload" href="../../../kit/web/vendor/d3-7.9.0.min.js">
+  <link rel="modulepreload" href="./main.js">
+  <link rel="modulepreload" href="../../../kit/web/steps.js">
+  <link rel="modulepreload" href="./figure.js">
+  <link rel="modulepreload" href="./lin.js">
+  <link rel="modulepreload" href="./hero.js">
+  <link rel="modulepreload" href="./pipeline.js">
+  <link rel="modulepreload" href="./paper.js">
+  <link rel="modulepreload" href="./diagrams.js">
+  <link rel="modulepreload" href="./monitor.js">
 </head>
 <body>
   <main class="explainer">
