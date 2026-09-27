@@ -346,7 +346,9 @@ fixed with a regression test. The prose test now also checks the static HTML.
 3. At the end: the lessons in `review.md` into `kit/PLAYBOOK.md` (with the learner's rule: a chart under a figure shares its
    axis and units, and a normalized histogram beats a saturating dot pile); move `figure.js`/`lin.js`
    patterns that generalize into `kit/web/`.
-4. Questions for the learner (open): is 32 steps too long for one sitting, and did the push step's new conclusion land?
+4. Questions for the learner: ~~is 32 steps too long for one sitting?~~ (no: "32 steps seems ok"; pieces are
+   textbook-grade introductions unless they ask for a lighter one, 2026-09-28). Still open: did the push step's new
+   conclusion land?
 5. ~~The step counter read 1 / N on load, so → skipped step 1~~ (fixed 2026-09-28 in `kit/web/steps.js`, both pieces,
    with tests).
 6. ~~Apply the performance review's fixes~~ (done 2026-09-28: fixes 1–4 and part of 5; `review.md`). Not done: caching

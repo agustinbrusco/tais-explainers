@@ -69,6 +69,9 @@
   not spoiled".
 - **Constructive order (same day):** mechanisms that set up what a probe can measure go first. The "which token?" and
   "every token, pooled?" steps belong at the start of the probes piece, "so the explanation is more constructive".
+- **Depth by default (2026-09-28):** a piece is a cool introduction to its topic, of the kind a great textbook has and
+  they would later recommend. The probes piece's 32 steps are fine. A lighter piece is the exception, and they will say
+  so at the start (for example, its audience and how long it should take).
 - **Pace:** they go through a whole piece in one sitting and give feedback in batches. They like large
   autonomous iterations between feedback rounds, then a complete report.
 - **Predict questions** must be genuinely didactic: aimed at a real misconception, not answerable from the figure.

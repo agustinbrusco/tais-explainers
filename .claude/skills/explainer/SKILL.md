@@ -27,7 +27,9 @@ observations in `references/craft/README.md`. The shots stay in the scratchpad.
 ## 1. Brief (`README.md`), with a gate
 `./scripts/new_project.sh <slug> --format web|manim|both`, then fill in the brief: the promise, 3–5 *checkable*
 objectives, the one running example, the misconceptions to defuse, what it will NOT show, and the format with a
-reason. **Show the brief to the learner and get agreement before building.** A wrong brief wastes every later phase.
+reason. The brief also states the piece's depth: a textbook-grade introduction by default, lighter only when the
+learner asks for it (with its audience and time). **Show the brief to the learner and get agreement before building.**
+A wrong brief wastes every later phase.
 
 ## 2. Research → `claims.md`
 Make sure `references/<topic>/` has a dossier (run the `research` skill if not). Then *read* the primary sources,
