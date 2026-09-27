@@ -1,0 +1,531 @@
+statement,label
+The Spanish word 'uno' means 'one'.,1
+The Spanish word 'uno' means 'wind'.,0
+The Spanish word 'dos' means 'two'.,1
+The Spanish word 'dos' means 'four'.,0
+The Spanish word 'tres' means 'three'.,1
+The Spanish word 'tres' means 'hen'.,0
+The Spanish word 'cuatro' means 'four'.,1
+The Spanish word 'cuatro' means 'bread'.,0
+The Spanish word 'cinco' means 'five'.,1
+The Spanish word 'cinco' means 'knee'.,0
+The Spanish word 'seis' means 'six'.,1
+The Spanish word 'seis' means 'purple'.,0
+The Spanish word 'siete' means 'seven'.,1
+The Spanish word 'siete' means 'watermelon'.,0
+The Spanish word 'ocho' means 'eight'.,1
+The Spanish word 'ocho' means 'chair'.,0
+The Spanish word 'nueve' means 'nine'.,1
+The Spanish word 'nueve' means 'to find'.,0
+The Spanish word 'diez' means 'ten'.,1
+The Spanish word 'diez' means 'garlic'.,0
+The Spanish word 'once' means 'eleven'.,1
+The Spanish word 'once' means 'church'.,0
+The Spanish word 'doce' means 'twelve'.,1
+The Spanish word 'doce' means 'queen'.,0
+The Spanish word 'veinte' means 'twenty'.,1
+The Spanish word 'veinte' means 'forest'.,0
+The Spanish word 'cien' means 'one hundred'.,1
+The Spanish word 'cien' means 'blood'.,0
+The Spanish word 'mil' means 'thousand'.,1
+The Spanish word 'mil' means 'dog'.,0
+The Spanish word 'rojo' means 'red'.,1
+The Spanish word 'rojo' means 'rain'.,0
+The Spanish word 'azul' means 'blue'.,1
+The Spanish word 'azul' means 'book'.,0
+The Spanish word 'verde' means 'green'.,1
+The Spanish word 'verde' means 'pillow'.,0
+The Spanish word 'amarillo' means 'yellow'.,1
+The Spanish word 'amarillo' means 'May'.,0
+The Spanish word 'negro' means 'black'.,1
+The Spanish word 'negro' means 'Tuesday'.,0
+The Spanish word 'blanco' means 'white'.,1
+The Spanish word 'blanco' means 'big'.,0
+The Spanish word 'gris' means 'gray'.,1
+The Spanish word 'gris' means 'three'.,0
+The Spanish word 'morado' means 'purple'.,1
+The Spanish word 'morado' means 'paper'.,0
+The Spanish word 'lunes' means 'Monday'.,1
+The Spanish word 'lunes' means 'neighbor'.,0
+The Spanish word 'martes' means 'Tuesday'.,1
+The Spanish word 'martes' means 'baker'.,0
+The Spanish word 'jueves' means 'Thursday'.,1
+The Spanish word 'jueves' means 'to forget'.,0
+The Spanish word 'viernes' means 'Friday'.,1
+The Spanish word 'viernes' means 'queen'.,0
+The Spanish word 'domingo' means 'Sunday'.,1
+The Spanish word 'domingo' means 'eight'.,0
+The Spanish word 'enero' means 'January'.,1
+The Spanish word 'enero' means 'to speak'.,0
+The Spanish word 'abril' means 'April'.,1
+The Spanish word 'abril' means 'winter'.,0
+The Spanish word 'mayo' means 'May'.,1
+The Spanish word 'mayo' means 'to buy'.,0
+The Spanish word 'junio' means 'June'.,1
+The Spanish word 'junio' means 'old'.,0
+The Spanish word 'agosto' means 'August'.,1
+The Spanish word 'agosto' means 'husband'.,0
+The Spanish word 'perro' means 'dog'.,1
+The Spanish word 'perro' means 'soldier'.,0
+The Spanish word 'gato' means 'cat'.,1
+The Spanish word 'gato' means 'bottle'.,0
+The Spanish word 'caballo' means 'horse'.,1
+The Spanish word 'caballo' means 'monkey'.,0
+The Spanish word 'vaca' means 'cow'.,1
+The Spanish word 'vaca' means 'whale'.,0
+The Spanish word 'cerdo' means 'pig'.,1
+The Spanish word 'cerdo' means 'shirt'.,0
+The Spanish word 'oveja' means 'sheep'.,1
+The Spanish word 'oveja' means 'to write'.,0
+The Spanish word 'cabra' means 'goat'.,1
+The Spanish word 'cabra' means 'lawyer'.,0
+The Spanish word 'gallina' means 'hen'.,1
+The Spanish word 'gallina' means 'to dance'.,0
+The Spanish word 'pato' means 'duck'.,1
+The Spanish word 'pato' means 'to help'.,0
+The Spanish word 'pájaro' means 'bird'.,1
+The Spanish word 'pájaro' means 'wheel'.,0
+The Spanish word 'pez' means 'fish'.,1
+The Spanish word 'pez' means 'eleven'.,0
+The Spanish word 'ratón' means 'mouse'.,1
+The Spanish word 'ratón' means 'to dance'.,0
+The Spanish word 'conejo' means 'rabbit'.,1
+The Spanish word 'conejo' means 'Friday'.,0
+The Spanish word 'oso' means 'bear'.,1
+The Spanish word 'oso' means 'white'.,0
+The Spanish word 'lobo' means 'wolf'.,1
+The Spanish word 'lobo' means 'war'.,0
+The Spanish word 'zorro' means 'fox'.,1
+The Spanish word 'zorro' means 'lip'.,0
+The Spanish word 'mono' means 'monkey'.,1
+The Spanish word 'mono' means 'sweet'.,0
+The Spanish word 'serpiente' means 'snake'.,1
+The Spanish word 'serpiente' means 'to speak'.,0
+The Spanish word 'rana' means 'frog'.,1
+The Spanish word 'rana' means 'grandmother'.,0
+The Spanish word 'tortuga' means 'turtle'.,1
+The Spanish word 'tortuga' means 'young'.,0
+The Spanish word 'abeja' means 'bee'.,1
+The Spanish word 'abeja' means 'horse'.,0
+The Spanish word 'hormiga' means 'ant'.,1
+The Spanish word 'hormiga' means 'to eat'.,0
+The Spanish word 'mariposa' means 'butterfly'.,1
+The Spanish word 'mariposa' means 'mountain'.,0
+The Spanish word 'araña' means 'spider'.,1
+The Spanish word 'araña' means 'easy'.,0
+The Spanish word 'ballena' means 'whale'.,1
+The Spanish word 'ballena' means 'to live'.,0
+The Spanish word 'tiburón' means 'shark'.,1
+The Spanish word 'tiburón' means 'bull'.,0
+The Spanish word 'águila' means 'eagle'.,1
+The Spanish word 'águila' means 'butterfly'.,0
+The Spanish word 'búho' means 'owl'.,1
+The Spanish word 'búho' means 'bitter'.,0
+The Spanish word 'ciervo' means 'deer'.,1
+The Spanish word 'ciervo' means 'soldier'.,0
+The Spanish word 'burro' means 'donkey'.,1
+The Spanish word 'burro' means 'January'.,0
+The Spanish word 'toro' means 'bull'.,1
+The Spanish word 'toro' means 'fox'.,0
+The Spanish word 'gusano' means 'worm'.,1
+The Spanish word 'gusano' means 'butterfly'.,0
+The Spanish word 'cabeza' means 'head'.,1
+The Spanish word 'cabeza' means 'soldier'.,0
+The Spanish word 'mano' means 'hand'.,1
+The Spanish word 'mano' means 'hair'.,0
+The Spanish word 'pie' means 'foot'.,1
+The Spanish word 'pie' means 'cow'.,0
+The Spanish word 'ojo' means 'eye'.,1
+The Spanish word 'ojo' means 'heart'.,0
+The Spanish word 'oreja' means 'ear'.,1
+The Spanish word 'oreja' means 'airplane'.,0
+The Spanish word 'nariz' means 'nose'.,1
+The Spanish word 'nariz' means 'to die'.,0
+The Spanish word 'boca' means 'mouth'.,1
+The Spanish word 'boca' means 'twenty'.,0
+The Spanish word 'diente' means 'tooth'.,1
+The Spanish word 'diente' means 'ant'.,0
+The Spanish word 'brazo' means 'arm'.,1
+The Spanish word 'brazo' means 'grandmother'.,0
+The Spanish word 'pierna' means 'leg'.,1
+The Spanish word 'pierna' means 'twenty'.,0
+The Spanish word 'dedo' means 'finger'.,1
+The Spanish word 'dedo' means 'lake'.,0
+The Spanish word 'rodilla' means 'knee'.,1
+The Spanish word 'rodilla' means 'brother'.,0
+The Spanish word 'hombro' means 'shoulder'.,1
+The Spanish word 'hombro' means 'rain'.,0
+The Spanish word 'corazón' means 'heart'.,1
+The Spanish word 'corazón' means 'June'.,0
+The Spanish word 'sangre' means 'blood'.,1
+The Spanish word 'sangre' means 'rabbit'.,0
+The Spanish word 'hueso' means 'bone'.,1
+The Spanish word 'hueso' means 'scissors'.,0
+The Spanish word 'piel' means 'skin'.,1
+The Spanish word 'piel' means 'Friday'.,0
+The Spanish word 'pelo' means 'hair'.,1
+The Spanish word 'pelo' means 'husband'.,0
+The Spanish word 'cuello' means 'neck'.,1
+The Spanish word 'cuello' means 'bone'.,0
+The Spanish word 'codo' means 'elbow'.,1
+The Spanish word 'codo' means 'to sell'.,0
+The Spanish word 'labio' means 'lip'.,1
+The Spanish word 'labio' means 'shark'.,0
+The Spanish word 'cara' means 'face'.,1
+The Spanish word 'cara' means 'river'.,0
+The Spanish word 'barba' means 'beard'.,1
+The Spanish word 'barba' means 'small'.,0
+The Spanish word 'madre' means 'mother'.,1
+The Spanish word 'madre' means 'bull'.,0
+The Spanish word 'padre' means 'father'.,1
+The Spanish word 'padre' means 'brother'.,0
+The Spanish word 'hermano' means 'brother'.,1
+The Spanish word 'hermano' means 'monkey'.,0
+The Spanish word 'hermana' means 'sister'.,1
+The Spanish word 'hermana' means 'church'.,0
+The Spanish word 'hijo' means 'son'.,1
+The Spanish word 'hijo' means 'April'.,0
+The Spanish word 'hija' means 'daughter'.,1
+The Spanish word 'hija' means 'war'.,0
+The Spanish word 'abuelo' means 'grandfather'.,1
+The Spanish word 'abuelo' means 'bed'.,0
+The Spanish word 'abuela' means 'grandmother'.,1
+The Spanish word 'abuela' means 'farm'.,0
+The Spanish word 'tío' means 'uncle'.,1
+The Spanish word 'tío' means 'to live'.,0
+The Spanish word 'tía' means 'aunt'.,1
+The Spanish word 'tía' means 'daughter'.,0
+The Spanish word 'esposo' means 'husband'.,1
+The Spanish word 'esposo' means 'foot'.,0
+The Spanish word 'hombre' means 'man'.,1
+The Spanish word 'hombre' means 'castle'.,0
+The Spanish word 'amigo' means 'friend'.,1
+The Spanish word 'amigo' means 'six'.,0
+The Spanish word 'vecino' means 'neighbor'.,1
+The Spanish word 'vecino' means 'to cry'.,0
+The Spanish word 'pan' means 'bread'.,1
+The Spanish word 'pan' means 'sad'.,0
+The Spanish word 'agua' means 'water'.,1
+The Spanish word 'agua' means 'cherry'.,0
+The Spanish word 'leche' means 'milk'.,1
+The Spanish word 'leche' means 'banana'.,0
+The Spanish word 'queso' means 'cheese'.,1
+The Spanish word 'queso' means 'wheel'.,0
+The Spanish word 'huevo' means 'egg'.,1
+The Spanish word 'huevo' means 'to swim'.,0
+The Spanish word 'carne' means 'meat'.,1
+The Spanish word 'carne' means 'finger'.,0
+The Spanish word 'arroz' means 'rice'.,1
+The Spanish word 'arroz' means 'donkey'.,0
+The Spanish word 'manzana' means 'apple'.,1
+The Spanish word 'manzana' means 'beach'.,0
+The Spanish word 'plátano' means 'banana'.,1
+The Spanish word 'plátano' means 'castle'.,0
+The Spanish word 'uva' means 'grape'.,1
+The Spanish word 'uva' means 'ant'.,0
+The Spanish word 'fresa' means 'strawberry'.,1
+The Spanish word 'fresa' means 'to smell'.,0
+The Spanish word 'sal' means 'salt'.,1
+The Spanish word 'sal' means 'soldier'.,0
+The Spanish word 'azúcar' means 'sugar'.,1
+The Spanish word 'azúcar' means 'beer'.,0
+The Spanish word 'mantequilla' means 'butter'.,1
+The Spanish word 'mantequilla' means 'day'.,0
+The Spanish word 'miel' means 'honey'.,1
+The Spanish word 'miel' means 'grandmother'.,0
+The Spanish word 'sopa' means 'soup'.,1
+The Spanish word 'sopa' means 'small'.,0
+The Spanish word 'cebolla' means 'onion'.,1
+The Spanish word 'cebolla' means 'lawyer'.,0
+The Spanish word 'ajo' means 'garlic'.,1
+The Spanish word 'ajo' means 'fish'.,0
+The Spanish word 'zanahoria' means 'carrot'.,1
+The Spanish word 'zanahoria' means 'old'.,0
+The Spanish word 'galleta' means 'cookie'.,1
+The Spanish word 'galleta' means 'duck'.,0
+The Spanish word 'vino' means 'wine'.,1
+The Spanish word 'vino' means 'foot'.,0
+The Spanish word 'cerveza' means 'beer'.,1
+The Spanish word 'cerveza' means 'to cry'.,0
+The Spanish word 'hielo' means 'ice'.,1
+The Spanish word 'hielo' means 'island'.,0
+The Spanish word 'cereza' means 'cherry'.,1
+The Spanish word 'cereza' means 'mountain'.,0
+The Spanish word 'pera' means 'pear'.,1
+The Spanish word 'pera' means 'duck'.,0
+The Spanish word 'sandía' means 'watermelon'.,1
+The Spanish word 'sandía' means 'Sunday'.,0
+The Spanish word 'casa' means 'house'.,1
+The Spanish word 'casa' means 'finger'.,0
+The Spanish word 'puerta' means 'door'.,1
+The Spanish word 'puerta' means 'to write'.,0
+The Spanish word 'ventana' means 'window'.,1
+The Spanish word 'ventana' means 'cow'.,0
+The Spanish word 'mesa' means 'table'.,1
+The Spanish word 'mesa' means 'rope'.,0
+The Spanish word 'silla' means 'chair'.,1
+The Spanish word 'silla' means 'car'.,0
+The Spanish word 'cama' means 'bed'.,1
+The Spanish word 'cama' means 'apple'.,0
+The Spanish word 'libro' means 'book'.,1
+The Spanish word 'libro' means 'ugly'.,0
+The Spanish word 'llave' means 'key'.,1
+The Spanish word 'llave' means 'cheap'.,0
+The Spanish word 'espejo' means 'mirror'.,1
+The Spanish word 'espejo' means 'soup'.,0
+The Spanish word 'cuchillo' means 'knife'.,1
+The Spanish word 'cuchillo' means 'mirror'.,0
+The Spanish word 'cuchara' means 'spoon'.,1
+The Spanish word 'cuchara' means 'dirty'.,0
+The Spanish word 'tenedor' means 'fork'.,1
+The Spanish word 'tenedor' means 'young'.,0
+The Spanish word 'plato' means 'plate'.,1
+The Spanish word 'plato' means 'shoulder'.,0
+The Spanish word 'taza' means 'cup'.,1
+The Spanish word 'taza' means 'neck'.,0
+The Spanish word 'botella' means 'bottle'.,1
+The Spanish word 'botella' means 'deer'.,0
+The Spanish word 'caja' means 'box'.,1
+The Spanish word 'caja' means 'seven'.,0
+The Spanish word 'papel' means 'paper'.,1
+The Spanish word 'papel' means 'ear'.,0
+The Spanish word 'lápiz' means 'pencil'.,1
+The Spanish word 'lápiz' means 'shark'.,0
+The Spanish word 'tijeras' means 'scissors'.,1
+The Spanish word 'tijeras' means 'sad'.,0
+The Spanish word 'jabón' means 'soap'.,1
+The Spanish word 'jabón' means 'street'.,0
+The Spanish word 'toalla' means 'towel'.,1
+The Spanish word 'toalla' means 'knife'.,0
+The Spanish word 'almohada' means 'pillow'.,1
+The Spanish word 'almohada' means 'window'.,0
+The Spanish word 'martillo' means 'hammer'.,1
+The Spanish word 'martillo' means 'blood'.,0
+The Spanish word 'cuerda' means 'rope'.,1
+The Spanish word 'cuerda' means 'school'.,0
+The Spanish word 'campana' means 'bell'.,1
+The Spanish word 'campana' means 'peace'.,0
+The Spanish word 'rueda' means 'wheel'.,1
+The Spanish word 'rueda' means 'shirt'.,0
+The Spanish word 'sombrero' means 'hat'.,1
+The Spanish word 'sombrero' means 'mirror'.,0
+The Spanish word 'zapato' means 'shoe'.,1
+The Spanish word 'zapato' means 'fire'.,0
+The Spanish word 'camisa' means 'shirt'.,1
+The Spanish word 'camisa' means 'river'.,0
+The Spanish word 'falda' means 'skirt'.,1
+The Spanish word 'falda' means 'aunt'.,0
+The Spanish word 'abrigo' means 'coat'.,1
+The Spanish word 'abrigo' means 'fork'.,0
+The Spanish word 'guante' means 'glove'.,1
+The Spanish word 'guante' means 'eye'.,0
+The Spanish word 'paraguas' means 'umbrella'.,1
+The Spanish word 'paraguas' means 'butterfly'.,0
+The Spanish word 'sol' means 'sun'.,1
+The Spanish word 'sol' means 'bridge'.,0
+The Spanish word 'luna' means 'moon'.,1
+The Spanish word 'luna' means 'red'.,0
+The Spanish word 'estrella' means 'star'.,1
+The Spanish word 'estrella' means 'forest'.,0
+The Spanish word 'nube' means 'cloud'.,1
+The Spanish word 'nube' means 'book'.,0
+The Spanish word 'lluvia' means 'rain'.,1
+The Spanish word 'lluvia' means 'four'.,0
+The Spanish word 'nieve' means 'snow'.,1
+The Spanish word 'nieve' means 'cheap'.,0
+The Spanish word 'viento' means 'wind'.,1
+The Spanish word 'viento' means 'skirt'.,0
+The Spanish word 'mar' means 'sea'.,1
+The Spanish word 'mar' means 'father'.,0
+The Spanish word 'río' means 'river'.,1
+The Spanish word 'río' means 'knee'.,0
+The Spanish word 'lago' means 'lake'.,1
+The Spanish word 'lago' means 'to kiss'.,0
+The Spanish word 'montaña' means 'mountain'.,1
+The Spanish word 'montaña' means 'winter'.,0
+The Spanish word 'bosque' means 'forest'.,1
+The Spanish word 'bosque' means 'banana'.,0
+The Spanish word 'árbol' means 'tree'.,1
+The Spanish word 'árbol' means 'goat'.,0
+The Spanish word 'flor' means 'flower'.,1
+The Spanish word 'flor' means 'fox'.,0
+The Spanish word 'arena' means 'sand'.,1
+The Spanish word 'arena' means 'knife'.,0
+The Spanish word 'isla' means 'island'.,1
+The Spanish word 'isla' means 'war'.,0
+The Spanish word 'playa' means 'beach'.,1
+The Spanish word 'playa' means 'grandfather'.,0
+The Spanish word 'fuego' means 'fire'.,1
+The Spanish word 'fuego' means 'tree'.,0
+The Spanish word 'calle' means 'street'.,1
+The Spanish word 'calle' means 'paper'.,0
+The Spanish word 'puente' means 'bridge'.,1
+The Spanish word 'puente' means 'to jump'.,0
+The Spanish word 'iglesia' means 'church'.,1
+The Spanish word 'iglesia' means 'young'.,0
+The Spanish word 'escuela' means 'school'.,1
+The Spanish word 'escuela' means 'four'.,0
+The Spanish word 'granja' means 'farm'.,1
+The Spanish word 'granja' means 'sweet'.,0
+The Spanish word 'castillo' means 'castle'.,1
+The Spanish word 'castillo' means 'young'.,0
+The Spanish word 'torre' means 'tower'.,1
+The Spanish word 'torre' means 'foot'.,0
+The Spanish word 'rey' means 'king'.,1
+The Spanish word 'rey' means 'cat'.,0
+The Spanish word 'reina' means 'queen'.,1
+The Spanish word 'reina' means 'wheel'.,0
+The Spanish word 'ladrón' means 'thief'.,1
+The Spanish word 'ladrón' means 'big'.,0
+The Spanish word 'juez' means 'judge'.,1
+The Spanish word 'juez' means 'thief'.,0
+The Spanish word 'abogado' means 'lawyer'.,1
+The Spanish word 'abogado' means 'bear'.,0
+The Spanish word 'panadero' means 'baker'.,1
+The Spanish word 'panadero' means 'island'.,0
+The Spanish word 'soldado' means 'soldier'.,1
+The Spanish word 'soldado' means 'foot'.,0
+The Spanish word 'cantante' means 'singer'.,1
+The Spanish word 'cantante' means 'year'.,0
+The Spanish word 'grande' means 'big'.,1
+The Spanish word 'grande' means 'grandmother'.,0
+The Spanish word 'pequeño' means 'small'.,1
+The Spanish word 'pequeño' means 'hat'.,0
+The Spanish word 'nuevo' means 'new'.,1
+The Spanish word 'nuevo' means 'winter'.,0
+The Spanish word 'viejo' means 'old'.,1
+The Spanish word 'viejo' means 'street'.,0
+The Spanish word 'joven' means 'young'.,1
+The Spanish word 'joven' means 'blue'.,0
+The Spanish word 'bueno' means 'good'.,1
+The Spanish word 'bueno' means 'five'.,0
+The Spanish word 'malo' means 'bad'.,1
+The Spanish word 'malo' means 'aunt'.,0
+The Spanish word 'caliente' means 'hot'.,1
+The Spanish word 'caliente' means 'goat'.,0
+The Spanish word 'frío' means 'cold'.,1
+The Spanish word 'frío' means 'ear'.,0
+The Spanish word 'feliz' means 'happy'.,1
+The Spanish word 'feliz' means 'spider'.,0
+The Spanish word 'triste' means 'sad'.,1
+The Spanish word 'triste' means 'war'.,0
+The Spanish word 'lento' means 'slow'.,1
+The Spanish word 'lento' means 'husband'.,0
+The Spanish word 'débil' means 'weak'.,1
+The Spanish word 'débil' means 'king'.,0
+The Spanish word 'sucio' means 'dirty'.,1
+The Spanish word 'sucio' means 'whale'.,0
+The Spanish word 'lleno' means 'full'.,1
+The Spanish word 'lleno' means 'island'.,0
+The Spanish word 'vacío' means 'empty'.,1
+The Spanish word 'vacío' means 'hat'.,0
+The Spanish word 'pesado' means 'heavy'.,1
+The Spanish word 'pesado' means 'queen'.,0
+The Spanish word 'dulce' means 'sweet'.,1
+The Spanish word 'dulce' means 'hen'.,0
+The Spanish word 'amargo' means 'bitter'.,1
+The Spanish word 'amargo' means 'Thursday'.,0
+The Spanish word 'oscuro' means 'dark'.,1
+The Spanish word 'oscuro' means 'bottle'.,0
+The Spanish word 'feo' means 'ugly'.,1
+The Spanish word 'feo' means 'thousand'.,0
+The Spanish word 'cansado' means 'tired'.,1
+The Spanish word 'cansado' means 'eagle'.,0
+The Spanish word 'perezoso' means 'lazy'.,1
+The Spanish word 'perezoso' means 'salt'.,0
+The Spanish word 'barato' means 'cheap'.,1
+The Spanish word 'barato' means 'to speak'.,0
+The Spanish word 'caro' means 'expensive'.,1
+The Spanish word 'caro' means 'frog'.,0
+The Spanish word 'fácil' means 'easy'.,1
+The Spanish word 'fácil' means 'six'.,0
+The Spanish word 'comer' means 'to eat'.,1
+The Spanish word 'comer' means 'to cry'.,0
+The Spanish word 'beber' means 'to drink'.,1
+The Spanish word 'beber' means 'nine'.,0
+The Spanish word 'dormir' means 'to sleep'.,1
+The Spanish word 'dormir' means 'fork'.,0
+The Spanish word 'correr' means 'to run'.,1
+The Spanish word 'correr' means 'mirror'.,0
+The Spanish word 'caminar' means 'to walk'.,1
+The Spanish word 'caminar' means 'door'.,0
+The Spanish word 'hablar' means 'to speak'.,1
+The Spanish word 'hablar' means 'April'.,0
+The Spanish word 'escribir' means 'to write'.,1
+The Spanish word 'escribir' means 'white'.,0
+The Spanish word 'leer' means 'to read'.,1
+The Spanish word 'leer' means 'mirror'.,0
+The Spanish word 'cantar' means 'to sing'.,1
+The Spanish word 'cantar' means 'ant'.,0
+The Spanish word 'bailar' means 'to dance'.,1
+The Spanish word 'bailar' means 'Monday'.,0
+The Spanish word 'nadar' means 'to swim'.,1
+The Spanish word 'nadar' means 'onion'.,0
+The Spanish word 'comprar' means 'to buy'.,1
+The Spanish word 'comprar' means 'bitter'.,0
+The Spanish word 'vender' means 'to sell'.,1
+The Spanish word 'vender' means 'eleven'.,0
+The Spanish word 'abrir' means 'to open'.,1
+The Spanish word 'abrir' means 'full'.,0
+The Spanish word 'cerrar' means 'to close'.,1
+The Spanish word 'cerrar' means 'beach'.,0
+The Spanish word 'llorar' means 'to cry'.,1
+The Spanish word 'llorar' means 'cheese'.,0
+The Spanish word 'saltar' means 'to jump'.,1
+The Spanish word 'saltar' means 'monkey'.,0
+The Spanish word 'olvidar' means 'to forget'.,1
+The Spanish word 'olvidar' means 'ant'.,0
+The Spanish word 'aprender' means 'to learn'.,1
+The Spanish word 'aprender' means 'glove'.,0
+The Spanish word 'enseñar' means 'to teach'.,1
+The Spanish word 'enseñar' means 'neck'.,0
+The Spanish word 'ayudar' means 'to help'.,1
+The Spanish word 'ayudar' means 'bed'.,0
+The Spanish word 'romper' means 'to break'.,1
+The Spanish word 'romper' means 'cheap'.,0
+The Spanish word 'construir' means 'to build'.,1
+The Spanish word 'construir' means 'friend'.,0
+The Spanish word 'encontrar' means 'to find'.,1
+The Spanish word 'encontrar' means 'frog'.,0
+The Spanish word 'vivir' means 'to live'.,1
+The Spanish word 'vivir' means 'to die'.,0
+The Spanish word 'morir' means 'to die'.,1
+The Spanish word 'morir' means 'night'.,0
+The Spanish word 'viajar' means 'to travel'.,1
+The Spanish word 'viajar' means 'shirt'.,0
+The Spanish word 'gritar' means 'to shout'.,1
+The Spanish word 'gritar' means 'coat'.,0
+The Spanish word 'besar' means 'to kiss'.,1
+The Spanish word 'besar' means 'small'.,0
+The Spanish word 'oler' means 'to smell'.,1
+The Spanish word 'oler' means 'to kiss'.,0
+The Spanish word 'día' means 'day'.,1
+The Spanish word 'día' means 'cookie'.,0
+The Spanish word 'noche' means 'night'.,1
+The Spanish word 'noche' means 'dog'.,0
+The Spanish word 'semana' means 'week'.,1
+The Spanish word 'semana' means 'wheel'.,0
+The Spanish word 'año' means 'year'.,1
+The Spanish word 'año' means 'yellow'.,0
+The Spanish word 'invierno' means 'winter'.,1
+The Spanish word 'invierno' means 'tired'.,0
+The Spanish word 'verano' means 'summer'.,1
+The Spanish word 'verano' means 'yellow'.,0
+The Spanish word 'dinero' means 'money'.,1
+The Spanish word 'dinero' means 'slow'.,0
+The Spanish word 'guerra' means 'war'.,1
+The Spanish word 'guerra' means 'duck'.,0
+The Spanish word 'paz' means 'peace'.,1
+The Spanish word 'paz' means 'fork'.,0
+The Spanish word 'miedo' means 'fear'.,1
+The Spanish word 'miedo' means 'cat'.,0
+The Spanish word 'coche' means 'car'.,1
+The Spanish word 'coche' means 'eye'.,0
+The Spanish word 'tren' means 'train'.,1
+The Spanish word 'tren' means 'year'.,0
+The Spanish word 'avión' means 'airplane'.,1
+The Spanish word 'avión' means 'ten'.,0
+The Spanish word 'bicicleta' means 'bicycle'.,1
+The Spanish word 'bicicleta' means 'to learn'.,0
+The Spanish word 'camión' means 'truck'.,1
+The Spanish word 'camión' means 'to build'.,0

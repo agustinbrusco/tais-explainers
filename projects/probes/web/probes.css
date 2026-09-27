@@ -225,3 +225,55 @@ sub { font-size: .7em; }
   .side-dish { margin-left: 0; padding: .9rem .95rem; }
   .side-dish svg .axis text, .side-dish svg .note, .side-dish svg .mark-label { font-size: 15px; }
 }
+
+/* ---- the pipeline scene (pipeline.js): a statement becomes a data point; which token a probe reads ----
+   glass = the model: one column per token (its residual stream), one row per layer, each dot a state. Teal arcs are
+   causal attention; gold is reading (the tap, the read layer, the scores); chips are paper (visible text). */
+.p-row { stroke: #6f86a8; stroke-width: .6; stroke-opacity: .12; }
+.p-row.on { stroke: var(--overseer); stroke-opacity: .45; stroke-width: 1; stroke-dasharray: 3 5; }
+.p-stream { stroke: var(--residual); stroke-width: 1.2; }
+.p-node { fill: var(--residual); opacity: .2; transition: opacity .15s; }
+.p-node.on { opacity: .9; }
+.p-node.on.row { fill: #d6e5fc; }
+.p-arc { fill: none; stroke: var(--attention); stroke-width: 1.3; }
+.p-tap { fill: none; stroke: var(--overseer); stroke-width: 2.2; filter: drop-shadow(0 0 3px rgba(245, 192, 74, .6)); }
+.glass-label.p-layer { fill: var(--overseer); }
+.glass-label.end { text-anchor: end; }
+.p-lead { fill: none; stroke: var(--overseer-ink); stroke-width: 1.6; }
+.p-chip rect { fill: var(--card); stroke: var(--rule); }
+.p-chip rect.country { stroke: var(--ink3); }
+.p-chip-t { fill: var(--token-ink); font: 500 20px var(--font-mono); }
+.p-chip-alt { fill: var(--ink3); font: 500 20px var(--font-mono); }
+.p-hchip { fill: #0b1019; stroke: rgba(91, 156, 245, .4); }
+.px { image-rendering: pixelated; }
+.p-note { fill: var(--ink2); font: 500 17px var(--font-mono); }
+.p-note.gold { fill: var(--overseer-ink); }
+.p-ychip rect { fill: var(--card); stroke: var(--rule); }
+.p-ytext { fill: var(--ink); font: 600 22px var(--font-mono); }
+.p-ydot.t { fill: var(--ink); stroke: var(--ink); stroke-width: 1.5; }
+.p-ydot.f { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.8; }
+.p-ycell.t { fill: var(--ink); }
+.p-ycell.f { fill: var(--sheet); }
+.p-tframe { fill: none; stroke: var(--rule); }
+.p-zero { stroke: var(--overseer-ink); stroke-width: 2; }
+.p-tick { fill: var(--ink3); font: 500 17px var(--font-mono); }
+.p-tick.zero { fill: var(--overseer-ink); font-weight: 600; }
+.p-brace { fill: none; stroke: var(--ink3); stroke-width: 1.2; }
+.p-ser { fill: none; stroke: var(--overseer-ink); stroke-width: 1.3; stroke-opacity: .7; }
+.p-ser.f { stroke-dasharray: 4 3; }
+.p-dot circle.t { fill: var(--overseer-ink); }
+.p-dot circle.f { fill: var(--sheet); stroke: var(--overseer-ink); stroke-width: 1.6; }
+.p-band { fill: var(--overseer); fill-opacity: .16; }
+.p-red { stroke: var(--overseer-ink); stroke-width: 1.8; }
+.p-red.f { stroke-dasharray: 7 5; }
+.p-own { stroke: var(--overseer-ink); stroke-width: 1.4; stroke-dasharray: 5 4; }
+.legend .lg-node { fill: var(--residual-ink); }
+.legend .lg-tap { fill: none; stroke: var(--overseer-ink); stroke-width: 2; }
+.legend .lg-arc { fill: none; stroke: var(--attention-ink); stroke-width: 1.6; }
+.legend .lg-score.t { fill: var(--overseer-ink); }
+.legend .lg-score.f { fill: var(--sheet); stroke: var(--overseer-ink); stroke-width: 1.6; }
+.p-cone { fill: var(--residual); fill-opacity: .1; stroke: var(--residual); stroke-opacity: .4; stroke-dasharray: 3 3; }
+@media (max-width: 860px) {
+  .p-chip-t, .p-chip-alt { font-size: 23px; }
+  .p-note, .p-tick { font-size: 20px; }
+}

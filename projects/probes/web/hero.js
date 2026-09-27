@@ -1,4 +1,4 @@
-// The hero: 748 real hidden states in a view that ignores the probe's direction; their truth labels appear; the view
+// The hero: real hidden states of every held-out statement in a view that ignores the probe's direction; their truth labels appear; the view
 // turns (an honest rotation through the layer-12 basis) until the probe's direction lies flat; its level sets draw in;
 // each statement's position along it falls through the glass onto a paper strip, where it joins a histogram. No negation, no example counts, no steering:
 // it spoils none of the predicts.
@@ -56,7 +56,7 @@ export function startHero(svgEl, DATA, { reduced = false, narrow = false } = {})
     paper.interrupt().style("opacity", 0);
     fig.cur = null; fig.pts.forEach((s) => { s.el?.remove(); s.dotEl?.remove(); s.ringEl?.remove(); }); fig.pts.clear();
     await fig.show(V0);
-    say("748 statements about cities, as 1,536 numbers each, seen in a view that ignores the probe");
+    say(`${idx.length.toLocaleString("en-US")} statements about cities, as 1,536 numbers each, seen in a view that ignores the probe`);
     await sleep(1300);
     await fig.show(V1);
     say("filled: true · hollow: false · in this view they overlap");

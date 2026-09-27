@@ -3,6 +3,31 @@
 Newest first. Each entry: what was reviewed, by whom, what was found, what was done (or why not).
 
 
+
+## Our own statements, and where a probe reads (2026-09-27)
+
+- **Why:** the learner asked for "a viz of how the activations are collected as data points", "accurate to the way it's
+  usually done", because where a probe reads decides what it can measure. And the page's data file couldn't ship while it
+  held Marks & Tegmark's unlicensed statements.
+- **Statements rebuilt** from GeoNames with their recipe (`data/statements.py`, App. H of their paper); our additions and
+  their reasons are in the file's docstring and C-I-17. The country-name baseline stays at chance (0.512).
+- **What changed in the story** (rule 10, re-derived sentence by sentence): the layer-12 flip reads 31.0% (not 8.0%),
+  still ranked almost perfectly upside down (AUROC 0.010), so P3's options became ≈99/75/50/30; layer 8 is now inverted like
+  12 (18.8%), and only layer 16 calls every negation false (50%, AUROC 0.19); the two directions are 57° apart and the L2
+  path turns 64°; the Spanish-word pattern moved (layer 12: 92.3% / 66.2%; layer 16: AUROC 0.99 / 0.95 but 68.3% / 62.5%),
+  so the "threshold doesn't transfer" sentence now points at layer 16, and the cost of retraining is larger (92.3% → 68.3%).
+  The SVD axis of Fig. 2 had flipped sign, which would have made "the upper cluster is Chinese cities" false; the exporter
+  now orients it.
+- **The new steps** (`pipeline.js`): the exact fact that carries the causal argument is real, not illustrative: the twins'
+  states over "in" agree to float16 storage (99.9% of entries bit-equal, max difference 0.004, one float16 step), and a probe
+  there scores 50.0%. Max pooling came out at 50.0% with threshold 0 (every false statement has an early token above zero:
+  in Krasnodar, "ras" at 0.7) and 87.8% with its own threshold: the failure CC++ smooths against, seen in miniature.
+- **Found on the way:** the per-token regression on raw states hit L-BFGS's evaluation limit, so every fit now uses
+  Newton-Cholesky (exact; the export takes under 3 minutes). The period-trained probe applied at the first token scores
+  −4,807 (the first position's massive activations), which is why the chart shows a probe trained on every token instead.
+  Two Krasnodar cards on the same side hid each other; cards now stack by side.
+- Stills `build/shots4/`, `build/shots4m/`; the collect film `build/motion-c/collect.png`.
+
 ## Paper as projection (2026-09-27), from the learner's reaction to the style frame
 
 - **The ask:** "the hist below [should] always be a projection of the dots above"; "a common, normalized hist would do

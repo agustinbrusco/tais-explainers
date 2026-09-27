@@ -1,12 +1,12 @@
 """Export the real data for "What a Probe Reads" (web/): hidden states, probe directions and every number the page shows.
 
-Reads the spike's cached activations (Qwen2.5-1.5B base, final token of each statement; see data/spike/README.md) and
-writes build/data/probes.json. The statements are Marks & Tegmark's (their repo has no license), so the output stays in
-build/ (gitignored) until we regenerate our own statements.
+Reads the activations of our statements (data/statements.py builds them, data/extract.py runs Qwen2.5-1.5B base on
+them) and writes web/data/probes.json, which the page loads and the repo ships.
 
 Protocol (pinned):
 - Split by city: each city's statements (true, false and their negations) sit on one side; rng(1) halves.
-- Logistic regression on raw hidden states, centred on the training mean, with no per-coordinate standardization.
+- Logistic regression on raw hidden states, centred on the training mean, with no per-coordinate standardization,
+  solved exactly (Newton-Cholesky).
   The L2 penalty is then rotation-invariant, so the regularization path runs from the difference of means (strong L2)
   to the max-margin direction (no L2; the training set is separable since n < d). C = 1 unless stated.
 - Difference of means: threshold at the midpoint of the two class means (training statements).
@@ -17,7 +17,7 @@ the difference of means, the retrained probe, their planes' second axes, and at 
 so each statement is stored as k numbers, the browser computes *exact* projections onto any of those directions, and a
 rotation between two views is itself an honest orthogonal projection.
 
-    uv run --group interp --with scikit-learn python projects/probes/data/export.py projects/probes/data/spike
+    uv run --group interp --with scikit-learn python projects/probes/data/export.py projects/probes/data/run
 """
 import csv, json, sys
 from pathlib import Path
@@ -26,7 +26,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 
 SRC = Path(sys.argv[1])
-OUT = Path(__file__).resolve().parents[1] / "build" / "data" / "probes.json"
+OUT = Path(__file__).resolve().parents[1] / "web" / "data" / "probes.json"
 MODEL = "Qwen2.5-1.5B"
 LAYERS = [8, 12, 16]
 PATH_LAYER = 12                 # the layer whose regularization path goes into the basis (the slider in step 3)
@@ -71,7 +71,7 @@ def unit(v):
 def lr(X, y, C=C_DEFAULT, centre=None):
     """Logistic regression on raw states; returns (w, b) in raw coordinates."""
     c = X.mean(0) if centre is None else centre
-    m = LogisticRegression(C=C, max_iter=20000, tol=1e-6).fit(X - c, y)
+    m = LogisticRegression(C=C, solver="newton-cholesky", max_iter=1000, tol=1e-8).fit(X - c, y)
     return m.coef_[0], float(m.intercept_[0] - c @ m.coef_[0])
 
 
@@ -108,12 +108,14 @@ out = {
         "split": "by city, rng(1) halves; negations and translations evaluated on held-out cities",
         "protocol": "logistic regression on raw hidden states centred on the training mean, no standardization, "
                     f"L2, C = {C_DEFAULT} unless stated; difference of means thresholded at the midpoint of the class means",
-        "statements": "Marks & Tegmark, geometry-of-truth datasets (to be regenerated before publishing)",
+        "statements": "ours (data/statements.py): Marks & Tegmark's cities construction rebuilt from GeoNames (CC BY 4.0), "
+                      "and our own Spanish-English word list, each word once true and once false",
         "sets": "aff / neg: every held-out city statement and its negated twin (same order); sp / negsp: all Spanish-English "
                 "statements and their negations",
         "coords": "per layer, coordinates in an orthonormal basis (B^T (h - c), c = mean of the training affirmatives), 3 d.p.; "
                   "each probe is a unit direction in that basis (coef), a threshold along it (thr), and |w| (norm) for LR",
-        "n": {"train_aff": int(tr.sum()), "test_aff": int(te.sum()), "test_neg": int(te.sum()), "sp": len(ys), "negsp": len(yn)},
+        "n": {"train_aff": int(tr.sum()), "test_aff": int(te.sum()), "test_neg": int(te.sum()), "sp": len(ys), "negsp": len(yn),
+              "cities": len(cities), "countries": len({r["correct_country"] for r in ra})},
     },
     "text": {"aff": [ra[i]["statement"] for i in TE], "neg": [rb[i]["statement"] for i in TE],
              "sp": [r["statement"] for r in rs], "negsp": [r["statement"] for r in rn]},
@@ -141,6 +143,10 @@ for L in LAYERS:
     path = [(C, *lr(Xa[tr], ya[tr], C=C)) for C in C_PATH]
     # second axes of the planes the page draws: the largest remaining spread beside each probe
     v_aff = top_pc(Xa[tr], [unit(w)])
+    # an SVD direction's sign is arbitrary: point it so that statements about Chinese cities sit up (the page says so)
+    china = np.array([ra[i]["correct_country"] == "China" for i in range(len(ra))])
+    if ((Xa[tr & china] - c) @ v_aff).mean() < ((Xa[tr & ~china] - c) @ v_aff).mean():
+        v_aff = -v_aff
     v_both = top_pc(Xboth, [unit(w2)])
     vecs = [unit(w), v_aff, unit(dmu), unit(w2), v_both, unit(dmu_neg)]
     if L == PATH_LAYER:
@@ -254,6 +260,78 @@ for name, lab in [("real", ya), ("coin", coin)]:
 out["fit16"] = fit
 out["meta"]["fit16"] = ("layer 16; 300 training statements drawn from the training cities, with true or coin-flip labels, "
                         "C = 1e4 for both; all of them and all held-out statements drawn; accuracy on all held-out cities")
+
+# From a statement to a data point, and which token to read. Every token's state of the affirmative cities at layers 8,
+# 12 and 16 (data/extract.py): the running example's tokens, its real state h at the period, a crop of the training
+# matrix X, the per-token scores of the period-trained probe, and held-out accuracy for probes that read elsewhere:
+# the mean over tokens, every token (the statement's label copied to each, scores pooled by mean or max), the country's
+# last token, and "in" (the last token before the country, where a true statement and its false twin are still the same
+# input, so their states are identical).
+tf = SRC / f"tokens_{MODEL}_cities.npz"
+if tf.exists():
+    from transformers import AutoTokenizer
+    T = np.load(tf)
+    st, ids, off, TL = T["states"], T["ids"], T["offsets"], [int(l) for l in T["layers"]]
+    tokz = AutoTokenizer.from_pretrained(f"Qwen/{MODEL}")
+    span = lambda i: (int(off[i]), int(off[i + 1]))
+    in_id = tokz(" in")["input_ids"][-1]
+    pos_in = np.array([span(i)[0] + int(np.where(ids[slice(*span(i))] == in_id)[0][-1]) for i in range(len(ya))])
+    pipe = {"layer": 12, "layers": TL, "n_train": int(tr.sum()), "n_test": int(te.sum()),
+            "tokens": {k: [tokz.decode([int(t)]) for t in ids[slice(*span(r))]] for k, r in (("true", K0), ("false", K0 + 1))},
+            "acc": {}, "scores": {}}
+    for L in TL:
+        j = TL.index(L)
+        X = A[:, L].astype(np.float64)
+        assert np.allclose(st[off[1:] - 1, j].astype(np.float64), X, atol=2e-2), "token states must end in the period's"
+        w, b = lr(X[tr], ya[tr])                                          # the pinned probe (the period, C = 1)
+        pooled = np.stack([st[slice(*span(i)), j].astype(np.float64).mean(0) for i in range(len(ya))])
+        wm, bm = lr(pooled[tr], ya[tr])
+        rows = np.concatenate([np.arange(*span(i)) for i in np.where(tr)[0]])
+        lab = np.concatenate([[ya[i]] * (span(i)[1] - span(i)[0]) for i in np.where(tr)[0]])
+        we, be = lr(st[rows, j].astype(np.float64), lab)
+        per = [st[slice(*span(i)), j].astype(np.float64) @ we + be for i in range(len(ya))]
+        country = st[off[1:] - 2, j].astype(np.float64)
+        wc, bc = lr(country[tr], ya[tr])
+        at_in = st[pos_in, j].astype(np.float64)
+        wi, bi = lr(at_in[tr], ya[tr])
+        # pooled scores need their own threshold: set it on the training statements (the one that reads them best)
+        def own_threshold(v):
+            cand = np.unique(v[tr])
+            best = max(cand, key=lambda t: ((v[tr] > t) == ya[tr]).mean())
+            return float(best), acc(v[te] - best, ya[te])
+        mx, mn = np.array([p.max() for p in per]), np.array([p.mean() for p in per])
+        thr_max, acc_max_own = own_threshold(mx)
+        pipe["acc"][str(L)] = {
+            "final": acc(X[te] @ w + b, ya[te]), "mean": acc(pooled[te] @ wm + bm, ya[te]),
+            "every_mean": acc(np.array([p.mean() for p in per])[te], ya[te]),
+            "every_max": acc(np.array([p.max() for p in per])[te], ya[te]),
+            "every_last": acc(np.array([p[-1] for p in per])[te], ya[te]),
+            "every_max_own": acc_max_own, "every_max_thr": round(thr_max, 2),
+            "max_below_zero_false": round(float((mx[te & (ya == 0)] <= 0).mean()), 3),
+            "country": acc(country[te] @ wc + bc, ya[te]), "at_in": acc(at_in[te] @ wi + bi, ya[te]),
+            # the same input, so the same state: equal up to float16 storage (a batch's arithmetic can differ in the last bit)
+            "at_in_identical": bool(np.allclose(st[pos_in[0::2], j].astype(np.float32), st[pos_in[1::2], j].astype(np.float32), atol=0.01)),
+        }
+        pipe["scores"][str(L)] = {
+            k: {"final": R(st[slice(*span(r)), j].astype(np.float64) @ w + b, 2), "every": R(per[r], 2)}
+            for k, r in (("true", K0), ("false", K0 + 1))}
+        if L == pipe["layer"]:
+            hk = {k: X[r] for k, r in (("true", K0), ("false", K0 + 1))}
+            pipe["h"] = {k: R(v, 2) for k, v in hk.items()}
+            pipe["hscale"] = round(float(np.quantile(np.abs(X[tr]), 0.98)), 2)
+            pick_rows = np.where(tr)[0][:64]
+            pipe["table"] = {"x": [R(X[i][::12], 2) for i in pick_rows], "y": ya[pick_rows].tolist(),
+                             "stride": 12, "text": [ra[i]["statement"] for i in pick_rows]}
+    out["pipeline"] = pipe
+    print("pipeline", json.dumps(pipe["acc"]), pipe["tokens"])
+
+# The country-name baseline: a classifier that sees only which country a statement names (one-hot), trained on the
+# training cities and tested on the held-out ones. The false country is drawn by frequency, so this should be chance.
+names = sorted({r["country"] for r in ra})
+onehot = np.array([[r["country"] == n for n in names] for r in ra], dtype=float)
+mc = LogisticRegression(C=1.0, max_iter=5000).fit(onehot[tr], ya[tr])
+out["meta"]["country_baseline"] = acc(mc.decision_function(onehot[te]), ya[te])
+print("country-name baseline", out["meta"]["country_baseline"])
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(json.dumps(out, separators=(",", ":")))

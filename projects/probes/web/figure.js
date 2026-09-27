@@ -56,8 +56,9 @@ export class Figure {
 
   build() {
     const { W, H, glass: G } = this.L;
-    const s = this.svg;
-    const defs = s.append("defs");
+    const defs = this.svg.append("defs");
+    // everything the figure draws sits in one root group, so another scene can share the SVG (see pipeline.js)
+    const s = this.root = this.svg.append("g").attr("class", "fig-root");
     defs.append("clipPath").attr("id", `${this.id}-glass`).append("rect")
       .attr("x", G.x0).attr("y", G.y0).attr("width", G.x1 - G.x0).attr("height", G.y1 - G.y0).attr("rx", G.rx);
     defs.append("clipPath").attr("id", `${this.id}-paper`).append("path").attr("clip-rule", "evenodd")
@@ -669,13 +670,23 @@ export class Figure {
     en.append("rect").attr("class", "card-bg").attr("rx", 5).attr("filter", `url(#${this.id}-card)`);
     en.append("text").attr("class", "card-text");
     const m = en.merge(sel).style("opacity", p);
+    // cards sit on their point's side of the glass; cards sharing a side line up outward from the edge, in the order of
+    // their points, so that none covers another
+    const place = new Map();
+    m.each(function (d) {
+      const w = (d3.select(this).select("text").text(d.text).node().getComputedTextLength?.() ?? d.text.length * 11) + 20;
+      const left = d.x == null ? d.s.X < (G.x0 + G.x1) / 2 : d.anchor !== "end";
+      place.set(d, { w, left });
+    });
+    const sides = { l: [...place].filter(([, q]) => q.left), r: [...place].filter(([, q]) => !q.left) };
+    let xl = G.x0 + 4;
+    for (const [d, q] of sides.l.sort((a, b) => a[0].s.X - b[0].s.X)) { q.x = d.x ?? xl; xl = q.x + q.w + 10; }
+    let xr = G.x1 - 4;
+    for (const [d, q] of sides.r.sort((a, b) => b[0].s.X - a[0].s.X)) { q.x = (d.x ?? xr) - q.w; xr = q.x - 10; }
     m.each(function (d) {
       const gg = d3.select(this);
-      const t = gg.select("text").text(d.text);
-      const w = (t.node().getComputedTextLength?.() ?? d.text.length * 11) + 20;
-      const left = d.x == null ? d.s.X < (G.x0 + G.x1) / 2 : d.anchor !== "end";
-      const x0 = d.x ?? (left ? G.x0 + 4 : G.x1 - 4);
-      const x = left ? x0 : x0 - w;
+      const t = gg.select("text");
+      const { w, x } = place.get(d);
       t.attr("x", x + 10).attr("y", cardY + 26);
       gg.select("rect").attr("x", x).attr("y", cardY).attr("width", w).attr("height", 36)
         .classed("pending", !!d.pending);
@@ -747,9 +758,17 @@ export class Figure {
     else g.attr("transform", null);
   }
 
+  /** Show or hide the whole figure (cross-fades with another scene in the same SVG). */
+  setVisible(on, ms = 450) {
+    this.hidden = !on;
+    this.root.interrupt().style("pointer-events", on ? null : "none")
+      .transition().duration(this.dur(ms)).style("opacity", on ? 1 : 0);
+    if (!on) this.unhover();
+  }
+
   // ---- hover ----
   hover(e) {
-    if (!this.tipEl || !this.cur) return;
+    if (!this.tipEl || !this.cur || this.hidden) return;
     const pt = this.svg.node().createSVGPoint();
     pt.x = e.clientX; pt.y = e.clientY;
     const m = this.svg.node().getScreenCTM();

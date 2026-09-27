@@ -56,10 +56,10 @@ into a steering vector, knowing why the obvious direction is the worse one.
    RL against them.
 
 ## The one running example
-**"The city of Krasnodar is in Russia." / "The city of Krasnodar is in South Africa."** A minimal pair: same template, one
+**"The city of Krasnodar is in Russia." / "The city of Krasnodar is in China."** A minimal pair: same template, one
 word apart. Real activations from **Qwen2.5-1.5B** (open base model, CPU), read at the statement's final token. The design
-is Marks & Tegmark's *cities* dataset; their repo has no license, so we regenerate the statements from a permissively
-licensed gazetteer with the same construction, and credit theirs. The negated twin ("…is *not* in…") and the
+is Marks & Tegmark's *cities* dataset; their repo has no license, so we rebuilt the statements from GeoNames (CC BY 4.0)
+with the same construction (`data/statements.py`), and credit theirs. The negated twin ("…is *not* in…") and the
 Spanish-English translation sets (and their negations) supply the shifts.
 
 It's safety-shaped (the dream is a lie detector), and it forces the right caveat: a truth probe reads the model's
@@ -276,26 +276,34 @@ adaptive spacing stated in the glass's scale note; the separate paper scales are
 all 300 training and 748 held-out statements; hovering a bin shows its counts and its range in units and logits; the first
 figure waits as an empty glass until the stage is on screen, so its read is seen. Prose and `script.md` updated.
 
+**Done since (2026-09-27, second part):**
+- **Our own statements** (`data/statements.py`): Marks & Tegmark's construction rebuilt from GeoNames (cities > 500,000,
+  unique names, UN member states, no city-states, false country drawn by frequency; plus: names containing their country
+  dropped): 1,026 cities in 123 countries; Krasnodar's false twin is now China. Our own Spanish-English list, 265 words, each
+  once true and once false. `data/extract.py` ran Qwen2.5-1.5B on all four sets (final token, every layer) plus every token's
+  state at layers 8/12/16 for the cities (~20 min CPU). `data/export.py` now writes `web/data/probes.json` (committed, 1 MB)
+  and solves logistic regression exactly (Newton-Cholesky). The page's numbers followed; the prose whose *facts* changed
+  was rewritten (the flip is now 31.0% with AUROC 0.010, so P3's options are ≈99/75/50/30; layer 8 is inverted like 12,
+  only 16 calls every negation false; the Spanish-word pattern moved: at 16 the retrained probe ranks well but reads 68.3%);
+  `claims.md` and `script.md` numbers updated; spike-only rows flagged for a re-run when their steps are built.
+- **Two new steps** (`web/pipeline.js`, a second scene in the stage's SVG): *From a statement to a data point* (tokens →
+  a sketch of the model → the state over "." at layer 12, tapped in gold → h as a glass chip with its 1,536 real numbers →
+  a row of X with its label; the false twin recomputes only the last two columns) and *Which token?* (causal attention; the
+  twins' states over "in" are identical, so a probe there is at 50.0%; per-token scores of a probe trained on every token,
+  on paper under the tokens; the period 98.4%, mean pooling 98.5%, max pooling 50.0% at threshold 0 and 87.8% with its own
+  threshold, because one spuriously high token decides; the literature for long inputs: CC++ smoothing, GDM MultiMax,
+  McKenzie's last-token result). Claims C-I-10..17.
+- `tests/functional.mjs` now takes every expected value from the exporter's numbers (survives regeneration) and checks
+  the new steps (the exact "in" fact, the per-token coincidence, the readouts, the toggle).
+
 **Next actions, in order:**
-2. **New step, "From a statement to a data point"** (chapter I, before "A direction and a threshold"): the statement's
-   tokens enter a sketch of the transformer (token columns × layer rows, the residual stream as the column); the state at
-   layer ℓ and the chosen position is read out as a vector h (the real 1,536 numbers as a grid), paired with its label, and
-   appended as a row of the dataset (X | y) that logistic regression fits. Then the position choice, as a toggle: the
-   final token (ours and Marks & Tegmark's end-of-sentence token; with causal attention it is the only position that has
-   seen the whole statement), the mean over tokens, every token with the label copied and the scores pooled (mean, max,
-   EMA then max, attention, MultiMax; dossier §F2, with McKenzie's "last token consistently performs poorly" for long
-   inputs), suffix probes. Say what each choice lets a probe measure; forward-link to the pooling beat (chapter IV).
-   Claims rows first (§F2 sources are verified-opened).
-3. Regenerate the statements from a permissively licensed gazetteer (the construction and the country-name baseline as in
-   Marks & Tegmark), extract activations, re-run `export.py`; the page's numbers follow automatically, then re-check the
-   prose that describes them (CLAUDE.md rule 10) and `claims.md`.
-4. Quick technical re-check of `script.md` (Fable), then build the remaining ~23 steps with the new engine (`figure.js`):
+1. Quick technical re-check of `script.md` (Fable), then build the remaining ~23 steps with the new engine (`figure.js`):
    prologue and chapter I (two statements → the probe; why linear; which layer); the in-browser trainer (n, L2, shuffle;
    drag the direction); chapter II's table and Othello; P4 and the push (violet arrows: writing); chapter IV (the dial,
    the cascade, pooling, the evidence board, pressure with magenta trails); chapter V; limits and check-yourself; side
    dishes SD2–SD4 (SD2 now carries the LR ↔ Σ⁻¹Δμ ↔ max-margin derivation).
-5. Full review loop: stills, films, `tests/functional.mjs`, then `technical-reviewer` and `rigor-reviewer` (Fable) and
+2. Full review loop: stills, films, `tests/functional.mjs`, then `technical-reviewer` and `rigor-reviewer` (Fable) and
    `learner-sim` (Opus).
-6. At the end: the lessons in `review.md` into `kit/PLAYBOOK.md` (with the learner's rule: a chart under a figure shares its
+3. At the end: the lessons in `review.md` into `kit/PLAYBOOK.md` (with the learner's rule: a chart under a figure shares its
    axis and units, and a normalized histogram beats a saturating dot pile); move `figure.js`/`lin.js`
    patterns that generalize into `kit/web/`.

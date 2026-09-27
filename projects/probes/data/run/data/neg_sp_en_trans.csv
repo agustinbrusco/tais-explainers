@@ -1,0 +1,531 @@
+statement,label
+The Spanish word 'uno' does not mean 'one'.,0
+The Spanish word 'uno' does not mean 'wind'.,1
+The Spanish word 'dos' does not mean 'two'.,0
+The Spanish word 'dos' does not mean 'four'.,1
+The Spanish word 'tres' does not mean 'three'.,0
+The Spanish word 'tres' does not mean 'hen'.,1
+The Spanish word 'cuatro' does not mean 'four'.,0
+The Spanish word 'cuatro' does not mean 'bread'.,1
+The Spanish word 'cinco' does not mean 'five'.,0
+The Spanish word 'cinco' does not mean 'knee'.,1
+The Spanish word 'seis' does not mean 'six'.,0
+The Spanish word 'seis' does not mean 'purple'.,1
+The Spanish word 'siete' does not mean 'seven'.,0
+The Spanish word 'siete' does not mean 'watermelon'.,1
+The Spanish word 'ocho' does not mean 'eight'.,0
+The Spanish word 'ocho' does not mean 'chair'.,1
+The Spanish word 'nueve' does not mean 'nine'.,0
+The Spanish word 'nueve' does not mean 'to find'.,1
+The Spanish word 'diez' does not mean 'ten'.,0
+The Spanish word 'diez' does not mean 'garlic'.,1
+The Spanish word 'once' does not mean 'eleven'.,0
+The Spanish word 'once' does not mean 'church'.,1
+The Spanish word 'doce' does not mean 'twelve'.,0
+The Spanish word 'doce' does not mean 'queen'.,1
+The Spanish word 'veinte' does not mean 'twenty'.,0
+The Spanish word 'veinte' does not mean 'forest'.,1
+The Spanish word 'cien' does not mean 'one hundred'.,0
+The Spanish word 'cien' does not mean 'blood'.,1
+The Spanish word 'mil' does not mean 'thousand'.,0
+The Spanish word 'mil' does not mean 'dog'.,1
+The Spanish word 'rojo' does not mean 'red'.,0
+The Spanish word 'rojo' does not mean 'rain'.,1
+The Spanish word 'azul' does not mean 'blue'.,0
+The Spanish word 'azul' does not mean 'book'.,1
+The Spanish word 'verde' does not mean 'green'.,0
+The Spanish word 'verde' does not mean 'pillow'.,1
+The Spanish word 'amarillo' does not mean 'yellow'.,0
+The Spanish word 'amarillo' does not mean 'May'.,1
+The Spanish word 'negro' does not mean 'black'.,0
+The Spanish word 'negro' does not mean 'Tuesday'.,1
+The Spanish word 'blanco' does not mean 'white'.,0
+The Spanish word 'blanco' does not mean 'big'.,1
+The Spanish word 'gris' does not mean 'gray'.,0
+The Spanish word 'gris' does not mean 'three'.,1
+The Spanish word 'morado' does not mean 'purple'.,0
+The Spanish word 'morado' does not mean 'paper'.,1
+The Spanish word 'lunes' does not mean 'Monday'.,0
+The Spanish word 'lunes' does not mean 'neighbor'.,1
+The Spanish word 'martes' does not mean 'Tuesday'.,0
+The Spanish word 'martes' does not mean 'baker'.,1
+The Spanish word 'jueves' does not mean 'Thursday'.,0
+The Spanish word 'jueves' does not mean 'to forget'.,1
+The Spanish word 'viernes' does not mean 'Friday'.,0
+The Spanish word 'viernes' does not mean 'queen'.,1
+The Spanish word 'domingo' does not mean 'Sunday'.,0
+The Spanish word 'domingo' does not mean 'eight'.,1
+The Spanish word 'enero' does not mean 'January'.,0
+The Spanish word 'enero' does not mean 'to speak'.,1
+The Spanish word 'abril' does not mean 'April'.,0
+The Spanish word 'abril' does not mean 'winter'.,1
+The Spanish word 'mayo' does not mean 'May'.,0
+The Spanish word 'mayo' does not mean 'to buy'.,1
+The Spanish word 'junio' does not mean 'June'.,0
+The Spanish word 'junio' does not mean 'old'.,1
+The Spanish word 'agosto' does not mean 'August'.,0
+The Spanish word 'agosto' does not mean 'husband'.,1
+The Spanish word 'perro' does not mean 'dog'.,0
+The Spanish word 'perro' does not mean 'soldier'.,1
+The Spanish word 'gato' does not mean 'cat'.,0
+The Spanish word 'gato' does not mean 'bottle'.,1
+The Spanish word 'caballo' does not mean 'horse'.,0
+The Spanish word 'caballo' does not mean 'monkey'.,1
+The Spanish word 'vaca' does not mean 'cow'.,0
+The Spanish word 'vaca' does not mean 'whale'.,1
+The Spanish word 'cerdo' does not mean 'pig'.,0
+The Spanish word 'cerdo' does not mean 'shirt'.,1
+The Spanish word 'oveja' does not mean 'sheep'.,0
+The Spanish word 'oveja' does not mean 'to write'.,1
+The Spanish word 'cabra' does not mean 'goat'.,0
+The Spanish word 'cabra' does not mean 'lawyer'.,1
+The Spanish word 'gallina' does not mean 'hen'.,0
+The Spanish word 'gallina' does not mean 'to dance'.,1
+The Spanish word 'pato' does not mean 'duck'.,0
+The Spanish word 'pato' does not mean 'to help'.,1
+The Spanish word 'pájaro' does not mean 'bird'.,0
+The Spanish word 'pájaro' does not mean 'wheel'.,1
+The Spanish word 'pez' does not mean 'fish'.,0
+The Spanish word 'pez' does not mean 'eleven'.,1
+The Spanish word 'ratón' does not mean 'mouse'.,0
+The Spanish word 'ratón' does not mean 'to dance'.,1
+The Spanish word 'conejo' does not mean 'rabbit'.,0
+The Spanish word 'conejo' does not mean 'Friday'.,1
+The Spanish word 'oso' does not mean 'bear'.,0
+The Spanish word 'oso' does not mean 'white'.,1
+The Spanish word 'lobo' does not mean 'wolf'.,0
+The Spanish word 'lobo' does not mean 'war'.,1
+The Spanish word 'zorro' does not mean 'fox'.,0
+The Spanish word 'zorro' does not mean 'lip'.,1
+The Spanish word 'mono' does not mean 'monkey'.,0
+The Spanish word 'mono' does not mean 'sweet'.,1
+The Spanish word 'serpiente' does not mean 'snake'.,0
+The Spanish word 'serpiente' does not mean 'to speak'.,1
+The Spanish word 'rana' does not mean 'frog'.,0
+The Spanish word 'rana' does not mean 'grandmother'.,1
+The Spanish word 'tortuga' does not mean 'turtle'.,0
+The Spanish word 'tortuga' does not mean 'young'.,1
+The Spanish word 'abeja' does not mean 'bee'.,0
+The Spanish word 'abeja' does not mean 'horse'.,1
+The Spanish word 'hormiga' does not mean 'ant'.,0
+The Spanish word 'hormiga' does not mean 'to eat'.,1
+The Spanish word 'mariposa' does not mean 'butterfly'.,0
+The Spanish word 'mariposa' does not mean 'mountain'.,1
+The Spanish word 'araña' does not mean 'spider'.,0
+The Spanish word 'araña' does not mean 'easy'.,1
+The Spanish word 'ballena' does not mean 'whale'.,0
+The Spanish word 'ballena' does not mean 'to live'.,1
+The Spanish word 'tiburón' does not mean 'shark'.,0
+The Spanish word 'tiburón' does not mean 'bull'.,1
+The Spanish word 'águila' does not mean 'eagle'.,0
+The Spanish word 'águila' does not mean 'butterfly'.,1
+The Spanish word 'búho' does not mean 'owl'.,0
+The Spanish word 'búho' does not mean 'bitter'.,1
+The Spanish word 'ciervo' does not mean 'deer'.,0
+The Spanish word 'ciervo' does not mean 'soldier'.,1
+The Spanish word 'burro' does not mean 'donkey'.,0
+The Spanish word 'burro' does not mean 'January'.,1
+The Spanish word 'toro' does not mean 'bull'.,0
+The Spanish word 'toro' does not mean 'fox'.,1
+The Spanish word 'gusano' does not mean 'worm'.,0
+The Spanish word 'gusano' does not mean 'butterfly'.,1
+The Spanish word 'cabeza' does not mean 'head'.,0
+The Spanish word 'cabeza' does not mean 'soldier'.,1
+The Spanish word 'mano' does not mean 'hand'.,0
+The Spanish word 'mano' does not mean 'hair'.,1
+The Spanish word 'pie' does not mean 'foot'.,0
+The Spanish word 'pie' does not mean 'cow'.,1
+The Spanish word 'ojo' does not mean 'eye'.,0
+The Spanish word 'ojo' does not mean 'heart'.,1
+The Spanish word 'oreja' does not mean 'ear'.,0
+The Spanish word 'oreja' does not mean 'airplane'.,1
+The Spanish word 'nariz' does not mean 'nose'.,0
+The Spanish word 'nariz' does not mean 'to die'.,1
+The Spanish word 'boca' does not mean 'mouth'.,0
+The Spanish word 'boca' does not mean 'twenty'.,1
+The Spanish word 'diente' does not mean 'tooth'.,0
+The Spanish word 'diente' does not mean 'ant'.,1
+The Spanish word 'brazo' does not mean 'arm'.,0
+The Spanish word 'brazo' does not mean 'grandmother'.,1
+The Spanish word 'pierna' does not mean 'leg'.,0
+The Spanish word 'pierna' does not mean 'twenty'.,1
+The Spanish word 'dedo' does not mean 'finger'.,0
+The Spanish word 'dedo' does not mean 'lake'.,1
+The Spanish word 'rodilla' does not mean 'knee'.,0
+The Spanish word 'rodilla' does not mean 'brother'.,1
+The Spanish word 'hombro' does not mean 'shoulder'.,0
+The Spanish word 'hombro' does not mean 'rain'.,1
+The Spanish word 'corazón' does not mean 'heart'.,0
+The Spanish word 'corazón' does not mean 'June'.,1
+The Spanish word 'sangre' does not mean 'blood'.,0
+The Spanish word 'sangre' does not mean 'rabbit'.,1
+The Spanish word 'hueso' does not mean 'bone'.,0
+The Spanish word 'hueso' does not mean 'scissors'.,1
+The Spanish word 'piel' does not mean 'skin'.,0
+The Spanish word 'piel' does not mean 'Friday'.,1
+The Spanish word 'pelo' does not mean 'hair'.,0
+The Spanish word 'pelo' does not mean 'husband'.,1
+The Spanish word 'cuello' does not mean 'neck'.,0
+The Spanish word 'cuello' does not mean 'bone'.,1
+The Spanish word 'codo' does not mean 'elbow'.,0
+The Spanish word 'codo' does not mean 'to sell'.,1
+The Spanish word 'labio' does not mean 'lip'.,0
+The Spanish word 'labio' does not mean 'shark'.,1
+The Spanish word 'cara' does not mean 'face'.,0
+The Spanish word 'cara' does not mean 'river'.,1
+The Spanish word 'barba' does not mean 'beard'.,0
+The Spanish word 'barba' does not mean 'small'.,1
+The Spanish word 'madre' does not mean 'mother'.,0
+The Spanish word 'madre' does not mean 'bull'.,1
+The Spanish word 'padre' does not mean 'father'.,0
+The Spanish word 'padre' does not mean 'brother'.,1
+The Spanish word 'hermano' does not mean 'brother'.,0
+The Spanish word 'hermano' does not mean 'monkey'.,1
+The Spanish word 'hermana' does not mean 'sister'.,0
+The Spanish word 'hermana' does not mean 'church'.,1
+The Spanish word 'hijo' does not mean 'son'.,0
+The Spanish word 'hijo' does not mean 'April'.,1
+The Spanish word 'hija' does not mean 'daughter'.,0
+The Spanish word 'hija' does not mean 'war'.,1
+The Spanish word 'abuelo' does not mean 'grandfather'.,0
+The Spanish word 'abuelo' does not mean 'bed'.,1
+The Spanish word 'abuela' does not mean 'grandmother'.,0
+The Spanish word 'abuela' does not mean 'farm'.,1
+The Spanish word 'tío' does not mean 'uncle'.,0
+The Spanish word 'tío' does not mean 'to live'.,1
+The Spanish word 'tía' does not mean 'aunt'.,0
+The Spanish word 'tía' does not mean 'daughter'.,1
+The Spanish word 'esposo' does not mean 'husband'.,0
+The Spanish word 'esposo' does not mean 'foot'.,1
+The Spanish word 'hombre' does not mean 'man'.,0
+The Spanish word 'hombre' does not mean 'castle'.,1
+The Spanish word 'amigo' does not mean 'friend'.,0
+The Spanish word 'amigo' does not mean 'six'.,1
+The Spanish word 'vecino' does not mean 'neighbor'.,0
+The Spanish word 'vecino' does not mean 'to cry'.,1
+The Spanish word 'pan' does not mean 'bread'.,0
+The Spanish word 'pan' does not mean 'sad'.,1
+The Spanish word 'agua' does not mean 'water'.,0
+The Spanish word 'agua' does not mean 'cherry'.,1
+The Spanish word 'leche' does not mean 'milk'.,0
+The Spanish word 'leche' does not mean 'banana'.,1
+The Spanish word 'queso' does not mean 'cheese'.,0
+The Spanish word 'queso' does not mean 'wheel'.,1
+The Spanish word 'huevo' does not mean 'egg'.,0
+The Spanish word 'huevo' does not mean 'to swim'.,1
+The Spanish word 'carne' does not mean 'meat'.,0
+The Spanish word 'carne' does not mean 'finger'.,1
+The Spanish word 'arroz' does not mean 'rice'.,0
+The Spanish word 'arroz' does not mean 'donkey'.,1
+The Spanish word 'manzana' does not mean 'apple'.,0
+The Spanish word 'manzana' does not mean 'beach'.,1
+The Spanish word 'plátano' does not mean 'banana'.,0
+The Spanish word 'plátano' does not mean 'castle'.,1
+The Spanish word 'uva' does not mean 'grape'.,0
+The Spanish word 'uva' does not mean 'ant'.,1
+The Spanish word 'fresa' does not mean 'strawberry'.,0
+The Spanish word 'fresa' does not mean 'to smell'.,1
+The Spanish word 'sal' does not mean 'salt'.,0
+The Spanish word 'sal' does not mean 'soldier'.,1
+The Spanish word 'azúcar' does not mean 'sugar'.,0
+The Spanish word 'azúcar' does not mean 'beer'.,1
+The Spanish word 'mantequilla' does not mean 'butter'.,0
+The Spanish word 'mantequilla' does not mean 'day'.,1
+The Spanish word 'miel' does not mean 'honey'.,0
+The Spanish word 'miel' does not mean 'grandmother'.,1
+The Spanish word 'sopa' does not mean 'soup'.,0
+The Spanish word 'sopa' does not mean 'small'.,1
+The Spanish word 'cebolla' does not mean 'onion'.,0
+The Spanish word 'cebolla' does not mean 'lawyer'.,1
+The Spanish word 'ajo' does not mean 'garlic'.,0
+The Spanish word 'ajo' does not mean 'fish'.,1
+The Spanish word 'zanahoria' does not mean 'carrot'.,0
+The Spanish word 'zanahoria' does not mean 'old'.,1
+The Spanish word 'galleta' does not mean 'cookie'.,0
+The Spanish word 'galleta' does not mean 'duck'.,1
+The Spanish word 'vino' does not mean 'wine'.,0
+The Spanish word 'vino' does not mean 'foot'.,1
+The Spanish word 'cerveza' does not mean 'beer'.,0
+The Spanish word 'cerveza' does not mean 'to cry'.,1
+The Spanish word 'hielo' does not mean 'ice'.,0
+The Spanish word 'hielo' does not mean 'island'.,1
+The Spanish word 'cereza' does not mean 'cherry'.,0
+The Spanish word 'cereza' does not mean 'mountain'.,1
+The Spanish word 'pera' does not mean 'pear'.,0
+The Spanish word 'pera' does not mean 'duck'.,1
+The Spanish word 'sandía' does not mean 'watermelon'.,0
+The Spanish word 'sandía' does not mean 'Sunday'.,1
+The Spanish word 'casa' does not mean 'house'.,0
+The Spanish word 'casa' does not mean 'finger'.,1
+The Spanish word 'puerta' does not mean 'door'.,0
+The Spanish word 'puerta' does not mean 'to write'.,1
+The Spanish word 'ventana' does not mean 'window'.,0
+The Spanish word 'ventana' does not mean 'cow'.,1
+The Spanish word 'mesa' does not mean 'table'.,0
+The Spanish word 'mesa' does not mean 'rope'.,1
+The Spanish word 'silla' does not mean 'chair'.,0
+The Spanish word 'silla' does not mean 'car'.,1
+The Spanish word 'cama' does not mean 'bed'.,0
+The Spanish word 'cama' does not mean 'apple'.,1
+The Spanish word 'libro' does not mean 'book'.,0
+The Spanish word 'libro' does not mean 'ugly'.,1
+The Spanish word 'llave' does not mean 'key'.,0
+The Spanish word 'llave' does not mean 'cheap'.,1
+The Spanish word 'espejo' does not mean 'mirror'.,0
+The Spanish word 'espejo' does not mean 'soup'.,1
+The Spanish word 'cuchillo' does not mean 'knife'.,0
+The Spanish word 'cuchillo' does not mean 'mirror'.,1
+The Spanish word 'cuchara' does not mean 'spoon'.,0
+The Spanish word 'cuchara' does not mean 'dirty'.,1
+The Spanish word 'tenedor' does not mean 'fork'.,0
+The Spanish word 'tenedor' does not mean 'young'.,1
+The Spanish word 'plato' does not mean 'plate'.,0
+The Spanish word 'plato' does not mean 'shoulder'.,1
+The Spanish word 'taza' does not mean 'cup'.,0
+The Spanish word 'taza' does not mean 'neck'.,1
+The Spanish word 'botella' does not mean 'bottle'.,0
+The Spanish word 'botella' does not mean 'deer'.,1
+The Spanish word 'caja' does not mean 'box'.,0
+The Spanish word 'caja' does not mean 'seven'.,1
+The Spanish word 'papel' does not mean 'paper'.,0
+The Spanish word 'papel' does not mean 'ear'.,1
+The Spanish word 'lápiz' does not mean 'pencil'.,0
+The Spanish word 'lápiz' does not mean 'shark'.,1
+The Spanish word 'tijeras' does not mean 'scissors'.,0
+The Spanish word 'tijeras' does not mean 'sad'.,1
+The Spanish word 'jabón' does not mean 'soap'.,0
+The Spanish word 'jabón' does not mean 'street'.,1
+The Spanish word 'toalla' does not mean 'towel'.,0
+The Spanish word 'toalla' does not mean 'knife'.,1
+The Spanish word 'almohada' does not mean 'pillow'.,0
+The Spanish word 'almohada' does not mean 'window'.,1
+The Spanish word 'martillo' does not mean 'hammer'.,0
+The Spanish word 'martillo' does not mean 'blood'.,1
+The Spanish word 'cuerda' does not mean 'rope'.,0
+The Spanish word 'cuerda' does not mean 'school'.,1
+The Spanish word 'campana' does not mean 'bell'.,0
+The Spanish word 'campana' does not mean 'peace'.,1
+The Spanish word 'rueda' does not mean 'wheel'.,0
+The Spanish word 'rueda' does not mean 'shirt'.,1
+The Spanish word 'sombrero' does not mean 'hat'.,0
+The Spanish word 'sombrero' does not mean 'mirror'.,1
+The Spanish word 'zapato' does not mean 'shoe'.,0
+The Spanish word 'zapato' does not mean 'fire'.,1
+The Spanish word 'camisa' does not mean 'shirt'.,0
+The Spanish word 'camisa' does not mean 'river'.,1
+The Spanish word 'falda' does not mean 'skirt'.,0
+The Spanish word 'falda' does not mean 'aunt'.,1
+The Spanish word 'abrigo' does not mean 'coat'.,0
+The Spanish word 'abrigo' does not mean 'fork'.,1
+The Spanish word 'guante' does not mean 'glove'.,0
+The Spanish word 'guante' does not mean 'eye'.,1
+The Spanish word 'paraguas' does not mean 'umbrella'.,0
+The Spanish word 'paraguas' does not mean 'butterfly'.,1
+The Spanish word 'sol' does not mean 'sun'.,0
+The Spanish word 'sol' does not mean 'bridge'.,1
+The Spanish word 'luna' does not mean 'moon'.,0
+The Spanish word 'luna' does not mean 'red'.,1
+The Spanish word 'estrella' does not mean 'star'.,0
+The Spanish word 'estrella' does not mean 'forest'.,1
+The Spanish word 'nube' does not mean 'cloud'.,0
+The Spanish word 'nube' does not mean 'book'.,1
+The Spanish word 'lluvia' does not mean 'rain'.,0
+The Spanish word 'lluvia' does not mean 'four'.,1
+The Spanish word 'nieve' does not mean 'snow'.,0
+The Spanish word 'nieve' does not mean 'cheap'.,1
+The Spanish word 'viento' does not mean 'wind'.,0
+The Spanish word 'viento' does not mean 'skirt'.,1
+The Spanish word 'mar' does not mean 'sea'.,0
+The Spanish word 'mar' does not mean 'father'.,1
+The Spanish word 'río' does not mean 'river'.,0
+The Spanish word 'río' does not mean 'knee'.,1
+The Spanish word 'lago' does not mean 'lake'.,0
+The Spanish word 'lago' does not mean 'to kiss'.,1
+The Spanish word 'montaña' does not mean 'mountain'.,0
+The Spanish word 'montaña' does not mean 'winter'.,1
+The Spanish word 'bosque' does not mean 'forest'.,0
+The Spanish word 'bosque' does not mean 'banana'.,1
+The Spanish word 'árbol' does not mean 'tree'.,0
+The Spanish word 'árbol' does not mean 'goat'.,1
+The Spanish word 'flor' does not mean 'flower'.,0
+The Spanish word 'flor' does not mean 'fox'.,1
+The Spanish word 'arena' does not mean 'sand'.,0
+The Spanish word 'arena' does not mean 'knife'.,1
+The Spanish word 'isla' does not mean 'island'.,0
+The Spanish word 'isla' does not mean 'war'.,1
+The Spanish word 'playa' does not mean 'beach'.,0
+The Spanish word 'playa' does not mean 'grandfather'.,1
+The Spanish word 'fuego' does not mean 'fire'.,0
+The Spanish word 'fuego' does not mean 'tree'.,1
+The Spanish word 'calle' does not mean 'street'.,0
+The Spanish word 'calle' does not mean 'paper'.,1
+The Spanish word 'puente' does not mean 'bridge'.,0
+The Spanish word 'puente' does not mean 'to jump'.,1
+The Spanish word 'iglesia' does not mean 'church'.,0
+The Spanish word 'iglesia' does not mean 'young'.,1
+The Spanish word 'escuela' does not mean 'school'.,0
+The Spanish word 'escuela' does not mean 'four'.,1
+The Spanish word 'granja' does not mean 'farm'.,0
+The Spanish word 'granja' does not mean 'sweet'.,1
+The Spanish word 'castillo' does not mean 'castle'.,0
+The Spanish word 'castillo' does not mean 'young'.,1
+The Spanish word 'torre' does not mean 'tower'.,0
+The Spanish word 'torre' does not mean 'foot'.,1
+The Spanish word 'rey' does not mean 'king'.,0
+The Spanish word 'rey' does not mean 'cat'.,1
+The Spanish word 'reina' does not mean 'queen'.,0
+The Spanish word 'reina' does not mean 'wheel'.,1
+The Spanish word 'ladrón' does not mean 'thief'.,0
+The Spanish word 'ladrón' does not mean 'big'.,1
+The Spanish word 'juez' does not mean 'judge'.,0
+The Spanish word 'juez' does not mean 'thief'.,1
+The Spanish word 'abogado' does not mean 'lawyer'.,0
+The Spanish word 'abogado' does not mean 'bear'.,1
+The Spanish word 'panadero' does not mean 'baker'.,0
+The Spanish word 'panadero' does not mean 'island'.,1
+The Spanish word 'soldado' does not mean 'soldier'.,0
+The Spanish word 'soldado' does not mean 'foot'.,1
+The Spanish word 'cantante' does not mean 'singer'.,0
+The Spanish word 'cantante' does not mean 'year'.,1
+The Spanish word 'grande' does not mean 'big'.,0
+The Spanish word 'grande' does not mean 'grandmother'.,1
+The Spanish word 'pequeño' does not mean 'small'.,0
+The Spanish word 'pequeño' does not mean 'hat'.,1
+The Spanish word 'nuevo' does not mean 'new'.,0
+The Spanish word 'nuevo' does not mean 'winter'.,1
+The Spanish word 'viejo' does not mean 'old'.,0
+The Spanish word 'viejo' does not mean 'street'.,1
+The Spanish word 'joven' does not mean 'young'.,0
+The Spanish word 'joven' does not mean 'blue'.,1
+The Spanish word 'bueno' does not mean 'good'.,0
+The Spanish word 'bueno' does not mean 'five'.,1
+The Spanish word 'malo' does not mean 'bad'.,0
+The Spanish word 'malo' does not mean 'aunt'.,1
+The Spanish word 'caliente' does not mean 'hot'.,0
+The Spanish word 'caliente' does not mean 'goat'.,1
+The Spanish word 'frío' does not mean 'cold'.,0
+The Spanish word 'frío' does not mean 'ear'.,1
+The Spanish word 'feliz' does not mean 'happy'.,0
+The Spanish word 'feliz' does not mean 'spider'.,1
+The Spanish word 'triste' does not mean 'sad'.,0
+The Spanish word 'triste' does not mean 'war'.,1
+The Spanish word 'lento' does not mean 'slow'.,0
+The Spanish word 'lento' does not mean 'husband'.,1
+The Spanish word 'débil' does not mean 'weak'.,0
+The Spanish word 'débil' does not mean 'king'.,1
+The Spanish word 'sucio' does not mean 'dirty'.,0
+The Spanish word 'sucio' does not mean 'whale'.,1
+The Spanish word 'lleno' does not mean 'full'.,0
+The Spanish word 'lleno' does not mean 'island'.,1
+The Spanish word 'vacío' does not mean 'empty'.,0
+The Spanish word 'vacío' does not mean 'hat'.,1
+The Spanish word 'pesado' does not mean 'heavy'.,0
+The Spanish word 'pesado' does not mean 'queen'.,1
+The Spanish word 'dulce' does not mean 'sweet'.,0
+The Spanish word 'dulce' does not mean 'hen'.,1
+The Spanish word 'amargo' does not mean 'bitter'.,0
+The Spanish word 'amargo' does not mean 'Thursday'.,1
+The Spanish word 'oscuro' does not mean 'dark'.,0
+The Spanish word 'oscuro' does not mean 'bottle'.,1
+The Spanish word 'feo' does not mean 'ugly'.,0
+The Spanish word 'feo' does not mean 'thousand'.,1
+The Spanish word 'cansado' does not mean 'tired'.,0
+The Spanish word 'cansado' does not mean 'eagle'.,1
+The Spanish word 'perezoso' does not mean 'lazy'.,0
+The Spanish word 'perezoso' does not mean 'salt'.,1
+The Spanish word 'barato' does not mean 'cheap'.,0
+The Spanish word 'barato' does not mean 'to speak'.,1
+The Spanish word 'caro' does not mean 'expensive'.,0
+The Spanish word 'caro' does not mean 'frog'.,1
+The Spanish word 'fácil' does not mean 'easy'.,0
+The Spanish word 'fácil' does not mean 'six'.,1
+The Spanish word 'comer' does not mean 'to eat'.,0
+The Spanish word 'comer' does not mean 'to cry'.,1
+The Spanish word 'beber' does not mean 'to drink'.,0
+The Spanish word 'beber' does not mean 'nine'.,1
+The Spanish word 'dormir' does not mean 'to sleep'.,0
+The Spanish word 'dormir' does not mean 'fork'.,1
+The Spanish word 'correr' does not mean 'to run'.,0
+The Spanish word 'correr' does not mean 'mirror'.,1
+The Spanish word 'caminar' does not mean 'to walk'.,0
+The Spanish word 'caminar' does not mean 'door'.,1
+The Spanish word 'hablar' does not mean 'to speak'.,0
+The Spanish word 'hablar' does not mean 'April'.,1
+The Spanish word 'escribir' does not mean 'to write'.,0
+The Spanish word 'escribir' does not mean 'white'.,1
+The Spanish word 'leer' does not mean 'to read'.,0
+The Spanish word 'leer' does not mean 'mirror'.,1
+The Spanish word 'cantar' does not mean 'to sing'.,0
+The Spanish word 'cantar' does not mean 'ant'.,1
+The Spanish word 'bailar' does not mean 'to dance'.,0
+The Spanish word 'bailar' does not mean 'Monday'.,1
+The Spanish word 'nadar' does not mean 'to swim'.,0
+The Spanish word 'nadar' does not mean 'onion'.,1
+The Spanish word 'comprar' does not mean 'to buy'.,0
+The Spanish word 'comprar' does not mean 'bitter'.,1
+The Spanish word 'vender' does not mean 'to sell'.,0
+The Spanish word 'vender' does not mean 'eleven'.,1
+The Spanish word 'abrir' does not mean 'to open'.,0
+The Spanish word 'abrir' does not mean 'full'.,1
+The Spanish word 'cerrar' does not mean 'to close'.,0
+The Spanish word 'cerrar' does not mean 'beach'.,1
+The Spanish word 'llorar' does not mean 'to cry'.,0
+The Spanish word 'llorar' does not mean 'cheese'.,1
+The Spanish word 'saltar' does not mean 'to jump'.,0
+The Spanish word 'saltar' does not mean 'monkey'.,1
+The Spanish word 'olvidar' does not mean 'to forget'.,0
+The Spanish word 'olvidar' does not mean 'ant'.,1
+The Spanish word 'aprender' does not mean 'to learn'.,0
+The Spanish word 'aprender' does not mean 'glove'.,1
+The Spanish word 'enseñar' does not mean 'to teach'.,0
+The Spanish word 'enseñar' does not mean 'neck'.,1
+The Spanish word 'ayudar' does not mean 'to help'.,0
+The Spanish word 'ayudar' does not mean 'bed'.,1
+The Spanish word 'romper' does not mean 'to break'.,0
+The Spanish word 'romper' does not mean 'cheap'.,1
+The Spanish word 'construir' does not mean 'to build'.,0
+The Spanish word 'construir' does not mean 'friend'.,1
+The Spanish word 'encontrar' does not mean 'to find'.,0
+The Spanish word 'encontrar' does not mean 'frog'.,1
+The Spanish word 'vivir' does not mean 'to live'.,0
+The Spanish word 'vivir' does not mean 'to die'.,1
+The Spanish word 'morir' does not mean 'to die'.,0
+The Spanish word 'morir' does not mean 'night'.,1
+The Spanish word 'viajar' does not mean 'to travel'.,0
+The Spanish word 'viajar' does not mean 'shirt'.,1
+The Spanish word 'gritar' does not mean 'to shout'.,0
+The Spanish word 'gritar' does not mean 'coat'.,1
+The Spanish word 'besar' does not mean 'to kiss'.,0
+The Spanish word 'besar' does not mean 'small'.,1
+The Spanish word 'oler' does not mean 'to smell'.,0
+The Spanish word 'oler' does not mean 'to kiss'.,1
+The Spanish word 'día' does not mean 'day'.,0
+The Spanish word 'día' does not mean 'cookie'.,1
+The Spanish word 'noche' does not mean 'night'.,0
+The Spanish word 'noche' does not mean 'dog'.,1
+The Spanish word 'semana' does not mean 'week'.,0
+The Spanish word 'semana' does not mean 'wheel'.,1
+The Spanish word 'año' does not mean 'year'.,0
+The Spanish word 'año' does not mean 'yellow'.,1
+The Spanish word 'invierno' does not mean 'winter'.,0
+The Spanish word 'invierno' does not mean 'tired'.,1
+The Spanish word 'verano' does not mean 'summer'.,0
+The Spanish word 'verano' does not mean 'yellow'.,1
+The Spanish word 'dinero' does not mean 'money'.,0
+The Spanish word 'dinero' does not mean 'slow'.,1
+The Spanish word 'guerra' does not mean 'war'.,0
+The Spanish word 'guerra' does not mean 'duck'.,1
+The Spanish word 'paz' does not mean 'peace'.,0
+The Spanish word 'paz' does not mean 'fork'.,1
+The Spanish word 'miedo' does not mean 'fear'.,0
+The Spanish word 'miedo' does not mean 'cat'.,1
+The Spanish word 'coche' does not mean 'car'.,0
+The Spanish word 'coche' does not mean 'eye'.,1
+The Spanish word 'tren' does not mean 'train'.,0
+The Spanish word 'tren' does not mean 'year'.,1
+The Spanish word 'avión' does not mean 'airplane'.,0
+The Spanish word 'avión' does not mean 'ten'.,1
+The Spanish word 'bicicleta' does not mean 'bicycle'.,0
+The Spanish word 'bicicleta' does not mean 'to learn'.,1
+The Spanish word 'camión' does not mean 'truck'.,0
+The Spanish word 'camión' does not mean 'to build'.,1
