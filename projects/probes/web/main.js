@@ -1244,7 +1244,7 @@ function setBaseOut() {
   const real = BASE[ui.base], fa = r.fpr * (1e6 - real), caught = r.recall * real;
   const oneIn = caught > 0 ? (fa + caught) / caught : Infinity;
   if (baseOut) baseOut.innerHTML = `a million requests a day, <b>${real.toLocaleString("en-US")}</b> real: <b>${Math.round(fa).toLocaleString("en-US")}</b> false alarms · ` +
-    `<b>${caught < 10 ? caught.toFixed(1) : Math.round(caught).toLocaleString("en-US")}</b> caught · ${Number.isFinite(oneIn) ? `1 flag in <b>${oneIn < 10 ? oneIn.toFixed(1) : Math.round(oneIn).toLocaleString("en-US")}</b> is real` : "no real case flagged"}`;
+    `<b>${caught < 0.1 ? caught.toFixed(2) : caught < 10 ? caught.toFixed(1) : Math.round(caught).toLocaleString("en-US")}</b> caught · ${Number.isFinite(oneIn) ? `1 flag in <b>${oneIn < 10 ? oneIn.toFixed(1) : Math.round(oneIn).toLocaleString("en-US")}</b> is real` : "no real case flagged"}`;
 }
 baseIn?.addEventListener("input", () => { ui.base = Number(baseIn.value); setBaseOut(); });
 tickIn?.addEventListener("input", () => {

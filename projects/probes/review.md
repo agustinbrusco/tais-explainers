@@ -6,6 +6,34 @@ Newest first. Each entry: what was reviewed, by whom, what was found, what was d
 
 
 
+## Re-review of the revision (2026-09-28; technical and rigor on Fable 5.1)
+
+Both re-reviews confirmed every resolution of the previous round (numbers re-derived from the data files, quotes found
+verbatim) and found no blockers. What they found in new or rewritten text, all verified and fixed:
+- *The contested step's framing* (technical, should): "the matched control is an unrelated pair" was our methodology
+  stated as fact, and the GLM-5 authors conclude the opposite ("Semantically unrelated contrastive pairs are not
+  appropriate controls"; "Our best guess is that Anthropic's steering experiments are indeed revealing evaluation gaming
+  behaviour!", while steering can't upper-bound awareness's influence). The step now gives both sides' positions,
+  Lindsey's reading of the GLM-5 runs (evidence neither for nor against), and the card's multi-turn audits (random
+  features did move behaviour there; the strongest awareness vectors exceeded their distribution). "Our voice: … and here
+  even the right control is disputed." The four GLM-5 awareness vectors are the Opus 4.6 card's, not Sonnet 4.5's
+  (rigor); "can have effects just as large"; the released Sonnet 4.5 vs an earlier, more sensitive snapshot.
+- *q-organism* (technical, should): 0.94 is the prompted-setting probe; the question now asks what the probe retrained
+  on the silent organism reads.
+- *Max-probe training* (rigor, should): Gupta and Jenner train only their MLP max probe through the top-k tokens; the P6
+  predict and chapter I's side dish no longer say the linear one was (C-I-16).
+- *The closing's shadow deployment* (both): the 5.5% is Constitutional Classifiers++ on Sonnet 4.5, an earlier cascade,
+  not the Opus 5.5 cyber probe.
+- Attributions and scope: the Atlas's "what moved" is the authors' reading, with their 20-question test (endorsement of
+  hard-coding 10–40% → 45–65%); Das's best probes "remain strong" on GPT-OSS (near perfect elsewhere); the likely
+  dataset described as generated text labelled by token likelihood; Liars' Bench's 0.54 is at a 1%-FPR threshold;
+  Goodfire's 3.0/7.9 are DeepSWE only; "a ranking that runs the wrong way" (not "slightly inverted"); the refusal
+  jailbreak switches off refusal rather than removing safety training; organisms named; the Atlas's filler is bland
+  code descriptions; OpenAI's Astra card gives recall without a false-alarm rate; the push step labels "the gap depends on
+  a recipe's settings" as our reading (untested) and notes the Δμ push saturates by half strength for false statements;
+  SAE features glossed; the credit line covers arithmetic; the Das control cloud's motion is a consequence of the fit.
+- Four claims.md line citations corrected; the base-rate readout prints tiny expectations to two decimals.
+
 ## The IV–VI reviews resolved; a restructured arc; a fast-scroll bug (2026-09-27/28, autonomous pass; Opus)
 
 Reviews of the six-chapter draft: technical (Fable 5.1, 1 blocker, 10 shoulds, 14 nits), rigor (Fable, 1 blocker,

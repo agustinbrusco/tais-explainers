@@ -425,7 +425,7 @@ sub { font-size: .7em; }
 .d-tick-line { stroke: var(--overseer-ink); stroke-width: 3; }
 .d-tick-label { fill: var(--overseer-ink); font: 600 18px var(--font-mono); }
 .d-bracket path { fill: none; stroke: var(--ink2); stroke-width: 1.3; }
-.d-bracket text { fill: var(--ink); font: 600 19px var(--font-mono); }
+.d-bracket text { fill: var(--ink); font: 600 19px var(--font-mono); paint-order: stroke; stroke: var(--sheet); stroke-width: 7px; stroke-linejoin: round; }
 .d-uk rect { fill: var(--card); stroke: var(--ink3); stroke-dasharray: 4 3; }
 .d-uk text { fill: var(--ink2); font: 500 17px var(--font-mono); }
 .d-uk.honest text { fill: var(--safe-ink); }
