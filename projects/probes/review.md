@@ -1,6 +1,62 @@
-# Review log: probes ("A Ruler Through the Glass")
+# Review log: probes ("What a Probe Reads")
 
 Newest first. Each entry: what was reviewed, by whom, what was found, what was done (or why not).
+
+## 2026-09-26 · Style frame (hero + 7 steps) · art direction by Fable (design memo) + Opus; learner-sim fixes applied
+
+**Why:** the learner liked the prototype and asked for less "ruler" language (projections, the LR weights, SVD/PCA are fine),
+clearer phrasing, and a final piece "an order of magnitude above in aesthetics and visual impact / coherence", with meaning
+encoded in the aesthetics.
+
+**Fable's design memo (`general-purpose`, Fable 5.1, confirmed from its system prompt), and what we did with it:**
+- Critique: meaning lived in labels, not form; furniture without units (graduations every 24 px); composition drifting per
+  step; one mono weight for everything; the green REAL badge spent the *safe* colour; the gold highlighter misused for "bad"
+  numbers; the side dish's violet; one crossfade for every kind of change. → All addressed.
+- Kept from it: the probe as a covector drawn as level sets (sharpness = ‖w‖; moving along a level set changes nothing);
+  gold rings for fitted statements; dashed = counterfactual; the old direction as a ghost; one dot per statement on paper
+  with counts from the dots; the grid in hidden-state units; provenance as material (badges, readouts; not inline); the
+  motion grammar; the hero (no spoilers); risks (colour cap, phone clutter).
+- Its corrections to our candidates: kill the six colours on the six questions (glyphs only; done); the gold wash replaced
+  by level sets (done); weak L2 on separable data tends to the max-margin direction, not Σ⁻¹Δμ (done, with Rosset et al.
+  2003 and Dobriban & Wager for the strong end).
+- Not yet: act 2 of the hero (the push), the monitoring dial and pressure trails (later chapters).
+
+**learner-sim prototype fixes:** 1–10 applied (details in the README handoff); 11 (drag the direction; hunting unknown
+shifts) and 12 (check-yourself gaps) remain.
+
+**Visual self-review (stills desktop + phone, `--clock` films of the hero, the flip, the retraining turn, the coin-flip fit):**
+1. NaN positions when a view changed space (another layer, the 2-D fit data): frames of different dimension can't be
+   interpolated. → Each view declares its `space`; a change of space cross-fades, and leaving points keep their old frame.
+2. A reduced-motion cut drew the *start* state. → Every phase completes at t = 0 in a cut.
+3. True-proportion views squeezed the paper pile into a column. → Those views get their own paper scale (fitted to the 99.5%
+   range of the scores); matched scales stay where the glass is stretched.
+4. Label collisions (glass label vs layer gauge, ghost labels vs group labels, grid note vs axis label, legend overflow). →
+   Axis labels in the glass, legend on the paper band, ghost lines named by the legend, a shorter grid note, the legend
+   scaled to fit.
+5. The 65° arc was hidden under the points. → Arcs and angle labels above the points.
+6. Card leaders crossed. → Cards sit on their point's side.
+7. The flip blinked: the probe's level sets and the paper axis faded out although unchanged, and the readouts went blank
+   for 3.4 s. → An unchanged probe and axis stay; the old readouts and counts stay dimmed until the new land ("99.5% → ?"
+   becomes "99.5% → 8.0%").
+8. The retraining turn lost the level sets during the rotation. → The old level sets turn with the view and give way to the
+   new ones.
+9. Prose numbers off by one statement (2-decimal coordinates). → 3 decimals; `tests/functional.mjs` checks the page against
+   the exporter within one statement.
+10. The empty hero paper strip before the drops; the hero's 99.5% over the points. → The strip fades in with the drops; the
+    number moved to the caption.
+
+**The learner on the style frame (2026-09-26):** the encodings are "cool", the register "much better". Two asks, queued as
+next actions 1–2 in the README: the paper must always be a projection of the glass in the same units, with a normalized
+histogram instead of saturating dot piles; and a new early step showing how a statement's activation becomes a labelled data
+point (which token, averaged or per token).
+
+**Lessons for kit/PLAYBOOK.md (at the end of the piece):**
+- Store points in a small per-view basis and interpolate *frames* (on the sphere), not positions: every transition is then
+  an honest projection, and rotations, plane changes and data shifts compose.
+- Keep what doesn't change on screen across a step change (the probe, the axis, the old readouts dimmed): a blank panel
+  during a 3-second animation reads as broken.
+- Declare a view's space; never interpolate between spaces.
+- A probe is a covector: draw level sets, and reserve arrows for vectors (writing).
 
 ## 2026-09-26 · Prototype · `learner-sim` (Opus 5.5, confirmed from its system prompt)
 

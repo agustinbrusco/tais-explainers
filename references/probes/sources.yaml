@@ -2012,3 +2012,41 @@
     can be applied to any personality trait of interest, given only a natural-language description.
   read: false
   notes: ''
+- id: arxiv:1507.03003
+  title: 'High-Dimensional Asymptotics of Prediction: Ridge Regression and Classification'
+  authors:
+  - Edgar Dobriban
+  - Stefan Wager
+  date: '2015-07-10'
+  url: https://arxiv.org/abs/1507.03003
+  abstract: 'We provide a unified analysis of the predictive risk of ridge regression and regularized
+    discriminant analysis in a dense random effects model. We work in a high-dimensional asymptotic regime
+    where $p, n \to \infty$ and $p/n \to \gamma \in (0, \, \infty)$, and allow for arbitrary covariance
+    among the features. For both methods, we provide an explicit and efficiently computable expression
+    for the limiting predictive risk, which depends only on the spectrum of the feature-covariance matrix,
+    the signal strength, and the aspect ratio $\gamma$. Especially in the case of regularized discriminant
+    analysis, we find that predictive accuracy has a nuanced dependence on the eigenvalue distribution
+    of the covariance matrix, suggesting that analyses based on the operator norm of the covariance matrix
+    may not be sharp. Our results also uncover several qualitative insights about both methods: for example,
+    with ridge regression, there is an exact inverse relation between the limiting predictive risk and
+    the limiting estimation risk given a fixed signal strength. Our analysis builds on recent advances
+    in random matrix theory.'
+  read: true
+  notes: 'Section 3.4 (txt L1207-1216): ridge discriminant analysis, w = (Sigma + lambda I)^-1 delta; lambda -> 0 is classical
+    LDA, lambda -> infinity gives the weight vector delta = mu_+1 - mu_-1 (an independence rule). Used for the strong-penalty
+    end of the regularization path in probes step 3 (the logistic-regression analogue is derived in the side dish).'
+- id: nips:rosset-2003-margin
+  title: Margin Maximizing Loss Functions
+  authors:
+  - Saharon Rosset
+  - Ji Zhu
+  - Trevor Hastie
+  date: 2003-12
+  url: https://hastie.su.domains/Papers/margmax1.pdf
+  accessed: '2026-09-26'
+  read: true
+  notes: 'NIPS 16. Theorem 2.1 (papers/rosset-2003-margin.txt L93-105): for separable data, any convergence point of the
+    normalized solutions of the l_p-regularized loss as lambda -> 0 is an l_p margin-maximizing separator (the limit, if that
+    separator is unique). The logistic log-likelihood satisfies the condition (L292-304). Used for the weak-penalty end of
+    the regularization path in probes step 3 (748 statements in 1,536 dimensions are separable). PDF not redistributable;
+    fetched from the URL into papers/ (gitignored).'

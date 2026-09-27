@@ -1,4 +1,4 @@
-# A Ruler Through the Glass
+# What a Probe Reads
 *Linear probes: how to make one, how to know what it reads, and what happens when you use it*
 
 > **Status:** brief **agreed 2026-09-26** · format: **web explorable** (a narrated history video only after the web piece
@@ -62,7 +62,7 @@ is Marks & Tegmark's *cities* dataset; their repo has no license, so we regenera
 licensed gazetteer with the same construction, and credit theirs. The negated twin ("…is *not* in…") and the
 Spanish-English translation sets (and their negations) supply the shifts.
 
-It's safety-shaped (the dream is a lie detector), and it forces the right caveat: a truth ruler reads the model's
+It's safety-shaped (the dream is a lie detector), and it forces the right caveat: a truth probe reads the model's
 *assessment of a statement*, which is neither the truth nor "the model is lying".
 
 **Feasibility, already run** (our own numbers from two independent runs, Opus's and Fable's, in scratch; they'll be
@@ -73,7 +73,7 @@ re-run as project data scripts with one pinned protocol):
 | truth probe, held-out cities (split by city) | 0.50 at layer 0 (every final token is "."), 0.88 at L6, 0.99 at L12, 0.999 at L16 |
 | labelled statements needed (layer 16, mean of 5 draws) | **4** → logistic regression 0.97, difference of means 0.94; 16 → 0.99 / 0.98 |
 | random labels, 300 training statements, 1,536 dimensions (C = 10⁴) | train **1.000**, held-out **0.52** (real labels: 1.000 / 0.99) |
-| two rulers, both ~0.99 (logistic regression, difference of means) | 57–78° apart across layers; at L16 from **42° to 67°** depending only on regularization, accuracy 0.99 throughout |
+| two directions, both ~0.99 (logistic regression, difference of means; spike protocol) | 57–78° apart across layers; at L16 from **42° to 67°** depending only on regularization, accuracy 0.99 throughout |
 | the best single coordinate out of 1,536 | reads truth at 0.91 (L12) and 0.976 (L16): truth is a dominant axis here |
 | trained on "is in", tested on "is not in" | logistic regression **0.03–0.11 at L12**, ranked upside down (AUROC **0.005**); ~0.5 at L8 and L16 because every negation lands on the false side, yet still ranked upside down (AUROC 0.02, 0.39); difference of means ~0.48 at the tick but also upside down (AUROC 0.03) |
 | difference-of-means directions of the two polarities | cosine −0.79 (L8) → −0.47 (L12) → −0.15 (L16) |
@@ -99,27 +99,27 @@ re-run as project data scripts with one pinned protocol):
   about the target, and a probe on a model organism is only as informative as the organism.
 - Origin note: Alain & Bengio (2016) named "probes".
 
-## The money shot: the cloud, the ruler and the push
+## The money shot: the cloud, the probe and the push
 A glass window holds ~300 real final-token states as points (filled = true, hollow = false) on the plane spanned by the
-ruler's direction and the largest remaining spread. A **gold ruler** crosses it with a threshold tick, and each point's
-reading lands on the paper below as a gold histogram. The learner operates it:
-- a **dataset switch** (cities | negated | translations) morphs the points while the ruler stays, and the accuracy drops;
-- **retrain** (logistic regression | difference of means | both polarities) turns the ruler, the readings recompute in
+probe's direction and the largest remaining spread. The probe is drawn as its **gold level sets** (one logit apart, ⊥ w),
+and each point's score lands on the paper below as one gold dot (see `script.md`, "Visual grammar"). The learner operates it:
+- a **dataset switch** (cities | negated | translations) morphs the points while the probe stays, and the accuracy drops;
+- **retrain** (logistic regression | difference of means | both polarities) turns the probe (the view rotates to it), the scores recompute in
   causal order, then the accuracy lands;
 - a **layer slider** recomputes the plane;
 - **push mode**: drag a hollow point along a **violet arrow** (a vector added to the model's hidden state) and a paper strip
   shows the model's own answer at that strength (real, precomputed; the unsteered answer dashed; the push's size shown
   relative to the hidden state's size).
 
-One picture shows the ruler reading its training set's quirks (the flip) and reaching into behaviour (the push).
+One picture shows the probe reading its training set's quirks (the flip) and reaching into behaviour (the push).
 
 ## Misconceptions to defuse (in both directions)
 - "Probes need lots of data." → four statements are enough here (P1), which is also why one pair caught a sleeper agent,
-  and why a handful of examples can point a ruler at the wrong thing.
+  and why a handful of examples can point a probe at the wrong thing.
 - "A probe that fits has found something." → random labels fit perfectly too.
 - "A more powerful probe is better evidence." → Othello (P2); selectivity (same 97% accuracy, selectivity 26 vs 4.5).
 - "A truth probe reads truth." → the negation flip (P3); it reads whatever separated its training set, and accuracy at a tick can hide that it's upside down (AUROC 0.005).
-- "The probe's direction *is* the concept." → accuracy underdetermines the direction (two 99% rulers, 42°–67° apart depending on regularization).
+- "The probe's direction *is* the concept." → accuracy underdetermines the direction (two directions at 96–99.5%, 46° apart; regularization alone turns logistic regression's through 54°).
 - "The best reader is the best handle." → the push (P4).
 - "Unsupervised probes discover what the model believes." → they find the most prominent difference.
 - "A deception probe detects the model's intent." → it reads the concept in play: misalignment probes fire on 97.7% of
@@ -135,14 +135,14 @@ Predicts are separate steps from their reveals, as in piece 1. Draft, to become 
 
 | # | chapter | steps (P = predict) |
 |---|---|---|
-| — | **Hero** | act 1: the ruler sweeps a wall of real states and the readings light up; act 2: a true statement is pushed along a violet arrow and the model's confidence falls. Must not spoil P1, P3 or P4. |
+| — | **Hero** | act 1: the view turns until the probe's direction lies flat, and the scores fall onto paper; act 2: a true statement is pushed along a violet arrow and the model's confidence falls. Must not spoil P1, P3 or P4. |
 | 1 | **Prologue: the cheapest reader** | In 2026 a linear probe screens every exchange first in Anthropic's classifiers, misuse probes run in user-facing Gemini, and OpenAI reports activation classifiers (self-reported by each lab). What can a dot product know, and how would you find out? |
-| 2–5 | **I. A ruler through the glass** | two statements and their 1,536 numbers · the ruler and its readings · why linear (every component reads the stream through a linear projection first; an expressive probe can compute what it reports) · which layer (slider, real curves) |
-| 6–11 | **II. Making rulers** | **P1** how many labelled statements? → the learning curve, then random labels fit perfectly; control tasks · the difference of means, 42°–67° from logistic regression depending on regularization · contrast pairs and no labels at all (the "what you give / what you get" table; the most-prominent-feature failure) · **P2** Othello → mine/yours on the real model with Nanda's probe; when non-linear probes are legitimate |
-| 12–16 | **III. What does the ruler measure?** | **P3** the L12 logistic-regression ruler on negations → the flip, the real matrix with both rulers · the fix and its limit (our real "general truth vs polarity" figure; the translations; the country-name baseline) · **P4** which direction moves the model → the push; the arrow turns from gold to violet: same direction, two uses |
+| 2–5 | **I. A direction and a threshold** | two statements and their 1,536 numbers · the probe, its level sets and its scores · why linear (every component reads the stream through a linear projection first; an expressive probe can compute what it reports) · which layer (slider, real curves) |
+| 6–11 | **II. Finding the direction** | **P1** how many labelled statements? → the learning curve, then random labels fit perfectly; control tasks · the difference of means, 42°–67° from logistic regression depending on regularization · contrast pairs and no labels at all (the "what you give / what you get" table; the most-prominent-feature failure) · **P2** Othello → mine/yours on the real model with Nanda's probe; when non-linear probes are legitimate |
+| 12–16 | **III. What does the probe read?** | **P3** the L12 logistic-regression probe on negations → the flip, the real matrix with both directions · the fix and its limit (our real "general truth vs polarity" figure; the translations; the country-name baseline) · **P4** which direction moves the model → the push; the arrow turns from gold to violet: same direction, two uses |
 | | *(seam: the piece can be split here)* | |
-| 17–24 | **IV. The ruler as a monitor** | two jobs for one dot product (science vs monitoring); a probe reads *the concept in play*, not whose intent it is (a truth ruler is not a lie detector; misalignment probes fire on role-play; "the situation, not the action") · one pair catches a sleeper agent; deception probes · **P5** AUROC 0.999: what recall at the deployed threshold? → the dial (operating points, base rates) · the cascade and the long context (cost, pooling) · the 2026 evidence board (self-reported vs independent) · **P6** which pooling survives RL? → under pressure (obfuscation, chameleons, drift without pressure) |
-| 25–26 | **V. The ruler as a handle** | steering for free (persona vectors: drift monitoring, preventative steering, data flagging) · inhibiting evaluation awareness, and why it's contested |
+| 17–24 | **IV. The probe as a monitor** | two jobs for one dot product (science vs monitoring); a probe reads *the concept in play*, not whose intent it is (a truth ruler is not a lie detector; misalignment probes fire on role-play; "the situation, not the action") · one pair catches a sleeper agent; deception probes · **P5** AUROC 0.999: what recall at the deployed threshold? → the dial (operating points, base rates) · the cascade and the long context (cost, pooling) · the 2026 evidence board (self-reported vs independent) · **P6** which pooling survives RL? → under pressure (obfuscation, chameleons, drift without pressure) |
+| 25–26 | **V. The direction as a handle** | steering for free (persona vectors: drift monitoring, preventative steering, data flagging) · inhibiting evaluation awareness, and why it's contested |
 | 27–28 | **VI. Limits, check yourself** | what this doesn't show · five questions, one transfer |
 
 **The six questions** (a paper card that fills in as the chapters answer them; the transfer question uses it):
@@ -168,7 +168,7 @@ the main course: a side-dish is optional depth on the beat it sits beside, with 
 **Web explorable, no narration for now** (Fable and Opus agreed independently). Probes are the archetype of a mechanism
 with knobs (layer, training set, number of examples, regularization, threshold, base rate, steering strength), and every
 knob drives a readout computed from real activations, including a probe you train in the browser. A video can't offer
-that, and it's what landed in piece 1. It will be more animated than piece 1: the ruler sweeps, points morph between
+that, and it's what landed in piece 1. It will be more animated than piece 1: the view turns to the probe, points morph between
 datasets, the push is a motion with its consequence on paper, and every transition gets its reads timed. Point clouds are
 drawn on canvas with our own projection math (no WebGL, so headless screenshots stay reliable), and projections change as
 a grand tour, so every frame is an honest linear projection. A narrated short (the Othello and lie-detector history) can
@@ -177,7 +177,7 @@ be decided after use.
 ## Visual grammar (extends paper and glass)
 - **Glass** = the activation space: real states as blue points, filled = true, hollow = false. No red/green for truth
   values: a false statement is not misbehaviour, and that conflation is exactly what chapter IV has to undo.
-- **Gold = reading.** Rulers, ticks, scores, monitors. Readings cross the readability boundary and land on paper as
+- **Gold = reading.** Probes (as level sets), boundaries, scores, monitors. Readings cross the readability boundary and land on paper as
   histograms and gauges.
 - **Violet = writing.** A steering vector is a concept vector (kit token `feature`). The difference-of-means arrow appears
   gold when it reads (step 8) and *turns* violet when it writes (step 16), as one read: same direction, two uses.
@@ -185,7 +185,7 @@ be decided after use.
   deceptive / honest *behaviour* in chapter IV.
 - **Every impressive number travels with its counterpart**, as a pair of paper cards: AUROC 0.999 with recall 0.009 at
   the deployed threshold; 99.3% on the sleeper agent with the salience caveat; Apollo's 0.96 with the 0.696 replication.
-- Badges: "real: Qwen2.5-1.5B, L12, final token · plane chosen to contain the ruler"; "real · re-plotted" for papers;
+- Badges: "real: Qwen2.5-1.5B, L12, final token · plane chosen to contain the probe"; "real · re-plotted" for papers;
   "schematic" for the cascade and overlays.
 
 ## Check yourself (draft)
@@ -227,49 +227,74 @@ and Opus acted on it. Both chose the same running example and model.
 
 ## State and next actions (keep current: this is the handoff)
 
-**Where we are (2026-09-26, end of the second pass):**
-- **Brief agreed** with the learner's five decisions (top of this file): one piece of ~28–30 steps; predicts for
-  everything (easy or hard); web only (history video later); side-dishes open by default; go light on experiments
-  (published results or badged illustrative data are fine; also in `CLAUDE.md` rule 4 and the `data-balance` memory).
-- **Dossier:** `references/probes/` (95 sources; the Opus 5.5 and Sonnet 4.5 system-card texts are cached in
-  `papers/web/`, gitignored). Read its §F–§H before writing the monitoring chapter.
-- **`claims.md`:** ~100 rows, revised after the technical gate. Open: C-III-24 (SAE encoder/decoder bridge: find the
-  passage or drop), C-SD-2 (capacity chart on real data, only if it takes minutes), C-SD-3 (a textbook citation for the
-  max-of-N-Gaussians aside). Our numbers point at `data/spike/FINDINGS.md` items 1–12.
-- **`script.md`:** 30 steps (hero + 29), P1–P6 and Q1–Q6, reads for every animated beat, the six-question card,
-  side-dishes SD1–SD4. Revised after the technical gate; not yet re-checked by it (a quick re-check before the full
-  build).
-- **Technical gate:** done, verdict "fix first"; every finding addressed (`review.md`, first entry). The ideas that
-  changed the piece: both rulers rank negations upside down (AUROC 0.005 / 0.03 at L12), so accuracy at a tick hides
-  direction; P4 in Marks & Tegmark's normalization with the cos² ≈ 0.16 explanation (their 0.17); P5 with two probes of
-  identical AUROC 0.999 catching 0.9% vs 100%; evasion drawn along the ruler (never sideways); the angle between the two
-  rulers swings 42°–67° with regularization at equal accuracy.
-- **Prototype of the money shot** (`web/`, 7 steps of chapters II–III): the ruler, fitting proves nothing (+ side-dish
-  SD1, Cover's capacity), two rulers in true proportions, P3, the flip (fills swap in place → drift → histogram and
-  readouts land), the fix and its cost, general truth vs polarity. Data: `data/export_prototype.py` →
-  `build/proto/cloud.json` (gitignored: Marks & Tegmark statements). Rebuild from the repo root:
-  `uv run --group interp --with scikit-learn python projects/probes/data/export_prototype.py projects/probes/data/spike`
-  (the spike activations `acts_Qwen2.5-1.5B_*.npz` and the source CSVs in `data/spike/data/` sit there, gitignored,
-  ~295 MB; on a fresh clone rebuild them with `data/spike/extract.py` after downloading the CSVs). Checks: `node projects/probes/tests/prototype-check.mjs` (click-through, readouts, no
-  console errors); stills in `build/shots/`, flip film `build/shots/motion-flip.png`.
-- **Reviews of the prototype:** visual self-review and `learner-sim` (Opus) done (`review.md`); learner-sim's verdict: build the rest this way; its 12 prioritized fixes are the first job.
-- **Not committed yet** (the learner hasn't asked).
+**Where we are (2026-09-26, end of the third pass: the style frame):**
+- **Brief agreed**, then four answers from the learner (2026-09-26): title **"What a Probe Reads"**; the six questions stay,
+  redesigned (titled, lit only where answered, a one-line answer, not controls); side dishes stay inline cards; commits go
+  on main. Their feedback on the prototype: less "ruler" language (projections, the LR weights, SVD/PCA are fine), clearer
+  phrasing, and a final piece "an order of magnitude above in aesthetics", with meaning encoded in the aesthetics (now in
+  `learner/profile.md`).
+- **Style frame built** (`web/`: hero + 7 steps of the core sequence), from a Fable art-direction consult merged with ours:
+  probes drawn as level sets (covectors), one dot per statement on paper, gold rings for fitted statements, dashed ghosts,
+  a grid in hidden-state units, provenance as material (badges and readouts), a motion grammar (read, shift, retrain,
+  rotate), and honest rotations (every frame an orthogonal projection of a per-layer basis). The visual grammar is written
+  in `script.md`. The learner-sim's prototype fixes 1–10 are applied (P3 number-first with per-option feedback; 05 → 07 as
+  one argument with the g/p algebra and a layer toggle; the stretch explained by the grid and a caveat; the six questions
+  titled and lit only where answered; step 02's n < d reason in a quick check; step 03's cone argument and the
+  regularization slider; Krasnodar marked; hover shows each statement; the side dish's accent, labels and d + 1; phone
+  layouts; no clamped points, since the scales are fitted by quantile and the glass clips honestly). Not done from that
+  list: dragging the probe's direction (#11), the hunt for unknown shifts (#11, content for step 14 or the limits), and
+  the check-yourself gaps (#12).
+- **Data pipeline pinned** (`data/export.py` → `build/data/probes.json`, gitignored): split by city; logistic regression
+  on raw centred states with no standardization (so the L2 path runs from Δμ to the max-margin direction), C = 1; every
+  held-out statement exported in a per-layer basis (k = 6 at layers 8 and 16, 18 at layer 12 with the regularization
+  path); fit16 at C = 10⁴ for both label sets. Numbers moved from the spike (e.g. the flip is 0.080 / AUROC 0.006 at L12;
+  the two directions are 46° apart); `claims.md` rows C-II-2/2b/8/8b–d, C-III-1/8/10/11, C-VIZ-6/7 updated. New sources:
+  Dobriban & Wager (1507.03003, §3.4) and Rosset, Zhu & Hastie 2003 (Theorem 2.1). Still the Marks & Tegmark statements.
+- **Checks:** `node projects/probes/tests/functional.mjs` (all pass: page numbers vs exporter, dot counts vs readouts, the
+  slider, P3's echo, toggles, no console errors). Stills in `build/shots2/` (desktop), `build/shots-m/` (phone); films of
+  the flip (`build/motion/`), the retraining turn (`build/motion6/`), the coin-flip fit (`build/motion1/`) and the hero
+  (`build/hero/`).
+- **Rebuild:** `uv run --group interp --with scikit-learn python projects/probes/data/export.py projects/probes/data/spike`
+  (the spike activations and CSVs sit in `data/spike/`, gitignored).
+- **Not yet reviewed by the agents** (the style frame was a checkpoint for the learner's eye first). Committed and pushed
+  on main with the learner's approval (2026-09-26).
 
-**Questions put to the learner (answers pending):** side-dish as an in-step "tray" card vs a margin column on wide
-screens; are the six-question chips useful or noise; is "↔ stretched ×k" vs "true proportions" clear; commit now?
+**The learner's reaction to the style frame (2026-09-26):** the encodings are "cool"; the technical register is "much
+better"; commit and push. Two changes asked for:
+- **The paper must always be a projection of the glass** (same x, same units). The dot piles saturate (flat tops at the band
+  height) and some views put the paper on its own scale (Fig. 2's logit fan; Figs. 3, 6, 7): "a common, normalized hist
+  would do the work just fine".
+- **A viz of how activations become data points**: a statement's tokens through a sketch of a transformer, the activation
+  read and saved with its label, accurate to practice (which token? averaged over tokens? per token?), because where a probe
+  reads decides what it can measure.
 
 **Next actions, in order:**
-1. Apply the learner-sim's prioritized fixes (`review.md`, top entry: P3 honesty; steps 05 → 07 as one argument; explain the stretch and the six chips once; …) and the learner's answers to the questions above.
-2. Pin the data pipeline: regenerate the city statements from a permissively licensed gazetteer (same construction:
-   false countries drawn from the true-country distribution, so the country-name baseline stays at chance), extract
-   fp32 activations, one protocol (split by city, fixed C, seeds), drop or label L28 (post-final-norm), check cosines
-   with and without the massive-activation coordinates; update `claims.md` from the pinned numbers.
-3. Quick technical re-check of `script.md` (Fable), then build the remaining steps in order: prologue and hero; chapter
-   I (steps 2–5); the in-browser trainer (step 7: n, L2 and shuffle knobs; the angle readout); chapter II's table,
-   Othello (re-plotted, schematic XOR); step 16's push (drawn to scale in the plane of the two rulers; our real push as a
-   badged secondary panel only if a tuned version is clean); chapter IV (the dial with two probes, the cascade, pooling,
-   the evidence board, pressure); chapter V; limits and check-yourself; side-dishes SD2–SD4; the six-question chips on
-   phones.
-4. Full review loop before showing the learner: stills (desktop, phone, reduced), `--clock` films of every animated
-   beat, `tests/functional.mjs`, then `technical-reviewer` and `rigor-reviewer` (Fable) and `learner-sim` (Opus).
-5. At the end of the piece: add the prototype's lessons (listed in `review.md`) to `kit/PLAYBOOK.md`.
+1. **Paper = projection of the glass.** Replace the beeswarm with a common normalized histogram under the glass: true filled,
+   false outlined, gold-ink; bins in screen px with an edge at the boundary; one normalization per view, stable through a
+   transition (the max over start and end); drops fall into bins, and bins morph during the flip. The paper axis is in
+   hidden-state units along ŵ (0 = the boundary), the same units as the grid; logits appear only as the level sets'
+   spacing (legend). Remove every separate paper scale (Fig. 2's fan; Figs. 3, 6, 7), keep the counts row, and update the
+   prose that mentions the dots or the fan (Fig. 1's "one gold dot", step 2's "the fan of drops") and `script.md`'s visual
+   grammar.
+2. **New step, "From a statement to a data point"** (chapter I, before "A direction and a threshold"): the statement's
+   tokens enter a sketch of the transformer (token columns × layer rows, the residual stream as the column); the state at
+   layer ℓ and the chosen position is read out as a vector h (the real 1,536 numbers as a grid), paired with its label, and
+   appended as a row of the dataset (X | y) that logistic regression fits. Then the position choice, as a toggle: the
+   final token (ours and Marks & Tegmark's end-of-sentence token; with causal attention it is the only position that has
+   seen the whole statement), the mean over tokens, every token with the label copied and the scores pooled (mean, max,
+   EMA then max, attention, MultiMax; dossier §F2, with McKenzie's "last token consistently performs poorly" for long
+   inputs), suffix probes. Say what each choice lets a probe measure; forward-link to the pooling beat (chapter IV).
+   Claims rows first (§F2 sources are verified-opened).
+3. Regenerate the statements from a permissively licensed gazetteer (the construction and the country-name baseline as in
+   Marks & Tegmark), extract activations, re-run `export.py`; the page's numbers follow automatically, then re-check the
+   prose that describes them (CLAUDE.md rule 10) and `claims.md`.
+4. Quick technical re-check of `script.md` (Fable), then build the remaining ~23 steps with the new engine (`figure.js`):
+   prologue and chapter I (two statements → the probe; why linear; which layer); the in-browser trainer (n, L2, shuffle;
+   drag the direction); chapter II's table and Othello; P4 and the push (violet arrows: writing); chapter IV (the dial,
+   the cascade, pooling, the evidence board, pressure with magenta trails); chapter V; limits and check-yourself; side
+   dishes SD2–SD4 (SD2 now carries the LR ↔ Σ⁻¹Δμ ↔ max-margin derivation).
+5. Full review loop: stills, films, `tests/functional.mjs`, then `technical-reviewer` and `rigor-reviewer` (Fable) and
+   `learner-sim` (Opus).
+6. At the end: the lessons in `review.md` into `kit/PLAYBOOK.md` (with the learner's rule: a chart under a figure shares its
+   axis and units, and a normalized histogram beats a saturating dot pile); move `figure.js`/`lin.js`
+   patterns that generalize into `kit/web/`.

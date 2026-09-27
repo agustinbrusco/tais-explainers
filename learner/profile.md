@@ -53,6 +53,13 @@
 - **Visual style (learned on the first piece, 2026-09-26):** expressive, crafted visuals in the spirit of Welch Labs and
   Goodfire's research pages, *and* rigorous: "simplify only in ways non-essential for the topic". The "paper and glass"
   art direction with real activations was received as "amazing work".
+- **Meaning in the aesthetics (probes prototype, 2026-09-26):** "When I make slides, I enjoy when meanings are encoded in
+  the aesthetics in some way": colors and visual forms chosen so they convey meaning explicitly *and* implicitly. A
+  prototype is a prototype; they expect the final piece to be "an order of magnitude above in aesthetics and visual
+  impact / coherence".
+- **Technical language over metaphors (same day):** analogies are welcome, but don't lean on simplified ones (the
+  probes prototype's "ruler" was too present). Talk about projections onto a learned direction, the weight vector a
+  logistic regression learns from labelled data, and how it connects to SVD/PCA. They asked for clearer phrasing too.
 - **Pace:** they go through a whole piece in one sitting and give feedback in batches. They like large
   autonomous iterations between feedback rounds, then a complete report.
 - **Predict questions** must be genuinely didactic: aimed at a real misconception, not answerable from the figure.
