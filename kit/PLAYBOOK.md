@@ -44,7 +44,7 @@ lessons and without repeating what's already here.
    - `learner-sim`: answer leaks, an overloaded beat, counts that didn't add up on phones, and words that disagreed with
      the picture.
 7. **Performance at the end** (added 2026-09-27, the learner's suggestion). Once a piece settles, `performance-reviewer`
-   (Sonnet) measures it as deployed, under CPU throttling and on phones, and proposes same-pixel fixes; it implements
+   (Opus) measures it as deployed, under CPU throttling and on phones, and proposes same-pixel fixes; it implements
    them only in a worktree, with pixel diffs (`review` skill, §3b).
 
 ## 2. Visual grammar that landed

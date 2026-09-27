@@ -8,8 +8,12 @@ import { Figure, LAYOUT } from "./figure.js";
 import { dot, orthTo, unit, scores, accuracy, auroc, deg, fmt } from "./lin.js";
 import { startHero } from "./hero.js";
 import { Pipeline } from "./pipeline.js";
+import { Paper } from "./paper.js";
+import * as D from "./diagrams.js";
+import * as M4 from "./monitor.js";
 
-const DATA = await fetch(new URL("./data/probes.json", import.meta.url)).then((r) => r.json());
+const [DATA, FIND, PUSH, MON] = await Promise.all(["./data/probes.json", "./data/find.json", "./data/push.json", "./data/monitor.json"]
+  .map((u) => fetch(new URL(u, import.meta.url)).then((r) => r.json())));
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const narrow = matchMedia("(max-width: 860px)").matches;
 const layout = narrow ? LAYOUT.phone : LAYOUT.desktop;
@@ -17,12 +21,15 @@ const fig = new Figure(document.getElementById("fig"), layout,
   { tip: document.getElementById("tip"), readouts: document.getElementById("readouts"), reduced });
 // the second scene in the same SVG: a statement becomes a data point, and which token a probe reads
 const pipe = new Pipeline(document.getElementById("fig"), layout, { reduced, tip: document.getElementById("tip") });
+// the third: paper diagrams (readers in production, why linear, boards, cascades)
+const paper = new Paper(document.getElementById("fig"), layout, { reduced, tip: document.getElementById("tip") });
 
 const Ls = (l) => DATA.layers[String(l)];
 const N_ALL = DATA.label.aff.length;
 const IDX = narrow ? DATA.show : d3.range(N_ALL);               // phones draw a lighter subset
 const K = DATA.krasnodar;
 const lab = DATA.label, txt = DATA.text;
+const TR = FIND.trainer, CV = FIND.curve;           // chapter II: the nested draw's fits and the learning curve
 
 // ---- numbers: computed from the coordinates the figure draws ----
 function evalProbe(l, probeName, set, probe = Ls(l).probes[probeName]) {
@@ -109,12 +116,64 @@ Object.assign(NUM, Object.fromEntries([2, 4, 6, 8, 10, 11, 28].map((L) => [`acc_
     coin_margin: F.coin.margin.toFixed(2), real_margin: F.real.margin.toFixed(2),
   });
 }
+{
+  const c16 = FIND.curve["16"], c12 = FIND.curve["12"], at = (c, n) => c.lr[c.n.indexOf(n)].mean;
+  const first95 = (c) => c.n[c.lr.findIndex((r) => r.mean >= 0.95)];
+  const f4 = TR.fits[TR.fits.findIndex((f) => f.n === 4)], f512 = TR.fits[TR.fits.findIndex((f) => f.n === 512)];
+  const NM = FIND.norm["12"];
+  Object.assign(NUM, {
+    c16_2: fmt.pct0(at(c16, 2)), c16_4: fmt.pct0(at(c16, 4)), c16_8: fmt.pct0(at(c16, 8)), c16_100: fmt.pct0(at(c16, 128)),
+    c16_all: fmt.pct1(at(c16, c16.n[c16.n.length - 1])), c16_dmu8: fmt.pct0(c16.dmu[c16.n.indexOf(8)].mean),
+    c16_first95: `${first95(c16)}`, c12_first95: `${first95(c12)}`, c12_8: fmt.pct0(at(c12, 8)),
+    tr4_acc: fmt.pct1(f4.acc), tr4_ang: fmt.deg(trAngle(f4)), tr512_ang: fmt.deg(trAngle(f512)),
+    // how much the direction depends on the draw (20 independent draws), and each fit against its own draw's Δμ
+    draw4_ang: fmt.deg(c16.draw_ang[c16.n.indexOf(4)]), draw512_ang: fmt.deg(c16.draw_ang[c16.n.indexOf(512)]),
+    own4: c16.dmu_cos[c16.n.indexOf(4)].toFixed(2), own512: c16.dmu_cos[c16.n.indexOf(512)].toFixed(2),
+    len_cv12: fmt.pct1(NM.len_cv), len_min12: `${Math.round(NM.len_min)}`, len_max12: `${Math.round(NM.len_max)}`,
+    acc_normed12: fmt.pct1(NM.acc_normed), ang_normed12: fmt.deg(deg(NM.cos_raw_normed)),
+    ...(FIND.pca ? { pc_cos16: FIND.pca["16"].cos.toFixed(2), pc_var16: fmt.pct0(FIND.pca["16"].var_share) } : {}),
+    ...(FIND.lengths ? { len1: `${Math.round(FIND.lengths[1])}`, len27: `${Math.round(FIND.lengths[27])}`, len28: `${Math.round(FIND.lengths[28])}` } : {}),
+  });
+}
+{
+  const P8 = FIND.pairs["8"], P12 = FIND.pairs["12"], P16 = FIND.pairs["16"];
+  Object.assign(NUM, {
+    pair_cos8: P8.cos_mean.toFixed(2), pair_cos12: P12.cos_mean.toFixed(2), pair_cos16: P16.cos_mean.toFixed(2),
+    pair_sd: P12.random_sd.toFixed(2), pair_pos12: fmt.pct1(P12.frac_pos), pair_meandiff12: P12.cos_mean_diff_dmu.toFixed(3),
+    pca_cos12: P12.pca_cos_dmu.toFixed(3), pca_acc12: fmt.pct1(P12.pca_acc), pca_acc8: fmt.pct1(P8.pca_acc), pca_acc16: fmt.pct1(P16.pca_acc),
+    pca_cos8: P8.pca_cos_dmu.toFixed(2), pca_sign12: fmt.pct1(P12.pca_sign),
+    text_lr: fmt.pct1(FIND.text_baseline.char_lr), text_mlp: fmt.pct0(FIND.text_baseline.char_mlp),
+  });
+}
+{
+  const nie = PUSH.nie.cities, j1 = PUSH.meta.alphas.indexOf(1), c = PUSH.geometry.cos_w_dmu;
+  Object.assign(NUM, {
+    w16: fmt.pct1(E[16].w.aff.acc), dmu16: fmt.pct1(E[16].dmu.aff.acc), angle16: fmt.deg(deg(c)), cos16: c.toFixed(2),
+    cos2_16: fmt.pct0(c * c), push_n: `${2 * PUSH.meta.n_each}`,
+    nie_mm: fmt.pct0(nie.mm.f2t[j1]), nie_lr: fmt.pct0(nie.lr.f2t[j1]),
+    nie_mm_t2f: fmt.pct0(nie.mm.t2f[j1]), nie_lr_t2f: fmt.pct0(nie.lr.t2f[j1]),
+    country_baseline: fmt.pct1(DATA.meta.country_baseline),
+    nie_mm_q: fmt.pct0(nie.mm.f2t[PUSH.meta.alphas.indexOf(0.25)]),
+    model_acc: fmt.pct1(PUSH.pd.cities.acc),
+    // out of distribution, as in Marks and Tegmark's table: Spanish-English statements
+    nie_sp_mm: fmt.pct0(PUSH.nie.sp.mm.f2t[j1]), nie_sp_lr: fmt.pct0(PUSH.nie.sp.lr.f2t[j1]),
+    ...(PUSH.nie.sp.mm_matched ? { m_sp_f2t1: fmt.pct0(PUSH.nie.sp.mm_matched.f2t[j1]) } : {}),
+    // the difference-of-means push as long along Δμ as the w push (alpha * cos²)
+    ...(nie.mm_matched ? (() => {
+      const M = nie.mm_matched, at = (k, a) => M[k][PUSH.meta.alphas.indexOf(a)];
+      return { m_f2t1: fmt.pct0(at("f2t", 1)), m_t2f1: fmt.pct0(at("t2f", 1)), m_f2t2: fmt.pct0(at("f2t", 2)), m_t2f2: fmt.pct0(at("t2f", 2)),
+        lr_f2t2: fmt.pct0(nie.lr.f2t[PUSH.meta.alphas.indexOf(2)]), lr_t2f2: fmt.pct0(nie.lr.t2f[PUSH.meta.alphas.indexOf(2)]) };
+    })() : {}),
+  });
+}
+Object.assign(NUM, { fa_day: Math.round(1e6 * M4.shareAbove(M4.drawnSamples(MON.chat), MON.meta.tick)).toLocaleString("en-US") });
 window.probesNumbers = { NUM, E, pathEval, sameSide };      // for tests
+window.probesSteps = () => ORDER;
 window.probesFig = fig;
 
 // ---- views ----
-const ui = { collect: { which: "true" }, pos: { at: "period" }, pool: { how: "mean", which: "kras" }, layer: 12, fit: { labels: "coin", show: "held" }, reg: 8, flip: { layer: "12" },
-  fix: { layer: "12", set: "cities" }, gp: { layer: "16" } };
+const ui = { push: { dir: "mm", which: "false", alpha: 1 }, oth: { labels: "my", angle: 0 }, pairs: { layer: "12" }, curve: 2, linear: { kind: "linear" }, collect: { which: "true" }, pos: { at: "period" }, pool: { how: "mean", which: "kras" }, layer: 12, fit: { labels: "coin", show: "held" }, reg: 8, flip: { layer: "12" },
+  fix: { layer: "12", set: "cities" }, gp: { layer: "16" }, job: { job: "monitor" }, dial: { probe: "A", traffic: "it" }, tick: 50, leak: { scored: "all" }, drift: { which: "moves" } };
 const guesses = {};
 const revealed = {};                 // quick checks answered: their readouts are no longer held back
 const probeOf = (l, name) => ({ ...Ls(l).probes[name], kind: Ls(l).probes[name].norm ? "lr" : "dim" });
@@ -178,6 +237,15 @@ function viewAff(l, extra = {}) {
 }
 
 const V = {
+  // prologue: readers in production
+  prologue: () => ({
+    scene: "paper", title: "Readers of hidden states, in production",
+    badge: badge("schematic", "the flow is a sketch · the deployments as each lab reports them"),
+    readouts: RO("≈ 377K", "FLOPs per token: a probe on all 46 layers of Gemma 3 27B", "gold") +
+      RO("≈ 8B", "FLOPs per token: one pass through Gemma 3 4B", "ink"),
+    paper: D.prologueView({}),
+    six: {},
+  }),
   // a statement becomes a data point
   collect: () => collectView(),
   // a direction and a threshold
@@ -192,10 +260,30 @@ const V = {
       six: {},
     };
   },
+  // why linear: how the next block reads the stream, beside how a probe reads it
+  linear: () => ({
+    scene: "paper", title: ui.linear.kind === "linear" ? "How the model reads its own states" : "A probe that can compute",
+    badge: badge("schematic", "Qwen2.5-1.5B's block, as a sketch · sizes from the model's configuration"),
+    readouts: RO("17,920", "directions each block's MLP reads, after normalizing", "ink") +
+      RO("1,536 · 256 · 256", "query, key and value directions each attention layer reads", "ink"),
+    paper: D.whyLinearView({ kind: ui.linear.kind, cfg: { intermediate: 8960 } }),
+    six: {},
+  }),
   // which token a probe reads
   position: () => positionView(),
   // or every token, pooled
   pooling: () => poolingView(),
+  // predict: how many labelled statements?
+  p1: () => {
+    const v = trainerView(TR.fits.length - 1, { hidden: true });
+    return { ...v, probe: null, paper: false, ghosts: [], counts: false, choreo: "move", axes: { x: "", y: "" },
+      title: "New statements, labels hidden",
+      badge: badge("real", `Qwen2.5-1.5B · layer ${TR.layer} · ${N_ALL.toLocaleString("en-US")} statements from held-out cities`),
+      readouts: RO("n = ?", "labelled statements to fit the probe to", "ink") + RO("95%", "of new statements read correctly", "ink"),
+      legend: [{ glyph: "hidden", text: "a held-out statement, label hidden" }], six: {} };
+  },
+  // a handful of statements
+  curve: () => trainerView(ui.curve),
   // a perfect fit proves nothing
   fit: () => {
     const f = F[ui.fit.labels], part = ui.fit.show === "train" ? f.train : f.held;
@@ -231,6 +319,18 @@ const V = {
   },
   // two directions that both read truth
   reg: () => regView(ui.reg),
+  // contrast pairs
+  pairs: () => pairsView(Number(ui.pairs.layer)),
+  // predict: Othello
+  p2: () => ({
+    scene: "paper", title: "Can a probe read the board?",
+    badge: badge("real", "re-plotted: Nanda, Lee and Wattenberg 2023, Table 1, best layer · the board: one real position"),
+    readouts: RO("75.0%", "linear probe: each square black, white or empty", "ink") + RO("98.7%", "probe with one hidden layer", "ink"),
+    paper: D.othelloPredictView({ acc: { linear: 0.75, mlp: 0.987, base: 0.618 } }),
+    six: { 1: "done" },
+  }),
+  // mine and yours
+  othello: () => othelloView(ui.oth.labels, ui.oth.angle),
   // predict: say "not"
   predict: () => ({
     ...viewAff(12), choreo: "move",
@@ -259,10 +359,136 @@ const V = {
   fix: () => fixView(ui.fix.layer, ui.fix.set, "B"),
   // truth has at least two directions
   gp: () => gpView(ui.gp.layer),
+  // predict: which direction pushes the model?
+  p4: () => {
+    const v = pushView({ ...ui.push, alpha: 0 });
+    return { ...v, probe: null, paper: false, arrows: [], cards: [], counts: false, choreo: "move",
+      ghosts: [{ ...probeOf(16, "w"), id: "w", label: "w's boundary" }, { ...Ls(16).probes.dmu, kind: "dim", id: "dmu", label: "Δμ's boundary" }],
+      legend: [...LG.tf, { glyph: "ghost", text: "each probe's boundary" }, { glyph: "mean", text: "class means" }],
+      title: "Two probes, one push each",
+      readouts: RO("?", "the model's answer after the logistic push", "ink") + RO("?", "after the Δμ push", "ink"), six: { 1: "done", 2: "done", 3: "done" } };
+  },
+  // the best reader isn't the best handle
+  push: () => pushView(ui.push),
   // which layer
   layer: () => layerView(ui.layer),
+  // chapter IV: the same probe as a monitor
+  job: () => jobView(ui.job.job),
+  // a lie detector and its counterparts
+  lies: () => ({
+    scene: "paper", title: "Every headline with its counterpart",
+    badge: badge("real", "re-plotted: each number as its paper reports it"),
+    readouts: RO("99.3%", "sleeper agents, one contrast pair: AUROC", "ink") + RO("0.96–0.999", "Apollo's deception probe: AUROC", "ink") +
+      RO(revealed["q-recipe"] ? "0.696" : "?", "the same recipe on another model", "ink"),
+    paper: M4.counterpartsView({ held: !revealed["q-recipe"] }),
+    six: { 1: "done", 2: "now", 3: "done", 4: "done", 5: "now" },
+  }),
+  // predict: an alarm at AUROC 0.999
+  p5: () => ({
+    scene: "paper", title: "An alarm set on ordinary chat",
+    badge: badge("illustrative", "the chat distribution's shape is ours · Alpaca: 1,000 benign instructions"),
+    readouts: RO("0.999", "AUROC: deceptive vs honest insider-trading reports", "ink") + RO(fmt.pct1(dialRead({ probe: "A", traffic: "it", tick: MON.meta.tick }).fpr), "of ordinary chat flagged", "gold") +
+      RO("?", "of the lies flagged", "ink"),
+    paper: M4.dialView(MON, { probe: "A", traffic: "none", tick: MON.meta.tick }),
+    six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "now" },
+  }),
+  // the dial: not an operating point
+  dial: () => dialStep(),
+  // in the activations, or in the text?
+  leak: () => {
+    const k = ui.leak.scored, held = k === "organism" && !revealed["q-organism"];
+    const au = { all: 0.95, answer: 0.81, benign: 0.63, organism: 0.5 }[k];
+    return {
+      scene: "paper", title: { all: "Scored on every token", answer: "Scored only on the answer", benign: "The instruction replaced by a benign one", organism: "A model that never says it" }[k],
+      badge: badge("schematic", "a sketch of a transcript · the AUROCs: Boxo, Neelappa and Raval, sandbagging"),
+      readouts: RO(held ? "?" : au.toFixed(2), "AUROC in this condition", "ink") + RO("10–30", "points of AUROC lost when the text's evidence is removed, across their settings", "ink"),
+      paper: M4.leakView({ scored: k, held: !revealed["q-organism"] }),
+      six: { 1: "done", 2: "done", 3: "now", 4: "done", 5: "done" },
+    };
+  },
+  // predict: train against it
+  p6: () => ({
+    scene: "paper", title: "A frozen probe in the reward",
+    badge: badge("schematic", "Gupta and Jenner's set-up, as a sketch · Qwen 2.5 14B"),
+    readouts: RO("?", "evaded: mean over tokens", "ink") + RO("?", "maximum over tokens", "ink") + RO("?", "learned attention", "ink"),
+    paper: M4.rlLoopView(),
+    six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "done", 6: "now" },
+  }),
+  // under pressure
+  pressure: () => ({
+    scene: "paper", title: "Evaded through the text",
+    badge: badge("real", "re-plotted: Gupta and Jenner, Table 1 (Qwen 2.5 14B) · the strip: a sketch of their mechanism"),
+    readouts: RO("82%", "the mean-pooled probe, evaded at 1% FPR", "ink") + RO("≈ 70%", "of that recall drop came from what the text says", "ink") +
+      RO("4.4% · 1.8%", "the max-pooled probe · the attention probe", "ink"),
+    paper: M4.pressureView(),
+    six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "done", 6: "now" },
+  }),
+  // without an adversary
+  drift: () => (ui.drift.which === "moves" ? {
+    scene: "paper", title: "The concept moves",
+    badge: badge("illustrative", "a drawn mechanism, not measured states · the AUCs: the Obfuscation Atlas, Table 4"),
+    readouts: RO(revealed["q-drift"] ? "0.991 → 0.376" : "0.991 → ?", "a fresh general deception probe on hard-coded solutions, before → after RL", "ink") +
+      RO("1.000 → 1.000", "a probe trained on hard-coding itself", "ink"),
+    paper: M4.movesView(),
+    six: { 1: "done", 2: "now", 3: "done", 4: "done", 5: "done", 6: "now" },
+  } : {
+    scene: "paper", title: "Told, not trained",
+    badge: badge("illustrative", "shapes ours · at the frozen threshold the readouts reproduce Das and colleagues (GPT-OSS-20B agents, logistic probe, peak score)"),
+    readouts: RO("0.975 → 0.912", "AUROC, collusion vs control runs", "ink") + RO("0.95 → 0.41", "recall at the frozen threshold", "gold"),
+    paper: M4.dasView(MON),
+    six: { 1: "done", 2: "now", 3: "done", 4: "done", 5: "done", 6: "now" },
+  }),
+  // chapter V: steering for free
+  handle: () => ({
+    scene: "paper", title: "One direction, many handles",
+    badge: badge("real", "re-plotted: Chen and colleagues 2025 (persona vectors); Arditi and colleagues 2024 (refusal)"),
+    readouts: RO(revealed["q-handle"] ? "0.940 · 0.942" : "?", "AxBench detection: probe · difference of means", "ink") +
+      RO(revealed["q-handle"] ? "0.098 · 0.239" : "?", "AxBench steering: probe · difference of means", "ink") + RO("0.894", "steering by prompting, for comparison", "ink"),
+    paper: M4.handleView(),
+    six: { 1: "done", 2: "done", 3: "done", 4: "now", 5: "done", 6: "done" },
+  }),
+  // contested: steering away evaluation awareness
+  contested: () => ({
+    scene: "paper", title: "A steering result, and its controls",
+    badge: badge("real", "re-plotted: Claude Sonnet 4.5 system card; Read, Schoen, Aranguri and Bloom 2026 (GLM-5)"),
+    readouts: RO("8–9%", "Sonnet 4.5: the highest rate with awareness inhibited", "ink") + RO(revealed["q-control"] ? "80%" : "?", "GLM-5: the highest rate, from a control pair", "ink"),
+    paper: M4.contestedView({ held: !revealed["q-control"] }),
+    six: { 1: "done", 2: "done", 3: "done", 4: "now", 5: "done", 6: "done" },
+  }),
+  // chapter VI
+  limits: () => ({
+    scene: "paper", title: "The six questions, answered",
+    badge: badge("schematic", "a summary of this piece"),
+    readouts: "",
+    paper: M4.sixView({ mode: "limits", answers: SIX_ANS }),
+    six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "done", 6: "done" },
+  }),
+  check: () => ({
+    scene: "paper", title: "Six questions for any probe",
+    badge: badge("schematic", "a checklist"),
+    readouts: "",
+    paper: M4.sixView({ mode: "check", answers: SIX_ASK }),
+    six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "done", 6: "done" },
+  }),
 };
-const ORDER = ["collect", "probe", "position", "pooling", "layer", "fit", "reg", "predict", "flip", "fix", "gp"];
+const SIX_ANS = [
+  ["held-out accuracy and controls, not a training fit;", "a probe with a hidden layer can compute what it reports"],
+  ["whatever separated the training set, when it's in play;", "test on shifted data, and again after any training"],
+  ["ask what a reader of the text alone would get;", "the probe's value is the difference"],
+  ["the best reader isn't the best handle;", "only a push shows which direction the model uses"],
+  ["recall at a threshold set on the traffic it will see,", "and the false alarms that threshold buys"],
+  ["optimized against, it's evaded through the text first;", "no gradients through it; one monitor training never sees"],
+];
+const SIX_ASK = [
+  ["held out? controls? what does a shuffled-label fit score?"],
+  ["what else separated the labels? how does it do on shifted sets?"],
+  ["what does a reader of the text alone score?"],
+  ["does pushing along the direction change the behaviour?"],
+  ["which threshold, set on which traffic? recall, false alarms?"],
+  ["is its score in any reward? has the model been trained since?"],
+];
+const ORDER = ["prologue", "collect", "probe", "linear", "position", "pooling", "layer", "p1", "curve", "fit", "reg", "pairs", "p2", "othello", "predict", "flip", "fix", "gp", "p4", "push",
+  "job", "lies", "p5", "dial", "leak", "p6", "pressure", "drift", "handle", "contested", "limits", "check"];
 const views = ORDER.map((k) => V[k]);
 const STEP = Object.fromEntries(ORDER.map((k, i) => [k, i]));
 
@@ -341,6 +567,61 @@ function layerView(L) {
   };
 }
 
+// ---- how many labelled statements: one nested draw at layer 16, a probe fitted at each n (find.json) ----
+const trFinal = TR.fits[TR.fits.length - 1];
+const trProbe = (f) => ({ coef: f.coef, thr: f.thr, norm: f.norm, kind: "lr" });
+function trAngle(f) { return deg(dot(unit(f.coef), unit(TR.fits[TR.fits.length - 1].coef))); }
+function trainerFrame(j) {
+  const last = TR.fits.length - 1, f = TR.fits[j], u = unit(f.coef);
+  // the plane of this fit and the final probe; the final probe itself is drawn in its plane with the previous fit, turned
+  // on from it (the same plane, so the last step is an in-plane rotation)
+  if (j < last) return { u, v: orthTo(trFinal.coef, u) };
+  const prev = unit(TR.fits[last - 1].coef);
+  return { u, v: orthTo(prev, u).map((x) => -x) };
+}
+const trScale = (() => {
+  // one scale for every fit (so the slider only turns the view): the tightest of their equal-aspect fits
+  const scs = TR.fits.map((f, j) => fig.fitScale({ frame: trainerFrame(j), aspect: "equal", probe: trProbe(f) }, TR.held));
+  const k = d3.min(scs, (q) => q.kx);
+  return { kx: k, ky: k };
+})();
+function curveSpark(j) {
+  // held-out accuracy by n (mean of 20 draws, the 10th to 90th percentile shaded), this draw's fit marked
+  const L = String(TR.layer), c = CV[L], w = 210, h = 58;
+  const x = d3.scaleLog().domain([2, c.n[c.n.length - 1]]).range([8, w - 8]), y = d3.scaleLinear().domain([0.5, 1]).range([h - 13, 4]);
+  const band = d3.area().x((d) => x(d.n)).y0((d) => y(d.lo)).y1((d) => y(d.hi))(c.n.map((n, i) => ({ n, ...c.lr[i] })));
+  const line = d3.line().x((d) => x(d.n)).y((d) => y(d.mean))(c.n.map((n, i) => ({ n, ...c.lr[i] })));
+  const f = TR.fits[j];
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-hidden="true"><line class="sp-half" x1="8" x2="${w - 8}" y1="${y(0.95)}" y2="${y(0.95)}"/>` +
+    `<path class="sp-band" d="${band}"/><path class="sp-line" d="${line}"/><line class="sp-now" x1="${x(f.n)}" x2="${x(f.n)}" y1="2" y2="${h - 13}"/>` +
+    `<circle class="sp-dot" cx="${x(f.n)}" cy="${y(f.acc)}" r="3.6"/><text class="sp-t" x="8" y="${h - 1}">2</text>` +
+    `<text class="sp-t" x="${w - 8}" y="${h - 1}" text-anchor="end">${c.n[c.n.length - 1].toLocaleString("en-US")}</text>` +
+    `<text class="sp-t" x="${w / 2}" y="${h - 1}" text-anchor="middle">n (log) · dashed 95%</text></svg>`;
+}
+function trainerView(j, { hidden = false } = {}) {
+  const f = TR.fits[j], fr = trainerFrame(j), last = j === TR.fits.length - 1;
+  const held = IDX.map((i) => ({ key: `tr:h${i}`, c: TR.held[i], truth: hidden ? null : lab.aff[i], shape: "c", text: txt.aff[i] }));
+  const nShow = hidden ? 0 : Math.min(f.n, TR.train.coords.length);
+  const train = TR.train.coords.slice(0, nShow).map((c, q) => ({ key: `tr:t${q}`, c, truth: TR.train.label[q], shape: "c", ring: true, noPaper: true,
+    text: TR.train.text[q] }));
+  const sc = { kx: trScale.kx, ky: trScale.ky, cx: f.thr, cy: d3.mean(TR.held, (r) => dot(r, fr.v)) };
+  const ang = Math.round(trAngle(f));
+  const mean = CV[String(TR.layer)].lr[j];
+  return {
+    layer: TR.layer, space: "trainer", pts: [...held, ...train], frame: fr, sc, probe: trProbe(f), choreo: "move",
+    ghosts: last ? [] : [{ ...trProbe(trFinal), id: "final", angle: `${ang}°` }],
+    paperLabel: PAPER(), axes: { x: "onto this probe's ŵ →", y: last ? "" : "final probe's ŵ, part ⊥ ↑" },
+    legend: [...LG.tf, { glyph: "ring", text: f.n > nShow ? `fitted to (${nShow} of ${f.n} drawn)` : "fitted to" },
+      ...(last ? [] : [{ glyph: "ghost", text: "the final probe's boundary" }])],
+    title: last ? `Fitted to all ${f.n.toLocaleString("en-US")} training statements` : `Fitted to ${f.n} statements`,
+    badge: badge("real", `Qwen2.5-1.5B · layer ${TR.layer} · one draw of n training statements, half true · plane of this probe and the final one, true proportions`),
+    readouts: RO(fmt.pct1(f.acc), `new statements read correctly · this draw · mean of 20 draws ${fmt.pct1(mean.mean)}`) +
+      RO(last ? "0°" : `${ang}°`, "from the final probe's direction", "ink") +
+      `<div class="ro">${curveSpark(j)}<span>held-out accuracy by n, 20 draws</span></div>`,
+    six: {},
+  };
+}
+
 function regView(ci) {
   const l = 12, q = pathEval[ci];
   const probe = { coef: q.coef, thr: q.thr, norm: q.norm, kind: "lr" };
@@ -379,6 +660,68 @@ function regView(ci) {
 const cLabel = (C) => (C >= 1 ? d3.format("~g")(C) : C >= 1e-3 ? d3.format("~g")(C) : `10${sup(Math.round(Math.log10(C)))}`);
 const sup = (n) => String(n).split("").map((ch) => "⁰¹²³⁴⁵⁶⁷⁸⁹"["0123456789".indexOf(ch)] ?? (ch === "-" ? "⁻" : ch)).join("");
 
+// ---- contrast pairs: every held-out city's two statements, joined; their mean difference is Δμ ----
+function pairsView(l) {
+  const P_ = Ls(l).probes;
+  const u = unit(P_.dmu.coef), v = orthTo(P_.w.coef, u);
+  const frame = { u, v };
+  const probe = { ...P_.dmu, kind: "dim" };
+  // rows 2k and 2k+1 are one city's true and false statements; phones draw every fourth city
+  const cities = d3.range(0, N_ALL, 2).filter((_, k) => !narrow || k % 4 === 0);
+  const pts = cities.flatMap((i) => [i, i + 1]).map((i) => ({ key: `${l}:p${i}`, c: Ls(l).coords.aff[i], truth: lab.aff[i], shape: "c", text: txt.aff[i] }));
+  const pairs = cities.map((i) => [`${l}:p${i + 1}`, `${l}:p${i}`]);
+  const means = Ls(l).means;
+  const sc = scaleFor(frame, Ls(l).coords.aff, { aspect: "equal", probe });
+  const PR = FIND.pairs[String(l)];
+  return {
+    layer: l, space: `L${l}`, pts, frame, sc, probe, pairs, choreo: "move", levels: false,
+    arrows: [{ id: "dmu", from: means.aff_false, to: means.aff_true, cls: "gold", label: "Δμ", dy: -16 }],
+    paperLabel: PAPER("Δμ"), axes: { x: "along Δμ →", y: "w, the part ⊥ Δμ ↑" },
+    legend: [...LG.tf, { glyph: "pair", text: "a city's two statements" }, { glyph: "arrow", text: "Δμ, their mean difference" }],
+    title: "Every pair, and their average",
+    badge: badge("real", `Qwen2.5-1.5B · layer ${l} · held-out cities, one segment per pair · plane of Δμ and w, true proportions`),
+    readouts: RO(PR.cos_mean.toFixed(2), "a pair's difference vs Δμ: mean cosine in all 1,536 dimensions") +
+      RO(`0 ± ${PR.random_sd.toFixed(2)}`, "the same, for random directions", "ink") +
+      RO(fmt.pct1(PR.pca_acc), "no labels: PCA of the differences (one pair sets the sign)", PR.pca_acc < 0.6 ? "ink" : "gold"),
+    six: { 1: "done" },
+  };
+}
+
+// ---- Othello, schematic: one square's states in the plane of two directions the model is hypothesized to hold ----
+// ownership (the piece is mine / yours: the player to move owns "mine") across, whose turn it is up. A black piece is
+// "mine" on black's turn and "yours" on white's, so black pieces sit in two opposite quadrants: an XOR no single
+// direction splits. Drawn from a fixed seed, as illustration (Nanda's hypothesis), not data.
+const OTH = (() => {
+  const rnd = d3.randomLcg(7), n = d3.randomNormal.source(rnd)(0, 0.42);
+  const pts = [];
+  for (const o of [1, -1]) for (const t of [1, -1]) for (let i = 0; i < (narrow ? 34 : 70); i++) pts.push({ o, t, c: [1.55 * o + n(), 1.15 * t + n()] });
+  return pts;
+})();
+function othelloView(labels, angle) {
+  const a = (angle * Math.PI) / 180;
+  const u = [Math.cos(a), Math.sin(a)], v = [-Math.sin(a), Math.cos(a)];
+  const bw = labels === "bw";
+  const pts = OTH.map((q, i) => ({ key: `oth${i}`, c: q.c, truth: bw ? (q.o * q.t > 0 ? 1 : 0) : (q.o > 0 ? 1 : 0), shape: "c",
+    text: `${q.o > 0 ? "my" : "your"} piece, ${q.t > 0 ? "black" : "white"} to move: ${q.o * q.t > 0 ? "black" : "white"}` }));
+  const frame = { u, v };
+  const probe = { coef: u, thr: 0, kind: "dim" };
+  const sc = { kx: narrow ? 78 : 74, ky: narrow ? 78 : 74, cx: 0, cy: 0.05 };
+  return {
+    layer: null, space: "othello", gridNote: false, pts, frame, sc, probe, choreo: "move", lattice: { u: [1, 0], v: [0, 1] }, counts: false, binW: narrow ? 10 : 8,
+    paperLabel: "position along the probe's direction (illustrative units)",
+    axes: angle ? { x: "", y: "" } : { x: "“mine vs yours” →", y: "whose turn ↑" },
+    legend: bw ? [{ glyph: "true", text: "black piece" }, { glyph: "false", text: "white piece" }]
+      : [{ glyph: "true", text: "my piece (the player to move)" }, { glyph: "false", text: "your piece" }],
+    groups: angle ? [] : [
+      { label: "black to move", test: (s_) => s_.c1[1] > 0 && s_.c1[0] > 0, corner: "tr" },
+      { label: "white to move", test: (s_) => s_.c1[1] < 0 && s_.c1[0] > 0, corner: "br" }],
+    title: bw ? "Labelled black and white: an XOR" : "Labelled mine and yours: one direction",
+    badge: badge("schematic", "one square's states, as Nanda hypothesized them · the accuracies are Nanda et al.'s, Table 1"),
+    readouts: RO("75.0%", "linear probe: black, white or empty", bw ? "gold" : "ink") + ARROW + RO(bw ? "?" : "99.6%", "linear probe: mine, yours or empty", bw ? "ink" : "gold"),
+    six: { 1: "now" },
+  };
+}
+
 function fixFrames(l) {
   const w = unit(Ls(l).probes.w.coef), w2 = unit(Ls(l).probes.w2.coef);
   const A = { u: w, v: orthTo(w2, w) };
@@ -413,7 +756,70 @@ function fixView(l, set, stage) {
     title: stage === "A" ? "The old probe, in the plane of both" : cities ? "Retrained on both polarities" : "The retrained probe, Spanish words",
     badge: badge("real", `Qwen2.5-1.5B · layer ${l} · retrained on “is in” and “is not in” · plane of both probes`),
     readouts: stage === "A" ? RO(fmt.pct1(e1.neg.acc), "the old probe on “is not in”", "ink") : ro,
-    six: { 1: "done", 2: "now" },
+    six: { 1: "done", 2: "now", 3: "now" },
+  };
+}
+
+// ---- the push (layer 16): each direction scaled by Marks & Tegmark's rule, and the model's answer (push.json) ----
+const PG = PUSH.geometry;
+const theta = (() => {
+  const m = Ls(16).means, dmu = m.aff_true.map((x, i) => x - m.aff_false[i]);
+  const wh = unit(Ls(16).probes.w.coef), k = dot(wh, dmu);
+  return { mm: dmu, lr: wh.map((x) => x * k) };          // lr: (ŵ·Δμ) ŵ, shorter by the cosine
+})();
+/** The model's answer (P(TRUE) − P(FALSE)) for a Krasnodar statement pushed by alpha along a direction, from the sweep. */
+function krAnswer(dir, which, alpha) {
+  const K_ = PUSH.krasnodar, a = K_.alphas, v = K_[dir][which];
+  const j = d3.bisectLeft(a, alpha);
+  if (j <= 0) return v[0];
+  if (j >= a.length) return v[a.length - 1];
+  const t = (alpha - a[j - 1]) / (a[j] - a[j - 1]);
+  return v[j - 1] + (v[j] - v[j - 1]) * t;
+}
+function answerGauge(pd, base) {
+  // the model's answer on paper: P(TRUE) − P(FALSE) from −1 to +1; the unpushed answer dashed
+  const w = 220, h = 50, x = d3.scaleLinear().domain([-1, 1]).range([10, w - 10]);
+  return `<svg class="spark gauge" viewBox="0 0 ${w} ${h}" aria-hidden="true"><line class="g-axis" x1="10" x2="${w - 10}" y1="22" y2="22"/>` +
+    `<line class="g-mid" x1="${x(0)}" x2="${x(0)}" y1="12" y2="32"/><line class="g-base" x1="${x(base)}" x2="${x(base)}" y1="8" y2="36"/>` +
+    `<rect class="g-bar" x="${Math.min(x(0), x(pd))}" y="16" width="${Math.abs(x(pd) - x(0))}" height="12"/>` +
+    `<text class="sp-t" x="10" y="${h - 2}">FALSE</text><text class="sp-t" x="${w - 10}" y="${h - 2}" text-anchor="end">TRUE</text>` +
+    `<text class="sp-t" x="${x(0)}" y="${h - 2}" text-anchor="middle">0</text></svg>`;
+}
+function pushView({ dir, which, alpha }) {
+  const l = 16, P_ = Ls(l).probes;
+  const u = unit(P_.dmu.coef), v = orthTo(P_.w.coef, u), frame = { u, v };
+  const means = Ls(l).means;
+  const probe = { ...P_.dmu, kind: "dim" };
+  const sc = scaleFor(frame, Ls(l).coords.aff, { aspect: "equal", probe });
+  const ki = which === "false" ? K.false : K.true, sign = which === "false" ? 1 : -1;
+  const a = sign * alpha;
+  const k0 = Ls(l).coords.aff[ki];
+  const kc = k0.map((x, i) => x + a * theta[dir][i]);
+  const pts = pointsFor(l, "aff", "p", "c").map((q) => (q.key === `${l}:p${ki}` ? { ...q, c: kc } : q));
+  // both pushes drawn from the statement's own state, at Marks and Tegmark's length (the vector that carries the average
+  // false statement to the average true one, for each probe)
+  const from = k0, tipMM = k0.map((x, i) => x + sign * theta.mm[i]), tipLR = k0.map((x, i) => x + sign * theta.lr[i]);
+  const compLR = k0.map((x, i) => x + sign * dot(theta.lr, u) * u[i]);     // the logistic push's component along Δμ
+  const pd = krAnswer(dir, which, a), base = krAnswer(dir, which, 0);
+  const cos = PG.cos_w_dmu, nie = PUSH.nie.cities, j1 = PUSH.meta.alphas.indexOf(1);
+  const nameOf = { mm: "Δμ", lr: "w" };
+  return {
+    layer: l, space: `L${l}`, pts, frame, sc, probe, choreo: "move", levels: false, counts: false,
+    arrows: [
+      { id: "mm", from, to: tipMM, cls: dir === "mm" ? "violet" : "violet faint", label: "the Δμ push", dy: -16 },
+      { id: "lr", from, to: tipLR, cls: dir === "lr" ? "violet" : "violet faint", label: "the w push", dx: -8, dy: 26, anchor: "end" },
+      { id: "comp", from: tipLR, to: compLR, cls: "violet dash", label: "" },
+    ],
+    means: [{ c: means.aff_true, label: "μ true", dx: 12, dy: -12 }, { c: means.aff_false, label: "μ false", dx: -12, dy: 26, anchor: "end" }],
+    cards: [{ key: `${l}:p${ki}`, text: `${which === "false" ? "…in China." : "…in Russia."} ${alpha ? `pushed ${alpha}×` : "unpushed"}` }],
+    paperLabel: PAPER("Δμ"), axes: { x: "along Δμ →", y: "w, the part ⊥ Δμ ↑" },
+    legend: [],
+    title: dir === "mm" ? "Pushed along the difference of means" : "Pushed along the logistic direction",
+    badge: badge("real", `Qwen2.5-1.5B · directions fitted at layer 16 · pushed at layers 14–18, last two tokens · the model's own answer`),
+    readouts: `<div class="ro">${answerGauge(pd, base)}<span>${narrow ? "the model's answer: P(TRUE) − P(FALSE) · dashed: unpushed" : `the model's answer to “${which === "false" ? "…is in China." : "…is in Russia."} This statement is:” · P(TRUE) − P(FALSE) · dashed: unpushed`}</span></div>` +
+      RO(`${nie.mm.f2t[j1].toFixed(2)} · ${nie.lr.f2t[j1].toFixed(2)}`, "false → true · 100 held-out false statements · Δμ · w (1 = as if true)", "gold"),
+    six: { 1: "done", 2: "done", 3: "done", 4: "now" },
+    _cos: cos, _name: nameOf[dir],
   };
 }
 
@@ -441,7 +847,54 @@ function gpView(l) {
     badge: badge("real", `Qwen2.5-1.5B · layer ${l} · plane of g and p (p made orthogonal to g) · true proportions`),
     readouts: RO(fmt.pct1(e.aff.acc), "along g: “is in”", "gold") + RO(fmt.pct1(e.neg.acc), "along g: “is not in”", "gold") +
       RO(`${cosOf(l, "w", "tP").toFixed(2)} · ${cosOf(l, "w", "tG").toFixed(2)}`, "the old probe's cosines with p and g", "ink"),
-    six: { 1: "done", 2: "done" },
+    six: { 1: "done", 2: "done", 3: "done" },
+  };
+}
+
+// ---- chapter IV: the probe as a monitor ----
+function jobView(job) {
+  // Fig. 3's exact view; as a monitor the labels go (one grey histogram) and the side it flags is shaded
+  const mon = job === "monitor", l = 12;
+  const v = viewAff(l);
+  const pts = mon ? v.pts.map((q) => ({ ...q, truth: null })) : v.pts;
+  const s = scores(Ls(l).coords.aff, probeOf(l, "w"));
+  const flagged = s.filter((x) => x <= 0).length, right = s.filter((x, i) => (x <= 0) === (lab.aff[i] === 0) && x <= 0).length;
+  return {
+    ...v, pts, choreo: "move", paperUnknown: mon, flagSide: mon ? "left" : null, counts: !mon,
+    legend: mon ? [{ glyph: "hidden", text: "a statement, label unknown" }, { glyph: "flag", text: "flagged: read as false" }] : [...LG.tf],
+    title: mon ? "The same probe, as a monitor" : "The probe, doing science",
+    badge: badge("real", `Qwen2.5-1.5B · layer 12 · final token · ${N_ALL.toLocaleString("en-US")} statements from held-out cities`),
+    readouts: mon ? RO(`${flagged.toLocaleString("en-US")}`, `of ${N_ALL.toLocaleString("en-US")} flagged: read as false`, "gold") + RO("?", "of the flags, how many are right", "ink")
+      : RO(fmt.pct1(E[l].w.aff.acc), "read correctly: the labels are known", "gold") + RO(`${right.toLocaleString("en-US")} of ${flagged.toLocaleString("en-US")}`, "flags that are right: false statements read as false", "ink"),
+    six: { 1: "done", 2: "now", 3: "done", 4: "done", 5: "now" },
+  };
+}
+/** The dial's readouts, computed from the drawn samples (the same ones the histograms show). */
+function dialRead(st) {
+  const C = M4.dialClasses(MON, st);
+  const chat = M4.drawnSamples(C.chat);
+  const out = { fpr: M4.shareAbove(chat, st.tick) };
+  if (C.honest) {
+    const hon = M4.drawnSamples(C.honest), dec = M4.drawnSamples(C.deceptive);
+    Object.assign(out, { recall: M4.shareAbove(dec, st.tick), honestUp: M4.shareAbove(hon, st.tick), auroc: M4.aurocOf(dec, hon) });
+  }
+  return out;
+}
+const TICK_STEP = 0.07;
+const tickOf = (v) => MON.meta.tick + (v - 50) * TICK_STEP;          // the slider's middle is the published threshold
+function dialStep() {
+  const st = { probe: ui.dial.probe, traffic: ui.dial.traffic, tick: tickOf(ui.tick) };
+  const r = dialRead(st), bd = st.traffic === "bd";
+  const pub = ui.tick === 50;
+  return {
+    scene: "paper",
+    title: bd ? "Probe A on a backdoor task" : `Probe ${st.probe}: ${st.probe === "A" ? "instructed pairs" : "role-play"}`,
+    badge: badge("illustrative", "shapes ours · at the published threshold the readouts reproduce Parrack, Attubato and Heimersheim, Tables 3 and 7 (Llama-3.3-70B-Instruct, Apollo's probes)"),
+    readouts: RO(r.auroc.toFixed(3), `AUROC, deceptive vs honest${bd ? " (Backdoors)" : ""}`, "ink") +
+      RO(fmt.pct1(r.fpr), pub ? "of chat flagged: the published threshold" : "of chat flagged", "gold") +
+      RO(fmt.pct1(r.recall), `of the lies flagged: recall${bd ? ` · honest flagged too: ${fmt.pct0(r.honestUp)}` : ""}`, "gold"),
+    paper: M4.dialView(MON, st),
+    six: { 1: "done", 2: "done", 3: "done", 4: "done", 5: "now" },
   };
 }
 
@@ -480,16 +933,15 @@ async function render(i, prev) {
     const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); res(); } }, { threshold: 0.4 });
     io.observe(document.querySelector(".stage .panel"));
   });
-  if (v.scene === "pipe") {
-    fig.setVisible(false, prev === -1 ? 0 : 350);
-    pipe.setVisible(true, prev === -1 ? 0 : 450);
+  const scene = v.scene ?? "fig";
+  const fade = (on) => (prev === -1 ? 0 : on ? 450 : 350);
+  for (const [name, sc] of [["fig", fig], ["pipe", pipe], ["paper", paper]]) if ((name === scene) !== !sc.hidden || prev === -1) sc.setVisible(name === scene, fade(name === scene));
+  if (scene !== "fig") {
     setReadouts(v.readouts);
     if (prev === -1 && !reduced && offscreen()) { await onscreen(); if (my !== token) return; }
-    await pipe.show(v.pipe);
+    await (scene === "pipe" ? pipe.show(v.pipe) : paper.show(v.paper));
     return;
   }
-  pipe.setVisible(false, prev === -1 ? 0 : 350);
-  fig.setVisible(true, prev === -1 ? 0 : 450);
   withDrawn(v);
   if (prev === -1 && !reduced && offscreen()) {
     // an empty glass first, so the figure's own choreography plays when it arrives
@@ -514,6 +966,51 @@ async function render(i, prev) {
     await sleep(700);
     if (my !== token) return;
   }
+  if (i === STEP.push && prev !== STEP.push && !reduced) {
+    const v0 = V.push();
+    const k0 = { ...v0, pts: v0.pts.map((q) => (q.key === `16:p${ui.push.which === "false" ? K.false : K.true}` ? { ...q, c: Ls(16).coords.aff[ui.push.which === "false" ? K.false : K.true] } : q)) };
+    await fig.show({ ...k0, arrows: [{ ...v0.arrows[0], cls: "gold", label: "Δμ" }], cards: [], choreo: "move" });
+    if (my !== token) return;
+    await sleep(700);
+    if (my !== token) return;
+    await fig.show({ ...k0, arrows: [{ ...v0.arrows[0], cls: "violet", label: v0.arrows[0].label }], cards: [], choreo: "move" });
+    if (my !== token) return;
+    await sleep(900);
+    if (my !== token) return;
+    await fig.show({ ...k0, arrows: v0.arrows.slice(0, 2), cards: [], choreo: "move" });
+    if (my !== token) return;
+    await sleep(600);
+    if (my !== token) return;
+    await fig.show({ ...k0, arrows: v0.arrows, choreo: "move" });
+    if (my !== token) return;
+    await sleep(500);
+    if (my !== token) return;
+  }
+  if (i === STEP.othello && prev !== STEP.othello && !reduced) {
+    // one full turn of the probe's direction, in three steps: black and white never come apart
+    for (const ang of [0, 120, 240, 360]) {
+      if (my !== token) return;
+      await fig.show({ ...othelloView("bw", ang), choreo: ang ? "move" : "read" });
+      if (my !== token) return;
+      await sleep(ang === 0 ? 900 : ang === 360 ? 800 : 150);
+    }
+    if (my !== token) return;
+    await fig.show({ ...othelloView(ui.oth.labels, 0), choreo: "flip" });
+    return;
+  }
+  if (i === STEP.curve && prev !== STEP.curve && !reduced) {
+    for (const j of d3.range(0, ui.curve)) {
+      if (my !== token) return;
+      const f = trainerView(j);
+      await fig.show(f);
+      d3.select("#fig-title").text(f.title);
+      setCurveOut(j);
+      if (my !== token) return;
+      await sleep(900);
+    }
+    setCurveOut(ui.curve);
+    if (my !== token) return;
+  }
   if (i === STEP.layer && prev !== STEP.layer && !reduced) {
     // a flipbook through the layers, 0 → 28, then back to where the slider was
     const target = ui.layer;
@@ -533,7 +1030,7 @@ async function render(i, prev) {
   await fig.show(v);
 }
 
-// the level-set spacing each label condition of Fig. 2 is drawn with (it depends on ‖w‖ and the shared scale)
+// the level-set spacing each label condition of the fit figure is drawn with (it depends on ‖w‖ and the shared scale)
 {
   const saved = ui.fit.labels, stepTxt = (k) => `${k} logit${k === 1 ? "" : "s"}`;
   for (const lb of ["coin", "real"]) { ui.fit.labels = lb; const v = V.fit(); NUM[`${lb}_step`] = stepTxt(fig.levelStep(v.probe, v.sc)); }
@@ -545,7 +1042,9 @@ document.querySelectorAll("[data-n]").forEach((el) => {
   const v = NUM[el.dataset.n];
   if (v != null) el.textContent = v;
 });
-// the stretch of Fig. 1, from its own scale
+// figure numbers in the prose follow the step order
+document.querySelectorAll("[data-fig]").forEach((el) => { el.textContent = `Fig. ${STEP[el.dataset.fig] + 1}`; });
+// the stretch of the probe's figure, from its own scale
 {
   const sc = flipScale(12);
   document.querySelectorAll('[data-n="stretch1"]').forEach((el) => { el.textContent = (sc.kx / sc.ky).toFixed(1); });
@@ -565,15 +1064,33 @@ document.querySelectorAll(".check").forEach((box) => {
     const i = window.explainer.current, v = views[i]();
     token++;
     if (v.scene === "pipe") { setReadouts(v.readouts); pipe.show({ ...v.pipe, choreo: "play" }); }
+    else if (v.scene === "paper") { setReadouts(v.readouts); paper.show(v.paper); }
     else fig.show({ ...v, choreo: "move" });
   });
 });
 
 const FEEDBACK = {
+  lr: "It reads best, and pushes least: its push is short and mostly sideways to the class means.",
+  mm: `Right: ${NUM.nie_mm} of the way to true along Δμ, ${NUM.nie_lr} along w.`,
+  same: "Each probe reads the pushed state as true, but the model doesn't read it through either probe.",
+  nonlin: "Li and colleagues' conclusion; the next step shows the board is linear in another labelling.",
+  other: "Right: squares labelled mine and yours are read linearly at 99.6%.",
+  nothing: "The directions are used: editing along them changes the model's moves as the new board requires.",
+  10: `Right: eight statements give ${NUM.c16_8} on average, four ${NUM.c16_4}.`,
+  100: `128 give ${NUM.c16_100}, but eight already give ${NUM.c16_8}: the direction is large and clean here, so a few examples find it.`,
+  1000: "“More examples than dimensions” is what it takes to stop a probe from fitting any labels at all (the next step); finding a salient direction takes far fewer.",
   99: `The negated statements' states do carry their truth: a probe retrained on both reads them at ${NUM.w2neg12}, on the next step. This probe's direction doesn't read it.`,
   75: "Not noise: the errors are systematic, as the ranking shows.",
   50: "That is what layer 16 scores, for a different reason (below).",
   30: `Right: ${fmt.pct1(E[12].w.neg.acc)}, and ranked almost perfectly upside down.`,
+  "p5:99": "What probe A did: 100% of the lies above the threshold.",
+  "p5:50": "What the slider shows when you drag the threshold into the lies.",
+  "p5:1": "What probe B did, at the same AUROC: 0.9%.",
+  "p5:any": "Right: the AUROC is the same 0.999 for both of Apollo's probes below, and their recalls are 100% and 0.9%.",
+  "p6:mean": "Right: evaded on 82% of harmful answers, mostly by padding them with text the probe scores low.",
+  "p6:max": "It held: evaded on 4.4%. One loud token is enough to flag the answer.",
+  "p6:attn": "It held best: 1.8%.",
+  "p6:none": "The policy doesn't need the probe's gradients: the reward tells it what gets flagged, and RL searches for text that doesn't.",
 };
 document.querySelectorAll(".guess").forEach((box) => {
   box.addEventListener("click", (e) => {
@@ -588,19 +1105,28 @@ function echoGuesses() {
     const g = guesses[el.dataset.echo];
     const box = document.querySelector(`.guess[data-q="${el.dataset.echo}"]`);
     const opts = box ? [...box.querySelectorAll("button")].map((b) => ({ a: b.dataset.a, label: b.textContent.split(":")[0].trim() })) : [];
-    const list = opts.map((o) => `<li class="${o.a === g?.a ? "mine" : ""}"><b>${o.label}</b> ${FEEDBACK[o.a] ?? ""}</li>`).join("");
+    const list = opts.map((o) => `<li class="${o.a === g?.a ? "mine" : ""}"><b>${o.label}</b> ${FEEDBACK[`${el.dataset.echo}:${o.a}`] ?? FEEDBACK[o.a] ?? ""}</li>`).join("");
     el.innerHTML = (g ? `You said <b>${g.text.split(":")[0]}</b>. ` : "") + `<ul class="fb">${list}</ul>`;
     el.classList.toggle("right", !!g?.right);
   });
 }
 
 const LEDGER = {
+  3: ["Activations or text?", `Could a reader of the text alone get the label? One that knows geography could: the label is a fact about the words, and the model itself answers ${NUM.model_acc} of them when asked. Cheap cues in the text don't carry it: the country's name alone reads ${NUM.country_baseline} (by construction), the statement's spelling ${NUM.text_mlp}. Chapter IV meets monitors whose target is spelled out in the text itself.`],
+  4: ["Read or used?", `Reading well doesn't make a direction the best handle. By Marks and Tegmark's rule the difference of means moved false statements' answers ${NUM.nie_mm} of the way to true, the logistic direction ${NUM.nie_lr}, mostly because its push is short along Δμ. At each method's best strength, other groups still find probe directions steer worse.`],
+  "1b": ["Representation or probe?", "A probe with a hidden layer can compute what it reports, and a linear probe can fail by asking in the wrong basis. Othello's board is linear in mine/yours; the non-linear probe may have recombined two directions (Nanda's speculation)."],
   1: ["Representation or probe?", "A perfect training fit is guaranteed whenever there are no more points than dimensions plus one (here 300 against 1,537). Held-out accuracy and controls are what separate a representation from a probe that memorized."],
   2: ["Concept or dataset?", "This probe partly read (our reading) a quirk of its training data, city–country match: it leans on p as much as on g. Test on shifted data, and read the ranking (AUROC), not only accuracy."],
+  "2b": ["Concept or dataset?", "At deployment a probe reads the concept in play, whoever's it is: misalignment probes fired on 97.7% of role-played misaligned reasoning. What it flags is what its training set separated."],
+  5: ["At deployment?", "A monitor is a threshold set on other data. Two probes with the same AUROC, 0.999, and the same rule catch 100% and 0.9% of the lies. Report recall at the deployed threshold, and the false alarms it costs."],
+  "3b": ["Activations or text?", "In monitoring the behaviour is often spelled out. Remove the tokens that say it and sandbagging probes lose 10 to 30 points of AUROC; on a model that never says it, the probe reads chance. The probe's value is the boost over a reader of the text."],
+  6: ["Under pressure?", "A frozen probe in an RL reward is evaded through the text first: the mean-pooled probe on 82% of harmful answers, the max-pooled one on 4.4%, and the survivors pay with false alarms on long inputs. No gradients through the probe; keep one monitor training never sees."],
+  "6b": ["Under pressure?", "And with no pressure at all: after ordinary RL a fresh deception probe fell from AUC 0.991 to 0.376, and agents shown the monitor's scores kept their ranking while recall at a frozen threshold fell from 0.95 to 0.41. Re-validate after any training."],
+  "4b": ["Read or used?", "A used direction is a handle: it can monitor, flag training data, steer, and prevent drift. A good handle isn't thereby a good reader, and a steering result is only as good as its control."],
 };
 document.querySelectorAll(".ledger").forEach((el) => {
   const [q, a] = LEDGER[el.dataset.qn];
-  el.innerHTML = `<span class="ledger-k">Question ${el.dataset.qn} of 6 · answered</span><b>${q}</b><span>${a}</span>`;
+  el.innerHTML = `<span class="ledger-k">Question ${parseInt(el.dataset.qn, 10)} of 6 · ${/b$/.test(el.dataset.qn) ? "more of the answer" : "answered"}</span><b>${q}</b><span>${a}</span>`;
 });
 d3.selectAll("#six li").attr("title", function () { const L_ = LEDGER[this.dataset.q]; return L_ ? `${L_[0]} ${L_[1]}` : "answered later in the piece"; });
 
@@ -611,10 +1137,12 @@ document.querySelectorAll(".toggles").forEach((box) => {
     if (!b) return;
     ui[box.dataset.for][b.dataset.k] = b.dataset.v;
     box.querySelectorAll(`button[data-k="${b.dataset.k}"]`).forEach((o) => o.classList.toggle("on", o === b));
+    if (box.dataset.for === "dial") setTickOut();
     const i = window.explainer.current;
     token++;
     const v = views[i]();
     if (v.scene === "pipe") { setReadouts(v.readouts); pipe.show(v.pipe); }
+    else if (v.scene === "paper") { setReadouts(v.readouts); paper.show(v.paper); }
     else fig.show({ ...withDrawn(v), choreo: box.dataset.for === "flip" || box.dataset.k === "layer" ? "move" : box.dataset.for === "fit" ? "read" : "move" });
     d3.select("#fig-title").text(v.title);
     d3.select("#fig-badge").html(v.badge);
@@ -656,6 +1184,67 @@ layerIn?.addEventListener("input", () => {
   d3.select("#readouts").interrupt().style("opacity", 1).html(v.readouts);
 });
 setLayerOut(ui.layer);
+
+// the n slider: each position is one fit of the nested draw
+const curveIn = document.getElementById("curve-n");
+const curveOut = document.getElementById("curve-out");
+function setCurveOut(j) {
+  const f = TR.fits[j];
+  if (curveIn) curveIn.value = String(j);
+  if (curveOut) curveOut.innerHTML = `n = <b>${f.n.toLocaleString("en-US")}</b> · <b>${fmt.pct1(f.acc)}</b> of new statements · ` +
+    `<b>${Math.round(trAngle(f))}°</b> from the final probe`;
+}
+curveIn?.addEventListener("input", () => {
+  ui.curve = Number(curveIn.value);
+  setCurveOut(ui.curve);
+  if (window.explainer.current !== STEP.curve) return;
+  token++;
+  const v = V.curve();
+  d3.select("#fig-title").text(v.title);
+  fig.show(withDrawn({ ...v, choreo: "move" }));
+});
+setCurveOut(ui.curve);
+
+// the push strength: alpha in quarters of Marks and Tegmark's scale, 0 to 2
+const pushIn = document.getElementById("push-a");
+const pushOut = document.getElementById("push-out");
+function setPushOut() {
+  const { dir, which, alpha } = ui.push, a = which === "false" ? alpha : -alpha;
+  const len = alpha * Math.hypot(...theta[dir]);
+  if (pushOut) pushOut.innerHTML = `strength <b>${alpha}×</b> · <b>${len.toFixed(1)}</b> units per layer, ` +
+    `${Math.round(5 * len)} by layer 18 (a state is about ${Math.round(PG.h_norm_mean)}) · the model: <b>${krAnswer(dir, which, a) > 0 ? "TRUE" : "FALSE"}</b>`;
+}
+pushIn?.addEventListener("input", () => {
+  ui.push.alpha = Number(pushIn.value) / 4;
+  setPushOut();
+  if (window.explainer.current !== STEP.push) return;
+  token++;
+  const v = V.push();
+  d3.select("#fig-title").text(v.title);
+  fig.show(withDrawn({ ...v, choreo: "move" }));
+});
+if (pushIn) pushIn.value = String(ui.push.alpha * 4);
+setPushOut();
+
+// the dial's threshold: the middle of the slider is the published one (1% of chat)
+const tickIn = document.getElementById("tick-t");
+const tickOut = document.getElementById("tick-out");
+function setTickOut() {
+  const st = { probe: ui.dial.probe, traffic: ui.dial.traffic, tick: tickOf(ui.tick) }, r = dialRead(st);
+  if (tickOut) tickOut.innerHTML = `flags <b>${fmt.pct1(r.fpr)}</b> of chat · catches <b>${fmt.pct1(r.recall)}</b> of the lies` +
+    ` · AUROC <b>${r.auroc.toFixed(3)}</b>${ui.tick === 50 ? " · the published threshold" : ""}`;
+}
+tickIn?.addEventListener("input", () => {
+  ui.tick = Number(tickIn.value);
+  setTickOut();
+  if (window.explainer.current !== STEP.dial) return;
+  token++;
+  const v = V.dial();
+  d3.select("#fig-title").text(v.title);
+  setReadouts(v.readouts);
+  paper.show(v.paper);
+});
+setTickOut();
 
 // ---- side dish: Cover's function-counting curve, for d = 5, 50 and 1,536 ----
 (function coverCurve() {

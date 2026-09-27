@@ -66,7 +66,7 @@ different model from the one that wrote the piece. The experience check runs on 
   why in `review.md`; never drop it silently.
 
 ## 3b. Performance, at the end of a piece (and before sharing it)
-Once content and visuals have settled, dispatch `performance-reviewer` (Sonnet; pass `model: "sonnet"`) with the project
+Once content and visuals have settled, dispatch `performance-reviewer` (Opus; pass `model: "opus"`) with the project
 path and, if the site is up, the live GitHub Pages URL. It measures load, every step's transition, sliders, the hero and
 phones under CPU throttling, against the budgets in its definition, and proposes same-pixel fixes. To have it implement
 them, run it with `isolation: "worktree"`; then check its pixel diffs and before/after numbers, run the functional tests

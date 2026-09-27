@@ -75,6 +75,11 @@ export class Figure {
     defs.append("filter").attr("id", `${this.id}-card`).attr("x", "-10%").attr("y", "-30%").attr("width", "120%").attr("height", "170%")
       .html(`<feDropShadow dx="0" dy="1.5" stdDeviation="1.6" flood-color="#3c2d14" flood-opacity="0.22"/>`);
 
+    for (const [k, col] of [["gold", "var(--overseer)"], ["violet", "var(--feature)"]]) {
+      defs.append("marker").attr("id", `${this.id}-ah-${k}`).attr("viewBox", "0 0 10 10").attr("refX", 7).attr("refY", 5)
+        .attr("markerWidth", 5.5).attr("markerHeight", 5.5).attr("orient", "auto-start-reverse")
+        .append("path").attr("d", "M0,0L10,5L0,10z").style("fill", col);
+    }
     const clipG = `url(#${this.id}-glass)`, clipP = `url(#${this.id}-paper)`;
     this.clip = { glass: clipG, paper: clipP };
     s.append("rect").attr("class", "glass-bg").attr("x", G.x0).attr("y", G.y0).attr("width", G.x1 - G.x0)
@@ -86,8 +91,10 @@ export class Figure {
     this.gLevels = g.append("g").attr("class", "levels");
     this.gGhosts = g.append("g").attr("class", "ghosts");
     this.gTrailsG = g.append("g").attr("class", "trails");
-    this.gRings = g.append("g").attr("class", "rings");
+    this.gPairs = g.append("g").attr("class", "pairs");          // segments joining twin statements
     this.gPts = g.append("g").attr("class", "pts");
+    this.gRings = g.append("g").attr("class", "rings");         // above the points: a fitted statement can sit in a dense cloud
+    this.gArrows = g.append("g").attr("class", "arrows");       // gold arrows read, violet arrows write
     this.gMeans = g.append("g").attr("class", "means");
     this.gArcs = g.append("g").attr("class", "arcs");
     this.gGroups = g.append("g").attr("class", "groups");
@@ -109,6 +116,8 @@ export class Figure {
     this.gHist = p.append("g").attr("class", "hist").attr("clip-path", `url(#${this.id}-band)`);
     // false: a faint tint, then true's solid fill, then false's outline on top (with a paper halo, so it stays visible
     // where the two overlap)
+    this.flagZone = this.gHist.append("rect").attr("class", "flag-zone").attr("y", G.y1).attr("height", H - G.y1).attr("width", 0);
+    this.histU = this.gHist.append("path").attr("class", "hist-u");
     this.histF = this.gHist.append("path").attr("class", "hist-f");
     this.histT = this.gHist.append("path").attr("class", "hist-t");
     this.histFHalo = this.gHist.append("path").attr("class", "hist-halo");
@@ -157,14 +166,14 @@ export class Figure {
     const G = this.L.glass;
     const i0 = Math.floor((G.x0 - x0) / bw), i1 = Math.ceil((G.x1 - x0) / bw);
     const n = Math.max(1, i1 - i0);
-    const t = new Float64Array(n), f = new Float64Array(n);
+    const t = new Float64Array(n), f = new Float64Array(n), u = new Float64Array(n);
     for (const it of items) {
-      if (!it.w || it.f == null || it.x < G.x0 || it.x > G.x1) continue;
+      if (!it.w || it.x < G.x0 || it.x > G.x1) continue;
       const i = Math.floor((it.x - x0) / bw) - i0;
       if (i < 0 || i >= n) continue;
-      (it.f ? t : f)[i] += it.w;
+      (it.f == null ? u : it.f ? t : f)[i] += it.w;
     }
-    return { t, f, xb: x0 + i0 * bw, bw, n };
+    return { t, f, u, xb: x0 + i0 * bw, bw, n };
   }
   /** Tick values for the paper's axis: distance from the boundary along the horizontal, in units of h. */
   axisTicks(view, st, x0) {
@@ -223,7 +232,7 @@ export class Figure {
       s.m1 = p.shape === "s" ? 1 : 0;
       s.ring0 = old ? old.ringNow : 0;
       s.ring1 = p.ring ? 1 : 0;
-      s.text = p.text; s.truth = p.truth; s.shape = p.shape; s.set = p.set; s.isNew = !old;
+      s.text = p.text; s.truth = p.truth; s.shape = p.shape; s.set = p.set; s.isNew = !old; s.noPaper = !!p.noPaper;
       next.set(p.key, s);
     }
     const leaving = [...this.pts.values()].filter((s) => !next.has(s.key));
@@ -236,11 +245,13 @@ export class Figure {
     const list = [...next.values()];
     const sc1 = (s) => (tProbe ? (tProbe.norm ?? 1) * (dot(s.c1, tProbe.coef) - tProbe.thr) : 0);
     list.forEach((s) => { s.score1 = sc1(s); });
-    const nT = list.filter((s) => s.fill1 === 1).length, nF = list.filter((s) => s.fill1 === 0).length;
+    const nT = list.filter((s) => s.fill1 === 1 && !s.noPaper).length, nF = list.filter((s) => s.fill1 === 0 && !s.noPaper).length;
+    const nU = list.filter((s) => s.fill1 == null && !s.noPaper).length;
     list.forEach((s) => {
       const old = this.pts.get(s.key);
       s.nw0 = old ? (old.nwNow ?? 0) : 0;
-      s.nw1 = view.paper === false || s.fill1 == null ? 0 : 1 / Math.max(1, s.fill1 ? nT : nF);
+      s.nw1 = view.paper === false || s.noPaper ? 0 : s.fill1 == null ? (view.paperUnknown ? 1 / Math.max(1, nU) : 0)
+        : 1 / Math.max(1, s.fill1 ? nT : nF);
     });
     const x0t = this.boundaryX(tProbe, tgt);
     const band = L.floor - L.pileTop;
@@ -248,7 +259,7 @@ export class Figure {
     let K1 = this.K ?? 0;
     if (x0t != null && view.paper !== false) {
       const H1 = this.histogram(list.map((s) => ({ x: this.toScreen(s.c1, tgt)[0], f: s.fill1, w: s.nw1 })), x0t);
-      K1 = (0.86 * band) / Math.max(1e-9, d3.max(H1.t), d3.max(H1.f));
+      K1 = (0.86 * band) / Math.max(1e-9, d3.max(H1.t), d3.max(H1.f), d3.max(H1.u));
     }
     const paperWas = !!prev && prev.paper !== false && !!this.K;
     const K0 = paperWas ? this.K : K1;
@@ -274,6 +285,8 @@ export class Figure {
     const sameProbe = sameSpace && !!prev.probe && !!view.probe && prev.probe.thr === view.probe.thr &&
       prev.probe.coef.every((x, i) => x === view.probe.coef[i]);
     const prevStep = prev?.lvlStep ?? null;
+    // arrows already on screen stay put (a changed material cross-fades its colour); new ones grow in
+    this.prevArrows = new Map((sameSpace ? prev.arrows ?? [] : []).map((a) => [a.id, a.cls ?? "gold"]));
     this.viewNow = view;
     this.renderStatic(view, T);
     const start = performance.now();
@@ -290,6 +303,8 @@ export class Figure {
       this.drawGhosts(view, st, ph("probe"));
       this.drawMeans(view, st, ph("probe"));
       this.drawPoints(st, T, elapsed);
+      this.drawPairs(view, ph("probe"));
+      this.drawArrows(view, st, ph("cards"));
       const pp = ease(ph("paper"));
       this.drawHist(st, T, elapsed, view, lerpN(K0, K1, choreo === "read" && !paperWas ? 1 : pp));
       this.drawAxis(view, st, axOld, axNew, paperWas ? pp : ph("axis"));
@@ -379,7 +394,7 @@ export class Figure {
     const vw = this.viewNow;
     const lv = vw?.probe?.norm && vw.levels !== false && this.lvlStep
       ? ` · level sets ${this.lvlStep} logit${this.lvlStep === 1 ? "" : "s"} apart` : "";
-    this.labGrid.text(`grid ${units} · ${stretch > 1.25 ? `↔ ×${stretch < 9.5 ? stretch.toFixed(1) : Math.round(stretch)}` : "1:1"}${lv}`);
+    this.labGrid.text(vw?.gridNote === false ? "" : `grid ${units} · ${stretch > 1.25 ? `↔ ×${stretch < 9.5 ? stretch.toFixed(1) : Math.round(stretch)}` : "1:1"}${lv}`);
     void pg;
   }
 
@@ -541,6 +556,48 @@ export class Figure {
     }
   }
 
+  /** Segments joining pairs of points (twin statements), following the points as they move. One path for all. */
+  drawPairs(view, p) {
+    const pr = view.pairs ?? [];
+    let d = "";
+    for (const [a, b] of pr) {
+      const A = this.pts.get(a), B = this.pts.get(b);
+      if (!A || !B || A.leaving || B.leaving || A.X == null || B.X == null) continue;
+      d += `M${A.X.toFixed(1)},${A.Y.toFixed(1)}L${B.X.toFixed(1)},${B.Y.toFixed(1)}`;
+    }
+    this.gPairs.selectAll("path").data(d ? [d] : []).join("path").attr("class", "pair").attr("d", d).style("opacity", p);
+  }
+
+  /** Arrows between two points of the basis (e.g. from the false class mean to the true one): gold reads, violet writes. */
+  drawArrows(view, st, p) {
+    const self = this;
+    const as = (view.arrows ?? []).map((a) => {
+      const A = this.toScreen(a.from, st), B = this.toScreen(a.to, st);
+      const isNew = !this.prevArrows?.has(a.id);
+      const grow = isNew ? ease(p) : 1;
+      return { ...a, A, B: [A[0] + (B[0] - A[0]) * grow, A[1] + (B[1] - A[1]) * grow], op: isNew ? Math.min(1, p * 3) : 1 };
+    });
+    const g = this.gArrows.selectAll("g.arrow").data(as, (d) => d.id);
+    g.exit().remove();
+    const en = g.enter().append("g").attr("class", "arrow");
+    en.append("line").attr("class", "arrow-halo");
+    en.append("line").attr("class", "arrow-line");
+    en.append("text").attr("class", "arrow-label");
+    const m = en.merge(g).attr("class", (d) => `arrow ${d.cls ?? "gold"}`).style("opacity", (d) => d.op);
+    m.selectAll("line").attr("x1", (d) => d.A[0]).attr("y1", (d) => d.A[1]).attr("x2", (d) => d.B[0]).attr("y2", (d) => d.B[1]);
+    // gold (reading) → violet (writing): the same arrow changes material, interpolated on the figure's own clock
+    const colOf = (c) => css(/violet/.test(c) ? "feature" : "overseer");
+    m.each(function (d) {
+      const was = self.prevArrows?.get(d.id), now = d.cls ?? "gold";
+      const col = was && colOf(was) !== colOf(now) ? d3.interpolateRgb(colOf(was), colOf(now))(ease(p)) : null;
+      d3.select(this).select(".arrow-line").style("stroke", col);
+      d3.select(this).select(".arrow-label").style("fill", col);
+    });
+    m.select(".arrow-line").attr("marker-end", (d) => (/dash/.test(d.cls ?? "") ? null : `url(#${this.id}-ah-${(d.cls ?? "gold").split(" ")[0]})`));
+    m.select("text").attr("x", (d) => (d.A[0] + d.B[0]) / 2 + (d.dx ?? 0)).attr("y", (d) => (d.A[1] + d.B[1]) / 2 + (d.dy ?? -12))
+      .attr("text-anchor", (d) => d.anchor ?? "middle").text((d) => d.label ?? "");
+  }
+
   /** The paper: the points' positions along the glass's horizontal, as one histogram per class. Recomputed every frame
    *  from where the points are drawn, so it is always the projection of the glass above it. In a "read", each point's
    *  shadow falls from the point to the top of its bin and joins it when it lands. */
@@ -578,13 +635,16 @@ export class Figure {
     };
     const on = view.paper !== false;
     const dT = on ? path(H.t) : "", dF = on ? path(H.f) : "";
+    this.histU.attr("d", on ? path(H.u) : "");
+    const fz = on && view.flagSide ? (view.flagSide === "left" ? [G.x0, Math.max(G.x0, Math.min(G.x1, x0))] : [Math.max(G.x0, Math.min(G.x1, x0)), G.x1]) : [0, 0];
+    this.flagZone.attr("x", fz[0]).attr("width", fz[1] - fz[0]).attr("height", floor - G.y1).style("opacity", on && view.flagSide ? ease(T.phase("paper", elapsed)) : 0);
     this.histT.attr("d", dT);
     this.histF.attr("d", dF); this.histFHalo.attr("d", dF); this.histFLine.attr("d", dF);
     // falling shadows: a short gold streak from the point down to the current top of its bin
     const trailsG = [], trailsP = [];
     for (const [s, q] of falling) {
       const i = Math.floor((s.X - x0) / H.bw) - Math.round((H.xb - x0) / H.bw);
-      const land = floor - Math.min(hMax, ((s.fillNow ? H.t : H.f)[i] ?? 0) * K);
+      const land = floor - Math.min(hMax, ((s.fillNow == null ? H.u : s.fillNow ? H.t : H.f)[i] ?? 0) * K);
       const y = s.Y + (land - s.Y) * d3.easeQuadIn(q);
       const seg = [[s.X, Math.max(s.Y, y - 16)], [s.X, y]];
       if (y <= G.y1) trailsG.push(seg);
@@ -641,7 +701,7 @@ export class Figure {
       ghost.transition().duration(this.dur(250)).style("opacity", 0.3).transition().delay(Math.max(0, T.readout - 250)).remove();
     } else old.remove();
     if (view.paper === false || view.counts === false) return;
-    const live = [...this.pts.values()].filter((s) => !s.leaving && s.fill1 != null);
+    const live = [...this.pts.values()].filter((s) => !s.leaving && s.fill1 != null && !s.noPaper);
     const right = live.filter((s) => s.score1 > 0), left = live.filter((s) => s.score1 <= 0);
     const cnt = (arr, f) => arr.filter((s) => s.fill1 === f).length;
     const g = this.gCounts.append("g").attr("class", "counts-new").style("opacity", 0);
@@ -742,12 +802,18 @@ export class Figure {
       const gi = g.append("g").attr("transform", `translate(${x},${y})`);
       const k = it.glyph;
       if (k === "true" || k === "false") gi.append("circle").attr("r", r).attr("class", `lg-pt ${k}`);
+      else if (k === "hidden") gi.append("circle").attr("r", r).attr("class", "lg-pt hidden");
       else if (k === "sq-true" || k === "sq-false") gi.append("rect").attr("x", -r * 0.9).attr("y", -r * 0.9).attr("width", r * 1.8).attr("height", r * 1.8).attr("class", `lg-pt ${k.slice(3)}`);
       else if (k === "ring") { gi.append("circle").attr("r", r - 1.5).attr("class", "lg-pt true"); gi.append("circle").attr("r", r + 2.5).attr("class", "lg-ring"); }
       else if (k === "lvl") { [-6, -2, 2, 6].forEach((dx, j) => gi.append("line").attr("x1", dx).attr("x2", dx).attr("y1", -9).attr("y2", 9).attr("class", j === 1 ? "lg-lvl zero" : "lg-lvl")); }
       else if (k === "bnd") gi.append("line").attr("x1", 0).attr("x2", 0).attr("y1", -9).attr("y2", 9).attr("class", "lg-lvl zero");
+      else if (k === "pair") { gi.append("line").attr("x1", -9).attr("x2", 9).attr("y1", 5).attr("y2", -5).attr("class", "lg-pair");
+        gi.append("circle").attr("cx", 9).attr("cy", -5).attr("r", 3.4).attr("class", "lg-pt true"); gi.append("circle").attr("cx", -9).attr("cy", 5).attr("r", 3.4).attr("class", "lg-pt false"); }
+      else if (k === "arrow" || k === "arrow-v") { gi.append("line").attr("x1", -10).attr("x2", 7).attr("y1", 0).attr("y2", 0).attr("class", k === "arrow" ? "lg-arrow" : "lg-arrow v");
+        gi.append("path").attr("d", "M5,-5L12,0L5,5Z").attr("class", k === "arrow" ? "lg-arrowhead" : "lg-arrowhead v"); }
       else if (k === "ghost") gi.append("line").attr("x1", -10).attr("x2", 10).attr("y1", 8).attr("y2", -8).attr("class", "lg-ghost");
       else if (k === "mean") { gi.append("circle").attr("r", 6).attr("class", "lg-mean"); gi.append("path").attr("d", "M-3.5,0H3.5M0,-3.5V3.5").attr("class", "lg-mean-x"); }
+      else if (k === "flag") gi.append("rect").attr("x", -8).attr("y", -7).attr("width", 16).attr("height", 14).attr("class", "lg-flag");
       const step = this.lvlStep ?? 1;
       const text = it.text.replace("{step}", `${step} logit${step === 1 ? "" : "s"}`);
       const t = gi.append("text").attr("class", "lg-text").attr("x", 14).attr("y", 7).text(text);
@@ -783,7 +849,7 @@ export class Figure {
       const H = this.hist, i = Math.floor((p.x - H.xb) / H.bw);
       if (i < 0 || i >= H.n) return this.unhover();
       const lo = H.xb + i * H.bw, hi = lo + H.bw;
-      const inBin = [...this.pts.values()].filter((s) => !s.leaving && s.fill1 != null && s.X >= lo && s.X < hi);
+      const inBin = [...this.pts.values()].filter((s) => !s.leaving && s.fill1 != null && !s.noPaper && s.X >= lo && s.X < hi);
       if (!inBin.length) return this.unhover();
       const nt = inBin.filter((s) => s.fill1).length, nf = inBin.length - nt;
       const d0 = (lo - H.x0) / st.sc.kx, d1 = (hi - H.x0) / st.sc.kx;
@@ -807,7 +873,7 @@ export class Figure {
     if (!best || !best.text) return this.unhover();
     const score = st.probe ? (st.probe.norm ?? 1) * (dot(best.c1, st.probe.coef) - st.probe.thr) : null;
     this.tipEl.hidden = false;
-    this.tipEl.innerHTML = `<span class="tip-text">${best.text}</span><span class="tip-meta">${best.fill1 ? "true" : "false"}${
+    this.tipEl.innerHTML = `<span class="tip-text">${best.text}</span><span class="tip-meta">${best.fill1 == null ? "label hidden" : best.fill1 ? "true" : "false"}${best.noPaper ? " · fitted to" : ""}${
       score == null ? "" : st.probe.norm ? ` · score ${score > 0 ? "+" : ""}${score.toFixed(1)} logits`
         : ` · ${score > 0 ? "+" : ""}${score.toFixed(2)} units from the boundary`}</span>`;
     this.tipEl.style.left = `${clamp(best.X * kk, 90, box.width - 90)}px`;

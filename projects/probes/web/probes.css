@@ -51,7 +51,7 @@ sub { font-size: .7em; }
 .gauge-tick { stroke: #4a5260; stroke-width: 1.6; }
 .gauge-tick.on { stroke: var(--overseer); stroke-width: 2.4; }
 .pt { stroke-width: 1.3; }
-.ring { fill: none; stroke: var(--overseer); stroke-width: 1.2; }
+.ring { fill: none; stroke: var(--overseer); stroke-width: 1.6; filter: drop-shadow(0 0 2px rgba(245, 192, 74, .6)); }
 /* a probe: its level sets. The heavy line is the boundary, glowing because it is where the reading happens */
 .lvl { stroke: var(--overseer); stroke-width: 1.1; }
 .lvl.zero { stroke-width: 2.6; filter: drop-shadow(0 0 3px rgba(245, 192, 74, .55)); }
@@ -60,6 +60,12 @@ sub { font-size: .7em; }
 .legend .lg-text { fill: var(--ink2); font: 500 19px var(--font-mono); }
 .legend .lg-pt.true { fill: var(--residual-ink); stroke: var(--residual-ink); stroke-width: 1.3; }
 .legend .lg-pt.false { fill: var(--sheet); stroke: var(--residual-ink); stroke-width: 1.4; }
+.legend .lg-pt.hidden { fill: rgba(43, 97, 196, .45); stroke: none; }
+.legend .lg-pair { stroke: var(--residual-ink); stroke-width: 1; stroke-opacity: .6; }
+.legend .lg-arrow { stroke: var(--overseer-ink); stroke-width: 2.6; }
+.legend .lg-arrowhead { fill: var(--overseer-ink); }
+.legend .lg-arrow.v { stroke: var(--feature-ink); }
+.legend .lg-arrowhead.v { fill: var(--feature-ink); }
 .legend .lg-ring { fill: none; stroke: var(--overseer-ink); stroke-width: 1.3; }
 .legend .lg-lvl { stroke: var(--overseer-ink); stroke-width: 1; opacity: .55; }
 .legend .lg-lvl.zero { stroke-width: 2.4; opacity: 1; }
@@ -78,11 +84,22 @@ sub { font-size: .7em; }
 .mseg { stroke: var(--overseer); stroke-width: 1.4; stroke-opacity: .8; }
 .group-label { fill: #d7dde6; font: 500 20px var(--font-mono); paint-order: stroke; stroke: #0b1019; stroke-width: 6px; stroke-linejoin: round; }
 .hi { fill: none; stroke: #fff; stroke-width: 1.6; }
+.pair { fill: none; stroke: #9fb8dc; stroke-width: .8; stroke-opacity: .32; }
+.arrow-line { stroke-width: 3; stroke-linecap: round; }
+.arrow-halo { stroke: #0b1019; stroke-width: 7; stroke-opacity: .7; stroke-linecap: round; }
+.arrow.gold .arrow-line { stroke: var(--overseer); filter: drop-shadow(0 0 3px rgba(245, 192, 74, .5)); }
+.arrow.violet .arrow-line { stroke: var(--feature); filter: drop-shadow(0 0 3px rgba(180, 140, 255, .55)); }
+.arrow-label { font: 600 20px var(--font-mono); paint-order: stroke; stroke: #0b1019; stroke-width: 6px; stroke-linejoin: round; }
+.arrow.gold .arrow-label { fill: var(--overseer); }
+.arrow.violet .arrow-label { fill: var(--feature); }
 
 /* the paper under the glass is its projection: the points' positions along the horizontal, as one histogram per class
    (normalized to sum to 1), true filled and false outlined, in gold ink because the probe reads along that axis */
 .hist-t { fill: var(--overseer-ink); fill-opacity: .82; stroke: var(--overseer-ink); stroke-width: 1; stroke-linejoin: round; }
 .hist-f { fill: var(--overseer-ink); fill-opacity: .07; stroke: none; }
+.hist-u { fill: var(--ink3); fill-opacity: .3; stroke: var(--ink2); stroke-width: 1.3; stroke-linejoin: round; }
+.flag-zone { fill: var(--overseer-ink); fill-opacity: .10; }
+.lg-flag { fill: var(--overseer-ink); fill-opacity: .14; stroke: var(--overseer-ink); stroke-width: 1; }
 .hist-halo { fill: none; stroke: var(--sheet); stroke-width: 4; stroke-linejoin: round; stroke-opacity: .9; }
 .hist-line { fill: none; stroke: var(--overseer-ink); stroke-width: 1.6; stroke-linejoin: round; }
 .lvl-p { stroke: var(--overseer-ink); stroke-width: 1; }
@@ -127,6 +144,7 @@ sub { font-size: .7em; }
 .spark .sp-half { stroke: var(--rule); stroke-dasharray: 3 3; }
 .spark .sp-now { stroke: var(--ink3); stroke-width: 1; }
 .spark .sp-dot { fill: var(--overseer-ink); }
+.spark .sp-band { fill: var(--overseer-ink); fill-opacity: .14; }
 .spark .sp-t { fill: var(--ink3); font: 500 9px var(--font-mono); }
 
 /* the six questions: glyphs that fill in as the piece answers them (not controls) */
@@ -301,3 +319,201 @@ sub { font-size: .7em; }
   .p-chip-t, .p-chip-alt { font-size: 23px; }
   .p-note, .p-tick { font-size: 20px; }
 }
+
+/* ---- the paper scene (paper.js, diagrams.js): figures that are not clouds of states ---- */
+.q-lvl { stroke: var(--overseer-ink); stroke-width: 1.2; }
+.q-lvl.zero { stroke-width: 2.6; }
+.q-lvlg { stroke: var(--overseer); stroke-width: 1.3; }
+.q-lvlg.zero { stroke-width: 2.8; filter: drop-shadow(0 0 3px rgba(245, 192, 74, .55)); }
+.q-box { fill: none; stroke: var(--overseer-ink); stroke-width: 2; }
+.q-layer { stroke: #6f86a8; stroke-width: 1; stroke-opacity: .2; }
+.q-ex { fill: var(--residual); }
+.q-modelbox { fill: rgba(91, 156, 245, .035); stroke: rgba(111, 134, 168, .22); stroke-width: 1; }
+.q-tap { stroke: var(--overseer); stroke-width: 1.4; stroke-dasharray: 3 3; }
+.q-drop { fill: none; stroke: var(--ink3); stroke-width: 1.2; stroke-dasharray: 3 4; }
+.legend .q-lg-ex { fill: var(--residual-ink); }
+.legend .q-lg-read { fill: none; stroke: var(--overseer-ink); stroke-width: 1.6; }
+.q-read { fill: none; stroke: var(--overseer); stroke-width: 1.8; }
+.glass-label.gold { fill: var(--overseer); }
+.q-note { fill: var(--ink2); font: 500 17px var(--font-mono); }
+.q-note.faint { fill: var(--ink3); }
+.q-card rect { fill: var(--card); stroke: var(--rule); }
+.q-card-title { fill: var(--ink); font: 600 19px var(--font-sans); }
+.q-card-body { fill: var(--ink2); font: 400 17px var(--font-sans); }
+.q-card-tag { fill: var(--ink3); font: 500 13px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
+@media (max-width: 860px) {
+  .q-note { font-size: 20px; }
+  .q-card-title { font-size: 22px; }
+  .q-card-body { font-size: 20px; }
+}
+/* why linear: the stream, a block's reads (component colour: MLP), a probe's read (gold) */
+.q-stream-rib { fill: rgba(91, 156, 245, .28); stroke: var(--residual); stroke-width: 1.2; }
+.q-h { fill: var(--residual); stroke: #d6e5fc; stroke-width: 1.4; }
+.q-blockbox { fill: rgba(232, 131, 90, .05); stroke: rgba(232, 131, 90, .5); stroke-width: 1.2; }
+.glass-label.mlp { fill: var(--mlp); }
+.glass-label.small { font-size: 17px; }
+.q-norm { fill: rgba(232, 131, 90, .12); stroke: var(--mlp); stroke-width: 1.2; }
+.q-read-mlp { stroke: var(--mlp); stroke-width: 1.8; }
+.q-read-mlp.thin { stroke-width: 1.1; stroke-opacity: .75; }
+.q-read-mlp.faint { stroke-width: .9; stroke-opacity: .35; }
+.q-unit { fill: var(--mlp); }
+.q-write { fill: none; stroke: #c9d2de; stroke-width: 1.4; stroke-dasharray: 5 4; }
+.q-plus { fill: #0b1019; stroke: #c9d2de; stroke-width: 1.4; }
+.q-plus-x { stroke: #c9d2de; stroke-width: 1.6; }
+.q-read-probe { stroke: var(--overseer); stroke-width: 2.2; }
+.q-read-probe.thin { stroke-width: 1.2; }
+.q-unit-probe { fill: var(--overseer); }
+.q-score { fill: #0b1019; stroke: var(--overseer); stroke-width: 2.2; filter: drop-shadow(0 0 3px rgba(245, 192, 74, .5)); }
+.q-f-label { fill: var(--ink3); font: 500 16px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.q-f { font: 500 22px var(--font-mono); }
+.q-f.mlp { fill: var(--mlp-ink); }
+.q-f.gold { fill: var(--overseer-ink); }
+.legend .q-lg-stream { fill: rgba(43, 97, 196, .25); stroke: var(--residual-ink); }
+.legend .q-lg-mlp { stroke: var(--mlp-ink); stroke-width: 2.2; }
+.legend .q-lg-probe { stroke: var(--overseer-ink); stroke-width: 2.6; }
+@media (max-width: 860px) {
+  .glass-label.small { font-size: 20px; }
+  .q-f-label { font-size: 18px; }
+  .q-f { font-size: 24px; }
+}
+
+/* the recipes table: what you give, what you get */
+.recipes { width: 100%; max-width: 60ch; border-collapse: collapse; margin: .2rem 0 1.2rem; font: 400 .86rem/1.4 var(--font-sans); color: var(--ink2); }
+.recipes th { text-align: left; font: 600 .6rem/1.2 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink3);
+  padding: 0 .6rem .4rem 0; border-bottom: 1px solid var(--ink); }
+.recipes td { padding: .45rem .6rem .45rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.recipes td:first-child { color: var(--ink); font-weight: 500; width: 26%; }
+.recipes td:nth-child(2) { width: 30%; }
+/* Othello: a paper board; the moves as token chips in the glass */
+.ob-bg { fill: #efe7d4; stroke: var(--ink3); stroke-width: 1.2; }
+.ob-grid { stroke: var(--ink3); stroke-width: .8; stroke-opacity: .6; }
+.ob-lab { fill: var(--ink3); font: 500 13px var(--font-mono); }
+.ob-disc.black { fill: var(--ink); }
+.ob-disc.white { fill: #fffdf7; stroke: var(--ink); stroke-width: 1.4; }
+.ob-disc.mine { fill: var(--residual-ink); }
+.ob-disc.yours { fill: #fffdf7; stroke: var(--residual-ink); stroke-width: 1.8; }
+.o-chip { fill: var(--card); stroke: var(--rule); }
+.o-chip-t { fill: var(--token-ink); font: 500 17px var(--font-mono); }
+.o-track { fill: rgba(143, 137, 126, .16); }
+.o-bar { fill: var(--overseer-ink); }
+.o-val { fill: var(--ink); font: 500 26px var(--font-display); font-variant-numeric: tabular-nums; }
+.o-base line { stroke: var(--ink2); stroke-width: 1.4; stroke-dasharray: 3 3; }
+@media (max-width: 860px) { .o-chip-t { font-size: 20px; } .ob-lab { font-size: 16px; } }
+.arrow.violet.faint .arrow-line { stroke-opacity: .35; filter: none; }
+.arrow.violet.faint .arrow-label { fill-opacity: .5; }
+.arrow.violet.dash .arrow-line { stroke-width: 1.6; stroke-dasharray: 3 4; filter: none; }
+.arrow.dash .arrow-halo { display: none; }
+/* the model's answer: a gauge on paper */
+.gauge .g-axis { stroke: var(--ink3); stroke-width: 1; }
+.gauge .g-mid { stroke: var(--ink3); stroke-width: 1; }
+.gauge .g-base { stroke: var(--ink2); stroke-width: 1.4; stroke-dasharray: 3 3; }
+.gauge .g-bar { fill: var(--ink2); }
+/* the dial: score distributions on paper; red/green only for deceptive/honest behaviour */
+.d-lg.chat { fill: rgba(27, 28, 30, .06); stroke: var(--ink2); stroke-width: 1.4; }
+.d-lg.honest { fill: none; stroke: var(--safe-ink); stroke-width: 2; }
+.d-lg.deceptive { fill: var(--danger-ink); fill-opacity: .7; stroke: var(--danger-ink); }
+.legend .d-lg-tick { stroke: var(--overseer-ink); stroke-width: 3; }
+.d-floor { stroke: var(--ink3); stroke-width: 1; }
+.d-axis line { stroke: var(--ink3); }
+.d-axis text { fill: var(--ink3); font: 500 18px var(--font-mono); }
+.d-axis .d-axis-title { fill: var(--ink2); font: 400 19px var(--font-sans); }
+.d-h.chat { fill: rgba(27, 28, 30, .05); stroke: var(--ink2); stroke-width: 1.4; stroke-linejoin: round; }
+.d-h.honest { fill: var(--safe-ink); fill-opacity: .06; stroke: none; }
+.d-h.honest-line { fill: none; stroke: var(--safe-ink); stroke-width: 2.2; stroke-linejoin: round; }
+.d-h.deceptive { fill: var(--danger-ink); fill-opacity: .62; stroke: var(--danger-ink); stroke-width: 1; stroke-linejoin: round; }
+.d-flagged { fill: var(--overseer-ink); fill-opacity: .05; }
+.d-tick-line { stroke: var(--overseer-ink); stroke-width: 3; }
+.d-tick-label { fill: var(--overseer-ink); font: 600 18px var(--font-mono); }
+.d-bracket path { fill: none; stroke: var(--ink2); stroke-width: 1.3; }
+.d-bracket text { fill: var(--ink); font: 600 19px var(--font-mono); }
+.d-uk rect { fill: var(--card); stroke: var(--ink3); stroke-dasharray: 4 3; }
+.d-uk text { fill: var(--ink2); font: 500 17px var(--font-mono); }
+.d-uk.honest text { fill: var(--safe-ink); }
+.d-uk.deceptive text { fill: var(--danger-ink); }
+@media (max-width: 860px) { .d-axis text { font-size: 21px; } .d-tick-label, .d-bracket text { font-size: 21px; } .d-axis .d-axis-title { font-size: 20px; } }
+
+/* chapter IV: the counterparts board */
+.cp-big { fill: var(--ink); font: 600 30px var(--font-display); }
+.cp-bracket { fill: none; stroke: var(--ink3); stroke-width: 1.4; }
+.cp-chip rect { fill: var(--sheet); stroke: var(--rule); }
+.cp-chip-text { fill: var(--ink2); font: 400 16.5px var(--font-sans); }
+.cp-chip-text tspan + tspan { fill: var(--ink); font-weight: 600; }
+.cp-chip.held rect { stroke: var(--ink3); stroke-dasharray: 4 3; }
+.cp-foot { fill: var(--ink2); font: italic 400 17px var(--font-display); }
+@media (max-width: 860px) {
+  .cp-big { font-size: 34px; }
+  .cp-chip-text { font-size: 21px; }
+  .cp-foot { font-size: 21px; }
+}
+
+/* chapter IV–VI boards (monitor.js) */
+.m-lg-hl { fill: var(--highlight); fill-opacity: .75; stroke: none; }
+.m-lg-tok { fill: var(--card); stroke: var(--ink3); }
+.m-lg-bar { fill: var(--overseer-ink); fill-opacity: .8; }
+.m-lg-mean { stroke: var(--overseer-ink); stroke-width: 2.4; stroke-dasharray: 6 4; }
+.m-lg-tick { stroke: var(--overseer-ink); stroke-width: 3.2; }
+.m-lg-pt.true { fill: var(--residual-ink); } .m-lg-pt.false { fill: none; stroke: var(--residual-ink); stroke-width: 1.6; }
+.m-lg-mag { fill: var(--training-ink); fill-opacity: .18; stroke: var(--training-ink); }
+.m-span-br { fill: none; stroke: var(--ink3); stroke-width: 1.3; }
+.m-span-t { fill: var(--ink2); font: 400 18px var(--font-display); font-style: italic; }
+.m-tok { fill: var(--card); stroke: var(--rule); stroke-width: 1; transition: fill .5s, opacity .5s; }
+.m-tok.hl { fill: var(--highlight); fill-opacity: .72; stroke: #d9b24a; }
+.m-tok.off { opacity: .35; }
+.m-tok.harm { fill: var(--danger-ink); fill-opacity: .2; stroke: var(--danger-ink); }
+.m-floor { stroke: var(--ink3); stroke-width: 1; }
+.m-axis-t { fill: var(--ink2); font: 400 17px var(--font-sans); }
+.m-bar { fill: var(--overseer-ink); fill-opacity: .78; transition: fill-opacity .5s; }
+.m-bar.off { fill-opacity: .16; }
+.m-bar.small { fill-opacity: .6; }
+.m-bar.filler { fill: var(--ink3); fill-opacity: .55; }
+.m-thr { stroke: var(--overseer-ink); stroke-width: 3; }
+.m-thr-t { fill: var(--overseer-ink); font: 600 16px var(--font-mono); }
+.m-mean { stroke: var(--overseer-ink); stroke-width: 2.6; stroke-dasharray: 7 5; }
+.m-mean-t, .m-max-t { fill: var(--overseer-ink); font: 600 16px var(--font-mono); }
+.m-max { fill: none; stroke: var(--ink); stroke-width: 2; }
+.m-max-t { fill: var(--ink); }
+.m-trail { fill: none; stroke: var(--training-ink); stroke-width: 3; }
+.m-au rect { fill: var(--sheet); stroke: var(--rule); }
+.m-au.on rect { fill: var(--card); stroke: var(--overseer-ink); stroke-width: 2; }
+.m-au-t { fill: var(--ink2); font: 400 17px var(--font-sans); }
+.m-au-v { fill: var(--ink); font: 600 19px var(--font-mono); }
+.m-au.on .m-au-t { fill: var(--ink); font-weight: 600; }
+.m-row-t { fill: var(--ink2); font: 400 17px var(--font-sans); }
+.m-verdict { fill: var(--card); stroke: var(--overseer-ink); stroke-dasharray: 4 3; }
+.m-verdict-t { fill: var(--overseer-ink); font: 600 16px var(--font-mono); }
+.m-attn { fill: var(--overseer-ink); fill-opacity: .7; }
+.m-loop-path { fill: none; stroke: var(--training-ink); stroke-width: 3; }
+.m-loop-t { fill: var(--training-ink); font: 500 16px var(--font-sans); }
+.m-panel-t { fill: var(--ink); font: 600 18px var(--font-sans); }
+.m-panel-sub { fill: var(--ink3); font: 500 14px var(--font-mono); letter-spacing: .04em; }
+.m-rate-bar { fill: var(--ink2); fill-opacity: .55; }
+.m-rate-bar.hot { fill: var(--danger-ink); fill-opacity: .75; }
+.m-rate-v { fill: var(--ink); font: 600 19px var(--font-mono); }
+.m-rate-v.small { font-size: 16px; font-weight: 500; fill: var(--ink2); }
+.m-pt { stroke: var(--residual); stroke-width: 1.3; }
+.m-pt.filled { fill: var(--residual); }
+.m-pt.hollow { fill: #0b1019; }
+.m-hist { stroke-linejoin: round; }
+.m-hist.filled { fill: var(--residual-ink); fill-opacity: .55; stroke: var(--residual-ink); stroke-width: 1; }
+.m-hist.hollow { fill: none; stroke: var(--residual-ink); stroke-width: 1.6; }
+.m-band rect { fill: var(--training-ink); fill-opacity: .14; stroke: var(--training-ink); stroke-width: 1; }
+.m-band text { fill: var(--training-ink); font: 500 16px var(--font-sans); }
+.q-lvlg.dash { stroke-dasharray: 5 5; filter: none; }
+.m-trainband { fill: var(--training-ink); fill-opacity: .16; stroke: var(--training-ink); stroke-width: 1; }
+.m-write { stroke: var(--feature-ink); stroke-width: 3; }
+.m-crate { fill: var(--feature-ink); fill-opacity: .7; }
+.m-crate.control { fill: var(--ink2); fill-opacity: .6; }
+.m-ref line { stroke: var(--ink2); stroke-width: 1.4; stroke-dasharray: 5 4; }
+.m-ref text { fill: var(--ink2); font: 500 14px var(--font-mono); }
+.m-six-dot { fill: var(--ink2); }
+.m-six-n { fill: var(--sheet); font: 700 15px var(--font-mono); }
+@media (max-width: 860px) {
+  .m-span-t { font-size: 22px; } .m-axis-t, .m-row-t, .m-au-t { font-size: 20px; } .m-au-v { font-size: 22px; }
+  .m-thr-t, .m-mean-t, .m-max-t, .m-verdict-t { font-size: 19px; } .m-loop-t, .m-band text { font-size: 20px; }
+  .m-panel-t { font-size: 21px; } .m-panel-sub, .m-ref text { font-size: 17px; } .m-rate-v { font-size: 21px; } .m-rate-v.small { font-size: 19px; }
+  .m-six-n { font-size: 17px; }
+}
+.d-base { fill: var(--ink2); font: 500 17px var(--font-mono); }
+@media (max-width: 860px) { .d-base { font-size: 20px; } }
+.m-mean-t { paint-order: stroke; stroke: var(--sheet); stroke-width: 5px; stroke-linejoin: round; }
+.cp-chip.one .cp-chip-text { fill: var(--ink); font-weight: 500; }

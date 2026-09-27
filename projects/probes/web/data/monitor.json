@@ -1,0 +1,88 @@
+{
+ "meta": {
+  "note": "illustrative shapes (Gaussians drawn as 1,000 quantile samples); parameters fitted so that the drawn samples reproduce the published rows at the published threshold. Only those rows are data.",
+  "n": 1000,
+  "tick": 2.3268
+ },
+ "chat": {
+  "mu": 0.0,
+  "sd": 1.0
+ },
+ "insider": {
+  "A": {
+   "name": "instructed-pairs probe",
+   "honest": {
+    "mu": 1.5306,
+    "sd": 0.8
+   },
+   "deceptive": {
+    "mu": 5.0092,
+    "sd": 0.8
+   },
+   "published": {
+    "auroc": 0.999,
+    "recall": 1.0
+   }
+  },
+  "B": {
+   "name": "roleplaying probe",
+   "honest": {
+    "mu": -0.8959,
+    "sd": 0.48
+   },
+   "deceptive": {
+    "mu": 1.1913,
+    "sd": 0.48
+   },
+   "published": {
+    "auroc": 0.999,
+    "recall": 0.009
+   }
+  }
+ },
+ "backdoors": {
+  "honest": {
+   "mu": 3.4677,
+   "sd": 0.6
+  },
+  "deceptive": {
+   "mu": 4.3256,
+   "sd": 0.6
+  },
+  "published": {
+   "auroc": 0.844,
+   "recall": 1.0
+  }
+ },
+ "das": {
+  "tick": 1.125,
+  "aware": {
+   "control": {
+    "mu": -0.0008,
+    "sd": 1.0
+   },
+   "collusion": {
+    "mu": 2.7699,
+    "sd": 1.0
+   },
+   "published": {
+    "auroc": 0.975,
+    "recall": 0.95
+   }
+  },
+  "feedback": {
+   "control": {
+    "mu": -1.0161,
+    "sd": 1.0
+   },
+   "collusion": {
+    "mu": 0.8975,
+    "sd": 1.0
+   },
+   "published": {
+    "auroc": 0.912,
+    "recall": 0.41
+   }
+  }
+ }
+}

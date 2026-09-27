@@ -6,13 +6,97 @@ Newest first. Each entry: what was reviewed, by whom, what was found, what was d
 
 
 
+## Chapters IV–VI drafted, and the review of the new I–III steps resolved (2026-09-27, autonomous pass; Opus)
+
+**Resolution of the technical (Fable 5.1) and rigor (Fable) reviews of the new I–III steps.** Every finding was checked
+against the source or the code; all were accepted.
+- *Blocker, "it isn't in the words alone"* (q-country, ledger 3): reworded to what the baseline shows (the country's name
+  closes one shortcut by construction), and the honest control was run: classifiers of the statement's characters (TF-IDF
+  of 2–4-grams, the same city split) read 50.4% (linear) and 64% (one hidden layer) of new cities; the model, asked, 92.5%.
+  The check's answer and the ledger now say: cheap cues don't carry the label, a reader that knows geography does
+  (C-III-12b).
+- *The trainer's turn* (technical #2): measured. Independent draws differ (57° at n = 4, 51° at 512), and with C fixed each
+  fit's cosine with its own draw's Δμ falls from 0.97 to 0.51: the prose names both causes (C-II-1d).
+- *The push*: the band is described as "where those two states still change the model's answer" (our contrast swaps the
+  country, so its row is partly token identity: C-III-19a); our OOD numbers (Spanish–English: 69% vs 20%) sit beside
+  Marks and Tegmark's OOD table; NIE > 1 explained. The per-unit claim was tested at matched displacement (a Δμ push of
+  α·cos²): on held-out cities the two pushes move the answer about equally at M&T's scale (32% vs 34%), so the in-
+  distribution gap is the rule and the geometry; OOD the w push does more than its Δμ part (20% vs 11%), and at α = 2 the two
+  drift apart. **This changed the conclusion**: the old hypothesis ("w reads along directions the model doesn't use") is
+  dropped (our OOD data contradicts it); the page now cites ITI's grid-searched strengths and AxBench for the gap that no
+  scaling rule explains, with ITI's own reading (C-III-19c, C-III-22).
+- *Othello arithmetic*: 47% empty (4 + t pieces after t moves) → 47% + 53%/2 ≈ 73.5%, with Li et al.'s inconsistency noted
+  (C-VIZ-5). *Why linear*: attributed as a view (Alain & Bengio's "Computational convenience matters. Not just entropy.")
+  with the opposite school quoted (Pimentel et al.); two norms per block. *Pairs*: "differ in one word and what follows";
+  the PCA threshold now uses the training median (95.5%; a random pair fixes the sign 99.4% of the time); L8 "mostly".
+- Attribution and quote fixes: Nanda's XOR as his speculation (ledger 1b, the P2 option "which a hidden layer can
+  recombine"); the AxBench sentence (about SAE-A) no longer attached to the probe numbers; "seem to discover" (Chinchilla,
+  IMDb); "two further classifiers"; the prologue's probe reads "one or more layers"; Goodfire's 87.98% as an average over
+  the trace; the onion code's authors expect it in transformers but didn't test; persona vectors moved to the labelled-
+  statements row; Park et al.'s inner product is one choice; Gaussian classes in the side dish; ITI's shifts per head;
+  "100 held-out false statements" and "71 units by layer 18" in the readouts.
+- `find.json` re-exported (lengths, PCA, draw angles, text baseline); `push.json` gained `mm_matched` (cities and sp).
+  Figure numbers in the prose are now computed from the step order (the prologue had shifted them).
+
+**Chapters IV–VI, drafted from Fable's design memo** (12 steps; the cascade step was cut, its numbers folded into the
+dial's base-rate paragraph): IV.1 two jobs (Fig. 3's view with the labels hidden: one grey histogram, the flagged side
+shaded; `figure.js` gained `paperUnknown` and `flagSide`), IV.2 counterparts board, P5 and the dial (illustrative shapes
+fitted by `data/export_monitor.py`; threshold slider; Backdoors; the false alarms at a million requests follow the
+threshold), IV.5 leakage strip (schematic, Boxo et al.'s AUROCs), P6 and "Under pressure" (Gupta & Jenner's bars; the
+filler mechanism as an animated sketch), "Without an adversary" (the Atlas as a drawn mechanism; Das et al. as the dial with
+a frozen threshold), V.1 handles, V.2 contested (both sides: Read et al.'s GLM-5 controls and Lindsey's reply), VI.1 the
+six questions answered and the limits, VI.2 five check-yourself questions with held-back model answers. New module
+`web/monitor.js`. Every quote was re-opened in its source this pass (Zhou et al.'s setup line included). Tests cover the
+flag count, the dial's published readouts, and every held-back number. Not yet reviewed by the agents: that round is next.
+
+## Chapters I–III completed (2026-09-27, autonomous pass): build notes (Opus)
+
+The learner's instruction: continue the probes explainer to a finished, rigorous, beautiful piece, iterating until done
+(Fable as advisor when useful). Built in this pass, in step order:
+- **Prologue, "The cheapest reader"** (`paper.js`, a third scene sharing the stage's SVG; `diagrams.js` `prologueView`): a
+  schematic stream of exchanges through a model, a probe reading one layer of each, two flagged and dropped onto paper;
+  three lab cards quoting what each lab reports (C-PRO-1/3/4/5). The first draft ended on an empty glass (the whole stream
+  had left): the resting state is now a snapshot of the running stream. "None reports how its probe performs" was an
+  overclaim (the Opus 5.5 card reports the classifier system's coverage and false-positive rate): the caveat now says the
+  numbers describe whole systems.
+- **Why a straight line?** (`whyLinearView`): the next block's MLP reading the stream (norm → 17,920 directions → write
+  back by adding) beside a probe's single direction; toggle to a probe with a hidden layer. Sizes from the model's config
+  (C-I-22). New data check: normalization barely matters for the states our probe reads (lengths vary 2.3%; a probe on
+  normalized states reads the same 98.4% along a direction 4° away: C-I-23).
+- **P1 "How many examples?" and "A handful of statements"** (`data/export_find.py` → `web/data/find.json`): the learning
+  curve re-run on our statements (20 draws; eight statements give 97% at layer 16; the spike's "four → 0.97" doesn't hold
+  on our data: four give 93%), and a trainer: one nested draw whose fits turn the view (every frame an in-plane rotation in
+  one basis holding all the fits), the fitted statements ringed. New finding on screen: the direction keeps turning after
+  the accuracy stops improving (70° from the final probe at n = 4 with 96% accuracy; 45° at n = 512). Small-n fits are
+  exact in the span of the points (`common.lr_span`, asserted equal to the full fit).
+- **Contrast pairs, and no labels at all**: every held-out pair joined by a segment in the plane of Δμ and w; Δμ as a gold
+  arrow; the recipes table; our own instance of "unsupervised methods find the most prominent difference": the top
+  principal direction of the pair differences reads 95.7% at layer 12 and 50.5% at layer 8. Banana/Shed as a quick check
+  (answer corrected to the source: PCA and K-means "score highly", many CCS seeds reach 100%).
+- **P2 "A board no one showed it" and "Mine and yours"**: a real Othello position (the 12 moves shown, replayed by the
+  tests), the published accuracies (75.0 / 98.7 / 99.6, baseline 61.8), then Nanda's XOR hypothesis drawn as schematic
+  clusters: the probe turns through a full circle without splitting black from white, then the fills swap to mine/yours
+  and one direction splits them. Nanda's post cached and quoted verbatim.
+- **P4 "Which one pushes?" and "The best reader isn't the best handle"** (`data/patch.py`, `data/push.py` →
+  `web/data/push.json`): a patching map of our model placed Marks & Tegmark's "group (b)" at the statement's last two
+  tokens, layers 14–18; pushes scaled by their rule; the model's own TRUE/FALSE answer. Δμ moves false statements' answers
+  82% of the way to true, w 34% (M&T 13B: .77 vs .13); per unit of movement along Δμ the two do about the same (false →
+  true), the cos² geometry made measurable. The Δμ arrow turns gold → violet (reading → writing); push mode shows the
+  model's real answer at each strength for the running example.
+- Chapter dividers (prologue, I–III); the performance agent moved to Opus at the learner's request.
+
+Engine additions: `figure.js` per-point `noPaper` (fitted statements drawn but kept off the paper), pair segments,
+arrows (grow in when new, change material by interpolating on the figure's clock, not CSS), rings drawn above points (a
+fitted statement inside a dense cloud was invisible), `gridNote: false` for schematic views; `lin.js` `frameAt` handles
+opposite frames; `paper.js` scene with its own choreography.
+
 ## The learner's reaction to chapters I–III (2026-09-27)
 - The where-to-read steps ("which token?", "every token, pooled?"): "these are cool", and they stay at the start of the
   piece: "the explanation is more constructive".
 - The histogram paper and the adaptive level-set spacing: "really good work with those variants".
 - Checks that hold back their answer: "Seems good! It's better that it's not spoiled."
 - Their suggestion: a performance agent that checks, at the end, that the explainer runs smoothly as deployed (GitHub
-  Pages). Added: `.claude/agents/performance-reviewer.md` (Sonnet), the `review` skill's §3b, and CLAUDE.md's "Who does
+  Pages). Added: `.claude/agents/performance-reviewer.md` (Opus since 2026-09-27: the learner asked for another Opus 5.5 instance, not Sonnet), the `review` skill's §3b, and CLAUDE.md's "Who does
   what".
 
 ## Review round on the built chapters I–III (2026-09-27): technical (Fable), rigor (Fable), learner-sim (Opus)

@@ -28,6 +28,11 @@ export function slerp(a, b, t) {
 export function frameAt(f0, f1, t) {
   if (t <= 0) return f0;
   if (t >= 1) return f1;
+  // opposite directions have no shortest great circle: turn through the start frame's second axis
+  if (dot(f0.u, f1.u) < -0.9999) {
+    const mid = { u: f0.v, v: f0.u.map((x) => -x) };
+    return t < 0.5 ? frameAt(f0, mid, t * 2) : frameAt(mid, f1, t * 2 - 1);
+  }
   const u = unit(slerp(f0.u, f1.u, t));
   const v = orthTo(slerp(f0.v, f1.v, t), u);
   return { u, v };

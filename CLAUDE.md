@@ -119,9 +119,9 @@ Each job goes to the model suited to it, and the technical content is always che
 | `technical-reviewer` | Fable (now 5.1) | is the explanation technically right? The script before building, then the built piece |
 | `rigor-reviewer` | Fable | every statement against its cited source |
 | `learner-sim` | Opus | the learner's experience: where they'd get lost, the predicts, engagement |
-| `performance-reviewer` | Sonnet (now 5) | at the end of a piece: load, transitions and phones as deployed, under CPU throttling; same-pixel fixes (implemented only in a worktree, with pixel diffs) |
+| `performance-reviewer` | Opus (now 5.5) | at the end of a piece: load, transitions and phones as deployed, under CPU throttling; same-pixel fixes (implemented only in a worktree, with pixel diffs) |
 
-- Each agent's model is in its frontmatter (`model: fable`, `model: opus`, `model: sonnet`), and the aliases follow the newest model of
+- Each agent's model is in its frontmatter (`model: fable`, `model: opus`), and the aliases follow the newest model of
   their family. Pass `model` in the Agent call as well: in this setup, new or edited agent files weren't picked up
   mid-session (2026-09-26), although the docs say they should be. To check which model an agent runs on, ask it to quote
   the sentence in its system prompt that names its model.

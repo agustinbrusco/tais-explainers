@@ -1940,8 +1940,9 @@
   - Joseph Bloom
   date: '2026-04-10'
   url: https://www.lesswrong.com/posts/HhF5kESdtPHku7kim
-  accessed: '2026-09-26'
-  read: partial
+  accessed: '2026-09-27'
+  read: full
+  cached: papers/web/lw_read_2026_eval_awareness.txt
   notes: 'GLM-5 reproduction of the Sonnet 4.5 §7.6.4 experiment. "\"Control\" steering vectors – derived
     from contrastive pairs that are semantically unrelated to alignment – can have effects just as large
     as deliberately designed evaluation-awareness steering vectors." control_book (book on bottom vs top
