@@ -7,7 +7,8 @@
 //
 // Ids installed (reference them from any SVG on the page): #glass-fill (window gradient), #card-shadow (a paper card
 // lying on paper), #paper (a card on glass), #glow (light along a route; userSpaceOnUse so perfectly vertical lines
-// keep their filter region), #tile-glow (a lit hidden state), #arrow-ink (an ink-gold arrowhead).
+// keep their filter region), #dot-glow (the same glow for a small moving dot), #tile-glow (a lit hidden state),
+// #arrow-ink (an ink-gold arrowhead).
 // Why a separate, always-rendered SVG: Chrome drops elements whose filter lives inside a display:none SVG, and scene
 // SVGs are hidden and shown as the steps change. Rationale and examples: kit/PLAYBOOK.md.
 
@@ -22,6 +23,10 @@ export function installGlassDefs(d3, { overseerInk = "#855A00", glowBox = [-40, 
   const [gx, gy, gw, gh] = glowBox;
   defs.append("filter").attr("id", "glow").attr("filterUnits", "userSpaceOnUse")
     .attr("x", gx).attr("y", gy).attr("width", gw).attr("height", gh)
+    .html(`<feGaussianBlur stdDeviation="3.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>`);
+  // the same glow for a small moving thing (a pulse): a filter region around the element only, so moving it doesn't
+  // re-blur the whole figure every frame
+  defs.append("filter").attr("id", "dot-glow").attr("x", "-150%").attr("y", "-150%").attr("width", "400%").attr("height", "400%")
     .html(`<feGaussianBlur stdDeviation="3.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>`);
   defs.append("filter").attr("id", "tile-glow").attr("x", "-60%").attr("y", "-60%").attr("width", "220%").attr("height", "220%")
     .html(`<feDropShadow dx="0" dy="0" stdDeviation="4.5" flood-color="#5B9CF5" flood-opacity="0.85"/>`);

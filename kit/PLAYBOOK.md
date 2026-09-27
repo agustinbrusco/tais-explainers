@@ -201,6 +201,17 @@ The whole argument in one cinematic shot, before any words:
 - **Filming motion:** frames taken on wall-clock time vary from run to run and skip moments. Use `--clock`, which
   controls the page's clock (D3 transitions, canvas loops; CSS transitions still run on real time). Under it, never await
   a promise that settles when a transition ends, because it waits on a paused clock.
+- **Slow transitions are usually paint, not JS.** In the CoT piece's DAG, one `clip-path` per path (two copies of ~200
+  edges) and a figure-sized `#glow` filter on every trail path made each frame repaint and re-blur the whole figure.
+  Clip and filter *groups* instead (one clipped layer for glass, one for paper, one glow group for the trails), use
+  `stroke-opacity` rather than `opacity` on single paths, and give moving dots a small-region filter (`#dot-glow`).
+  Long tasks during steps fell from ~6.7 s to ~0.05 s at 4× CPU throttle, with the same pixels.
+- **Canvas heroes: cache what doesn't move.** Redrawing every square, strand and `shadowBlur` trail each frame ran the CoT
+  hero at ~20 fps (4× throttle). Offscreen layers (static floor and wiring, plus lit squares and finished trails rebuilt
+  only when a leg ends) bring it to 60 fps with identical output, since source-over is associative.
+- **Measure before optimizing:** CPU profile plus a trace aggregated by event (Paint, Layerize), under
+  `Emulation.setCPUThrottlingRate`. Scroll to each step so an on-screen hero doesn't pollute the numbers. Check sameness
+  with a pixel diff of every step against shots taken before the change.
 - **Headless WebGL, for a future Three.js piece (untested here):** without a GPU, headless Chrome may give no WebGL
   context. ClaudeAnimationBase's `render.mjs` passes `--use-angle=swiftshader --enable-unsafe-swiftshader` for software
   WebGL, and `--use-angle=vulkan` or `gl-egl` on headless NVIDIA machines.

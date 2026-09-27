@@ -13,6 +13,9 @@
   <script type="importmap">
     { "imports": { "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm" } }
   </script>
+  <!-- start the slow fetches at once instead of at the end of the module chain (main.js -> tiles.js -> the data) -->
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/d3@7/+esm">
+  <link rel="preload" href="./data/tiles.json" as="fetch" crossorigin>
   <style>
     .stage { padding: 1.4rem 0; }
     .panel { max-height: calc(100vh - 2.8rem); }

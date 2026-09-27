@@ -22,8 +22,8 @@ export function mount(svg, { K }) {
   // the paper transcript on the floor, and the monitor's eye at its start
   svgEl(svg, "rect", { x: 14, y: CARD_Y - 16, width: W - 28, height: CARD_H + 32, rx: 10, fill: K.sheet, opacity: 0.96 });
   const eye = svgEl(svg, "g", { transform: `translate(38 ${CARD_Y + CARD_H / 2})` });
-  svgEl(eye, "path", { d: "M-15 0 Q0 -11 15 0 Q0 11 -15 0 Z", fill: "none", stroke: K["overseer-ink"], "stroke-width": 2.2 });
-  svgEl(eye, "circle", { r: 4.6, fill: K["overseer-ink"] });
+  const lid = svgEl(eye, "path", { d: "M-15 0 Q0 -11 15 0 Q0 11 -15 0 Z", fill: "none", stroke: K["overseer-ink"], "stroke-width": 2.2 });
+  const pupil = svgEl(eye, "circle", { r: 4.6, fill: K["overseer-ink"] });
 
   // the wall: faint wiring up each column, then the squares of real numbers
   for (let c = 0; c < COLS; c++) svgEl(svg, "line", { x1: colX(c), x2: colX(c), y1: CARD_Y, y2: rowY(LAYERS - 1), stroke: K.residual, "stroke-opacity": 0.18, "stroke-width": 1.5 });
@@ -85,16 +85,28 @@ export function mount(svg, { K }) {
     tx.textContent = b.count;
   }
 
+  // the monitor reacts as each word lands, as in the piece: the pupil glances along the transcript and the lid tightens
+  const writes = legs.filter((L) => L.kind === "write").map((L) => L.t0 + L.dur);
+  const glance = (dt) => (dt < 0 ? 0 : dt < 0.16 ? ease(dt / 0.16) : dt < 0.46 ? 1 : 1 - ease((dt - 0.46) / 0.26));
+  const squint = (dt) => (dt < 0 ? 0 : dt < 0.16 ? ease(dt / 0.16) : 1 - ease((dt - 0.16) / 0.4));
+
   function render(time) {
     for (const L of legs) L.el.setAttribute("stroke-dashoffset", L.len * (1 - ease((time - L.t0) / L.dur)));
-    const lit = new Map();   // counted states glow fully; carried ones (passed through, not counted) half
+    const lit = new Map();   // counted states glow with a solid ring; carried ones (passed up, no new step) a dashed one
     for (const b of badges) {
       const on = clamp01((time - b.at) / 0.15);
       b.g.setAttribute("opacity", on);
-      if (on > 0) lit.set(`${b.c}_${b.r}`, 1);
+      if (on > 0) lit.set(`${b.c}_${b.r}`, "counted");
     }
-    for (const k of carried) if (time >= k.at) lit.set(`${k.c}_${k.r}`, 0.45);
-    for (const s of tiles) s.ring.setAttribute("opacity", lit.get(`${s.c}_${s.r}`) ?? 0);
+    for (const k of carried) if (time >= k.at) lit.set(`${k.c}_${k.r}`, "carried");
+    for (const s of tiles) {
+      const how = lit.get(`${s.c}_${s.r}`);
+      s.ring.setAttribute("opacity", how ? 1 : 0);
+      s.ring.setAttribute("stroke-dasharray", how === "carried" ? "4 3" : "none");
+    }
+    const g = Math.max(0, ...writes.map((at) => glance(time - at))), q = Math.max(0, ...writes.map((at) => squint(time - at)));
+    pupil.setAttribute("cx", 4.7 * g);
+    lid.setAttribute("stroke-width", 2.2 + 1.5 * q);
     cards.forEach((card, c) => {
       const w = legs.find((L) => L.card === c);
       const written = c === 0 || (w && time >= w.t0 + w.dur);

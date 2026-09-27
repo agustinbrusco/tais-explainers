@@ -20,7 +20,8 @@ export function mountHero(el, { K, font }) {
   if (!el) return;
   const canvas = document.createElement("canvas");
   el.appendChild(canvas);
-  const ctx = canvas.getContext("2d");
+  const main = canvas.getContext("2d");
+  let ctx = main;                    // the drawing helpers draw into ctx: the canvas, or an offscreen layer (see below)
   const caption = el.parentElement.querySelector(".scene-caption");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -50,6 +51,31 @@ export function mountHero(el, { K, font }) {
     cam = narrow
       ? { x: -2.2, y: 2.9, z: -4.6, yaw: 0.62, pitch: 0.2, f: H * 0.78, cx: W * 0.36, cy: H * 0.4 }
       : { x: -1.9, y: 2.75, z: -4.3, yaw: 0.56, pitch: 0.17, f: H * (W < 1100 ? 0.72 : 0.8), cx: W * (W < 1100 ? 0.7 : 0.6), cy: H * 0.45 };
+    layers.clear();
+  }
+
+  // Offscreen layers, so a frame redraws only what moves. Under the moving pulse, the scene is kept as canvases its
+  // size: the floor, and the monitor with the wall's wiring (fixed for a layout), and the squares with the finished
+  // trails (fixed until a leg ends). Drawing into a transparent layer and compositing it gives the same pixels as
+  // drawing in place (source-over is associative), and the drawing order is unchanged.
+  const layers = new Map();          // name -> { cv, key }
+  function layer(name, key, paint) {
+    let l = layers.get(name);
+    if (!l) {
+      const cv = document.createElement("canvas");
+      cv.width = canvas.width; cv.height = canvas.height;
+      layers.set(name, (l = { cv, key: null }));
+    }
+    if (l.key !== key) {
+      const g = l.cv.getContext("2d");
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.clearRect(0, 0, l.cv.width, l.cv.height);
+      ctx = g; reset(); paint(); ctx = main;
+      l.key = key;
+    }
+    main.setTransform(1, 0, 0, 1, 0, 0);
+    main.drawImage(l.cv, 0, 0);
+    reset();
   }
   // world -> screen. x runs along the transcript, y up; the wall is the plane z = 0, the camera at negative z
   function P(x, y, z) {
@@ -144,6 +170,10 @@ export function mountHero(el, { K, font }) {
     ctx.stroke();
     ctx.shadowBlur = 0;
   }
+  function trail(l, pts) {           // a leg's light trail, up to pts
+    const color = l.kind === "write" ? "rgba(245, 192, 74, 0.95)" : l.kind === "read" ? "rgba(225, 216, 196, 0.6)" : "rgba(126, 180, 255, 0.92)";
+    worldLine(pts, color, l.kind === "climb" || l.kind === "link" ? 2.4 : 2, l.kind === "read" ? 0 : 12);
+  }
   function affine(o, ex, ey, s) {    // map local units (s px per unit) onto the parallelogram at o spanned by ex, ey
     ctx.setTransform(dpr * (ex[0] - o[0]) * s, dpr * (ex[1] - o[1]) * s, dpr * (ey[0] - o[0]) * s, dpr * (ey[1] - o[1]) * s, dpr * o[0], dpr * o[1]);
   }
@@ -162,16 +192,22 @@ export function mountHero(el, { K, font }) {
     });
 
     // the floor: the transcript, a strip of paper in front of the wall, fading into the dark at the far end
-    const x0 = -0.75, x1 = colX(N - 1) + 1.2, zn = -0.22, zf = -1.22;
-    const strip = [P(x0, 0, zn), P(x1, 0, zn), P(x1, 0, zf), P(x0, 0, zf)];
-    poly(strip, "rgba(238, 232, 219, 0.95)");
-    const fa = P(colX(N - 1) + 1.2, 0, -0.7), fb = P(colX(Math.max(2, N - 5)), 0, -0.7);
-    const grad = ctx.createLinearGradient(fa[0], fa[1], fb[0], fb[1]);
-    grad.addColorStop(0, "rgba(6,8,13,0.97)"); grad.addColorStop(1, "rgba(6,8,13,0)");
-    poly(strip, grad);
-    for (let c = 0; c < N; c++) {
-      const cx = colX(c), hw = 0.38, hz = 0.24;
-      poly([P(cx - hw, 0, CARD_Z + hz), P(cx + hw, 0, CARD_Z + hz), P(cx + hw, 0, CARD_Z - hz), P(cx - hw, 0, CARD_Z - hz)], null, "rgba(130, 112, 86, 0.4)", 0.8);
+    const hw = 0.38, hz = 0.24;
+    layer("floor", "floor", () => {
+      const x0 = -0.75, x1 = colX(N - 1) + 1.2, zn = -0.22, zf = -1.22;
+      const strip = [P(x0, 0, zn), P(x1, 0, zn), P(x1, 0, zf), P(x0, 0, zf)];
+      poly(strip, "rgba(238, 232, 219, 0.95)");
+      const fa = P(colX(N - 1) + 1.2, 0, -0.7), fb = P(colX(Math.max(2, N - 5)), 0, -0.7);
+      const grad = ctx.createLinearGradient(fa[0], fa[1], fb[0], fb[1]);
+      grad.addColorStop(0, "rgba(6,8,13,0.97)"); grad.addColorStop(1, "rgba(6,8,13,0)");
+      poly(strip, grad);
+      for (let c = 0; c < N; c++) {
+        const cx = colX(c);
+        poly([P(cx - hw, 0, CARD_Z + hz), P(cx + hw, 0, CARD_Z + hz), P(cx + hw, 0, CARD_Z - hz), P(cx - hw, 0, CARD_Z - hz)], null, "rgba(130, 112, 86, 0.4)", 0.8);
+      }
+    });
+    for (let c = 0; c < N; c++) {      // the words on the cards (cards don't overlap, so the outlines can go first)
+      const cx = colX(c);
       const card = c === 0 ? { word: "Q", a: 1 } : printed.get(c);
       if (!card) continue;
       if (card.forced) {  // the monitor's highlighter
@@ -187,63 +223,69 @@ export function mountHero(el, { K, font }) {
       ctx.fillText(card.word, o[0], o[1] + 1);
     }
 
-    {   // the monitor, reading the paper
-      const e = P(-0.6, 0, CARD_Z), e2 = P(-0.3, 0, CARD_Z), w = Math.hypot(e2[0] - e[0], e2[1] - e[1]) * 0.55;
-      ctx.beginPath(); ctx.moveTo(e[0] - w, e[1]); ctx.quadraticCurveTo(e[0], e[1] - w * 0.75, e[0] + w, e[1]);
-      ctx.quadraticCurveTo(e[0], e[1] + w * 0.75, e[0] - w, e[1]); ctx.closePath();
-      ctx.fillStyle = "rgba(255, 253, 247, 0.95)"; ctx.fill(); ctx.lineWidth = 1.8; ctx.strokeStyle = "#855A00"; ctx.stroke();
-      ctx.beginPath(); ctx.arc(e[0], e[1], w * 0.32, 0, 7); ctx.fillStyle = "#855A00"; ctx.fill();
-    }
-
-    // the wall: residual lines and faint attention strands, then the squares
-    for (let c = 0; c < N; c++) {
-      const a = P(colX(c), rowY(0), 0), b = P(colX(c), rowY(LAYERS - 1), 0);
-      ctx.strokeStyle = "rgba(60, 90, 140, 0.5)"; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
-      for (let r = 0; r < LAYERS - 1 && c > 0; r++) for (let q = 0; q < c; q++) {
-        const s0 = P(colX(q), rowY(r), 0), s1 = P(colX(c), rowY(r + 1), 0);
-        ctx.strokeStyle = `rgba(70, 110, 170, ${Math.max(0.035, 0.2 - (c - q) * 0.035)})`;
-        ctx.beginPath(); ctx.moveTo(s0[0], s0[1]); ctx.lineTo(s1[0], s1[1]); ctx.stroke();
+    layer("wall", mode, () => {
+      {   // the monitor, reading the paper
+        const e = P(-0.6, 0, CARD_Z), e2 = P(-0.3, 0, CARD_Z), w = Math.hypot(e2[0] - e[0], e2[1] - e[1]) * 0.55;
+        ctx.beginPath(); ctx.moveTo(e[0] - w, e[1]); ctx.quadraticCurveTo(e[0], e[1] - w * 0.75, e[0] + w, e[1]);
+        ctx.quadraticCurveTo(e[0], e[1] + w * 0.75, e[0] - w, e[1]); ctx.closePath();
+        ctx.fillStyle = "rgba(255, 253, 247, 0.95)"; ctx.fill(); ctx.lineWidth = 1.8; ctx.strokeStyle = "#855A00"; ctx.stroke();
+        ctx.beginPath(); ctx.arc(e[0], e[1], w * 0.32, 0, 7); ctx.fillStyle = "#855A00"; ctx.fill();
       }
-    }
-    if (mode === "fullbw") for (let c = 0; c < N - 2; c++) worldLine(wire(c), "rgba(91, 156, 245, 0.34)", 1.3);   // faint until used
-    for (let c = 0; c < N; c++) for (let r = 0; r < LAYERS; r++) {
-      const h = TILE / 2, cx = colX(c), cy = rowY(r);
-      const p00 = P(cx - h, cy + h, 0), p10 = P(cx + h, cy + h, 0), p01 = P(cx - h, cy - h, 0), p11 = P(cx + h, cy - h, 0);
-      const key = `${c}_${r}`, on = lit.has(key), n = lit.get(key);
-      const far = Math.min(1, 1.08 - 0.72 * (c / (N - 1)) ** 1.2);
-      ctx.globalAlpha = (on ? 1 : 0.4) * far;
-      if (on && n) { ctx.shadowColor = "rgba(91,156,245,0.95)"; ctx.shadowBlur = 24; poly([p00, p10, p11, p01], "#0a1424"); ctx.shadowBlur = 0; }
-      const s = texture(c, r).width;
-      affine(p00, p10, p01, 1 / s);
-      ctx.drawImage(texture(c, r), 0, 0);
-      reset();
-      poly([p00, p10, p11, p01], null, on && n ? "rgba(190, 216, 255, 0.95)" : on ? "rgba(91,156,245,0.8)" : "rgba(70, 100, 150, 0.5)", on && n ? 1.4 : 0.8);
-      ctx.globalAlpha = 1;
-      if (on && n) {   // the running count, on a badge at the square's corner
-        const rr = Math.max(7.5, Math.hypot(p10[0] - p00[0], p10[1] - p00[1]) * 0.24);
-        ctx.beginPath(); ctx.arc(p10[0], p10[1], rr, 0, 7); ctx.fillStyle = K.residual; ctx.fill();
-        ctx.lineWidth = 2; ctx.strokeStyle = "#05080d"; ctx.stroke();
-        ctx.fillStyle = "#05080d"; ctx.font = `700 ${Math.round(rr * (n > 9 ? 0.95 : 1.12))}px ${font.mono}`;
-        ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.fillText(n, p10[0], p10[1] + 0.5);
+      // the wall: residual lines and faint attention strands (the squares come next)
+      for (let c = 0; c < N; c++) {
+        const a = P(colX(c), rowY(0), 0), b = P(colX(c), rowY(LAYERS - 1), 0);
+        ctx.strokeStyle = "rgba(60, 90, 140, 0.5)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+        for (let r = 0; r < LAYERS - 1 && c > 0; r++) for (let q = 0; q < c; q++) {
+          const s0 = P(colX(q), rowY(r), 0), s1 = P(colX(c), rowY(r + 1), 0);
+          ctx.strokeStyle = `rgba(70, 110, 170, ${Math.max(0.035, 0.2 - (c - q) * 0.035)})`;
+          ctx.beginPath(); ctx.moveTo(s0[0], s0[1]); ctx.lineTo(s1[0], s1[1]); ctx.stroke();
+        }
       }
-    }
-
-    // trails, then the pulse
-    legs.forEach((l, i) => {
-      if (i > done) return;
-      const pts = i < done ? l.pts : partial(l.pts, ease(frac));
-      if (pts.length < 2) return;
-      const color = l.kind === "write" ? "rgba(245, 192, 74, 0.95)" : l.kind === "read" ? "rgba(225, 216, 196, 0.6)" : "rgba(126, 180, 255, 0.92)";
-      worldLine(pts, color, l.kind === "climb" || l.kind === "link" ? 2.4 : 2, l.kind === "read" ? 0 : 12);
-      if (i === done && frac < 1) {
-        const p = P(...pts.at(-1));
-        ctx.beginPath(); ctx.arc(p[0], p[1], 4.6, 0, 7);
-        ctx.fillStyle = l.kind === "write" ? K.overseer : "#ffffff";
-        ctx.shadowColor = l.kind === "write" ? K.overseer : "#9cc8ff"; ctx.shadowBlur = 18; ctx.fill(); ctx.shadowBlur = 0;
-      }
+      if (mode === "fullbw") for (let c = 0; c < N - 2; c++) worldLine(wire(c), "rgba(91, 156, 245, 0.34)", 1.3);   // faint until used
     });
+
+    // the squares and the finished trails change only when a leg ends
+    layer("lit", `${mode}|${done}|${[...lit].join(";")}`, () => {
+      for (let c = 0; c < N; c++) for (let r = 0; r < LAYERS; r++) {
+        const h = TILE / 2, cx = colX(c), cy = rowY(r);
+        const p00 = P(cx - h, cy + h, 0), p10 = P(cx + h, cy + h, 0), p01 = P(cx - h, cy - h, 0), p11 = P(cx + h, cy - h, 0);
+        const key = `${c}_${r}`, on = lit.has(key), n = lit.get(key);
+        const far = Math.min(1, 1.08 - 0.72 * (c / (N - 1)) ** 1.2);
+        ctx.globalAlpha = (on ? 1 : 0.4) * far;
+        if (on && n) { ctx.shadowColor = "rgba(91,156,245,0.95)"; ctx.shadowBlur = 24; poly([p00, p10, p11, p01], "#0a1424"); ctx.shadowBlur = 0; }
+        const s = texture(c, r).width;
+        affine(p00, p10, p01, 1 / s);
+        ctx.drawImage(texture(c, r), 0, 0);
+        reset();
+        poly([p00, p10, p11, p01], null, on && n ? "rgba(190, 216, 255, 0.95)" : on ? "rgba(91,156,245,0.8)" : "rgba(70, 100, 150, 0.5)", on && n ? 1.4 : 0.8);
+        ctx.globalAlpha = 1;
+        if (on && n) {   // the running count, on a badge at the square's corner
+          const rr = Math.max(7.5, Math.hypot(p10[0] - p00[0], p10[1] - p00[1]) * 0.24);
+          ctx.beginPath(); ctx.arc(p10[0], p10[1], rr, 0, 7); ctx.fillStyle = K.residual; ctx.fill();
+          ctx.lineWidth = 2; ctx.strokeStyle = "#05080d"; ctx.stroke();
+          ctx.fillStyle = "#05080d"; ctx.font = `700 ${Math.round(rr * (n > 9 ? 0.95 : 1.12))}px ${font.mono}`;
+          ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText(n, p10[0], p10[1] + 0.5);
+        }
+      }
+      for (let i = 0; i < Math.min(done, legs.length); i++) trail(legs[i], legs[i].pts);
+    });
+
+    // the leg in progress, then the pulse
+    const l = legs[done];
+    if (l) {
+      const pts = partial(l.pts, ease(frac));
+      if (pts.length >= 2) {
+        trail(l, pts);
+        if (frac < 1) {
+          const p = P(...pts.at(-1));
+          ctx.beginPath(); ctx.arc(p[0], p[1], 4.6, 0, 7);
+          ctx.fillStyle = l.kind === "write" ? K.overseer : "#ffffff";
+          ctx.shadowColor = l.kind === "write" ? K.overseer : "#9cc8ff"; ctx.shadowBlur = 18; ctx.fill(); ctx.shadowBlur = 0;
+        }
+      }
+    }
 
     // a soft scrim behind the title, so the scene never fights the text
     if (!narrow) {

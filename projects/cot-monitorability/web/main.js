@@ -261,6 +261,11 @@ function setClips(slots) {
 const gCam = svg.append("g");
 const [gWin, gBands, gEdges, gTrail, gNodes, gRoute, gPulse, gCards, gOver, gAnno, gHover] = d3.range(11).map(() => gCam.append("g"));
 gHover.style("pointer-events", "none");
+// Edges are drawn twice with the same shape: once inside the glass and once on paper. Each copy sits in a layer that is
+// clipped once, rather than each path carrying its own clip (hundreds of clip nodes made every frame expensive to paint).
+const gEdgesGlass = gEdges.append("g").attr("clip-path", "url(#clip-win)");
+const gEdgesPaper = gEdges.append("g").attr("clip-path", "url(#clip-out)");
+const crossesPaper = (e) => e.id.startsWith("out") || e.id.startsWith("in");   // the only edges that leave the glass
 gWin.append("rect").attr("x", WIN.x0).attr("y", WIN.y0).attr("width", WIN.x1 - WIN.x0).attr("height", WIN.y1 - WIN.y0).attr("rx", 14)
   .attr("fill", "url(#glass-fill)").attr("stroke", K.win);
 // the paper transcript strip under the window: a faint baseline the cards sit on
@@ -416,21 +421,18 @@ function drawGraph(g, s, t, { fresh = false } = {}) {
     }
     return { glass: K.line, ink: KI.rule, w: 1.6, o: 1, dash: null };
   };
-  gEdges.selectAll("g.edge").data(g.edges, (e) => e.id).join(
-    (enter) => {
-      const eg = enter.append("g").attr("class", "edge").attr("opacity", 0);
-      eg.append("path").attr("class", "in-glass").attr("fill", "none").attr("clip-path", "url(#clip-win)").attr("d", (e) => edgePath(e, g));
-      eg.append("path").attr("class", "on-paper").attr("fill", "none").attr("clip-path", "url(#clip-out)").attr("d", (e) => edgePath(e, g));
-      return eg;
-    },
-    (update) => update,
-    (exit) => exit.transition(t).attr("opacity", 0).remove(),
-  ).each(function (e) {
-    const st = edgeStyle(e), sel = d3.select(this);
-    sel.transition(t).attr("opacity", st.o);
-    sel.select(".in-glass").attr("stroke-dasharray", st.dash).transition(t).attr("d", edgePath(e, g)).attr("stroke", st.glass).attr("stroke-width", st.w);
-    sel.select(".on-paper").attr("stroke-dasharray", st.dash).transition(t).attr("d", edgePath(e, g)).attr("stroke", st.ink).attr("stroke-width", st.w);
-  });
+  // (stroke-opacity, not opacity: the same look for a single stroke, without a compositing layer per path)
+  for (const [layer, cls, data, color] of [[gEdgesGlass, "in-glass", g.edges, "glass"], [gEdgesPaper, "on-paper", g.edges.filter(crossesPaper), "ink"]]) {
+    layer.selectAll(`path.${cls}`).data(data, (e) => e.id).join(
+      (enter) => enter.append("path").attr("class", cls).attr("fill", "none").attr("stroke-opacity", 0).attr("d", (e) => edgePath(e, g)),
+      (update) => update,
+      (exit) => exit.transition(t).attr("stroke-opacity", 0).remove(),
+    ).each(function (e) {
+      const st = edgeStyle(e);
+      d3.select(this).attr("stroke-dasharray", st.dash).transition(t)
+        .attr("d", edgePath(e, g)).attr("stroke", st[color]).attr("stroke-width", st.w).attr("stroke-opacity", st.o);
+    });
+  }
 
   // hidden states: squares of real numbers
   const tiles = gNodes.selectAll("g.tile").data(g.nodes.filter((n) => n.kind === "h"), (n) => n.id).join((enter) => {
@@ -533,6 +535,11 @@ function playStory(story, g, s, task, { delay, quick, my }) {
   pupil.interrupt().attr("cx", 0);
   const layer = (parent) => parent.append("g").attr("class", "story");
   const trail = layer(gTrail), route = layer(gRoute), over = layer(gOver), pulseG = layer(gPulse);
+  // the light trails, one layer per look: blue glowing in the glass (one glow filter for all of them, not one per path),
+  // gold in the glass, and both on paper
+  const trailGlow = trail.append("g").attr("clip-path", "url(#clip-win)").attr("filter", "url(#glow)");
+  const trailGlass = trail.append("g").attr("clip-path", "url(#clip-win)");
+  const trailPaper = trail.append("g").attr("clip-path", "url(#clip-out)");
   const R = g.R, ts = tileSize(R), rb = badgeR(R);
   const P = (id) => pos(g.byId.get(id), R);
 
@@ -585,11 +592,10 @@ function playStory(story, g, s, task, { delay, quick, my }) {
     if (it.type !== "card") {
       // light trails: blue in the glass; a write is gold, glass gold inside the window and ink gold on paper
       const parts = kind === "write"
-        ? [[K.overseer, "url(#clip-win)", 3], [KI.overseer, "url(#clip-out)", 2.6]]
-        : [[K.residual, "url(#clip-win)", 3.4], [KI.residual, "url(#clip-out)", 2.6]];
-      for (const [color, clip, w] of parts) {
-        const p = trail.append("path").attr("d", d).attr("fill", "none").attr("stroke", color).attr("stroke-width", w)
-          .attr("clip-path", clip).attr("filter", kind !== "write" && clip === "url(#clip-win)" ? "url(#glow)" : null);
+        ? [[K.overseer, trailGlass, 3], [KI.overseer, trailPaper, 2.6]]
+        : [[K.residual, trailGlow, 3.4], [KI.residual, trailPaper, 2.6]];
+      for (const [color, into, w] of parts) {
+        const p = into.append("path").attr("d", d).attr("fill", "none").attr("stroke", color).attr("stroke-width", w);
         if (!quick) p.attr("stroke-dasharray", `${len} ${len}`).attr("stroke-dashoffset", len)
           .transition().delay(clock).duration(dur).ease(d3.easeLinear).attr("stroke-dashoffset", 0);
       }
@@ -669,7 +675,7 @@ function playStory(story, g, s, task, { delay, quick, my }) {
   // the pulse rides the legs in order
   const first = story.items.find((it) => it.type === "node");
   const p0 = P(first.id);
-  const pulse = pulseG.append("circle").attr("r", 6).attr("fill", "#ffffff").attr("filter", "url(#glow)")
+  const pulse = pulseG.append("circle").attr("r", 6).attr("fill", "#ffffff").attr("filter", "url(#dot-glow)")
     .attr("transform", `translate(${p0.x},${p0.y})`).attr("opacity", 0);
   let tr = pulse.transition("pulse").delay(delay).duration(120).attr("opacity", 1);
   for (const leg of legs) {
