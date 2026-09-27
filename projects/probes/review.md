@@ -6,23 +6,22 @@ Newest first. Each entry: what was reviewed, by whom, what was found, what was d
 
 
 
-## Performance review (2026-09-28; Opus, measure-only): interim notes, report pending
+## Performance review (2026-09-28; Opus, measure-only)
 
-Written by the main session from the reviewer's outputs while it finished (in case the session was interrupted). The
-reviewer's own report goes to `build/perf/REPORT.md`; its scripts and raw outputs are in `build/perf/` (gitignored).
-- **Where it hurts:** the glass figure's transitions (`figure.js`). Under a 4× CPU throttle on desktop, 16 of 32 steps
-  pass every frame budget; every paper-scene step passes (IV–VI are smooth). The failures are the glass steps with
-  choreography: e.g. fit (step 10) median frame 100 ms with 89 long tasks (9.3 s total), the flipbook (step 7) 46 long
-  tasks, the retrained-probe views (steps 17–18) median 267 ms per frame, the push (step 20) 117 long tasks. The traces are
-  scripting-bound (per-frame work over up to ~2,300 SVG points), then style and layerize. At 1× desktop most of these run
-  at 16.7 ms median (gp, step 18, is 66.6 ms). On a phone at 6× throttle 20 of 32 steps pass.
-- **Controls:** the same pattern for toggles that retrain or re-project the glass (fit labels/show, pairs, flip, fix, gp,
-  push, job: 66–283 ms median frames at 4×); paper-scene toggles and the dial pass. The hero's replay fails at 4× (66.6 ms
-  median frames).
-- **Outputs to read:** `build/perf/out/table-steps.md` (the per-step table above, with controls), the traces
-  (`trace-desktop-4x-*.json.gz`, `steps-*-trace*.json`), and the batch logs.
-- **Next:** read the reviewer's `REPORT.md` for its ranked same-pixel fixes, apply them in a worktree with pixel diffs,
-  and fix the step-counter-on-load bug in `kit/web/steps.js` at the same time (README, next actions 5–6).
+The full report is `perf/REPORT.md`, with the measured fixes as patches beside it; nothing has been applied yet.
+- **Where it hurts:** only the glass steps. At desktop 4× throttle 16 of 32 steps pass every budget (gp, step 18, runs at
+  267 ms per frame); at phone 6×, 20 of 32. Paper-scene steps (IV–VI) pass. One function carries the cost:
+  `Figure.drawPoints` rebuilds and rewrites every point on every frame (up to 4,104). Other hot spots: text measured every
+  frame; the hidden glass still painted under paper scenes; the figure and the hero animating after the reader has left
+  them; a mono font arriving mid-page (a whole-page relayout at step 3).
+- **Measured fix bundle** (five changes in `figure.js`): phone 30 of 32 steps passing, long tasks over a desktop-4× pass
+  52.8 → 12.6 s, the hero 15 → 60 fps; 280 of 280 functional checks pass; end-state stills pixel-identical; mid-transition
+  frames differ invisibly in one step. Loading: a self-hosted pinned d3 with preloads takes the phone's first step from
+  3.72 to 2.69 s and removes the dependence on jsDelivr being fast (or up).
+- **Not recommended:** canvas for the glass points (no better than the bundle here, a large refactor); rounding the JSON
+  (moves a statement across a boundary); dropping the drop-shadows (the look changes for little gain).
+- **Also found:** the first glass step's choreography never plays when scrolling from the top; the flipbook's counts row
+  flickers. Both are in the README's next actions, with the learner's step-counter bug (→ skips step 1 on load).
 
 ## Learner-sim on the new arc (2026-09-28; Opus) and what changed
 

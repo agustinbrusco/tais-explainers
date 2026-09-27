@@ -339,7 +339,14 @@ fixed with a regression test. The prose test now also checks the static HTML.
    hero, but the step counter already reads 1 / N (`kit/web/steps.js` calls `goto(0)` at mount), so pressing → jumps to
    step 2 and skips step 1. Fix in `kit/web/steps.js`: while the first step isn't on screen (the hero is), treat the
    position as "before step 1" (→ scrolls to step 1; the counter shows the hero state), and add a test to both pieces.
-6. **Performance review (Opus, measure-only, 2026-09-28):** its report is `build/perf/REPORT.md` (gitignored, local), its
-   scripts and outputs in `build/perf/`. Apply its fixes in a worktree (the agent's brief): pixel diffs are a guardrail, not the goal; a change that
-   looks just as good and keeps the data is fine after a side-by-side look (the learner, 2026-09-28),
-   together with item 5; summarize the result in `review.md`.
+6. **Performance review (Opus, measure-only, 2026-09-28): done, nothing applied yet.** Report: `perf/REPORT.md`
+   (tracked), with the measured bundle as `perf/figure-bundle.patch` and the loading variant as `perf/loadfix-index.patch`
+   (raw outputs in `build/perf/`, local). Order: the bundle (phone 20 → 30 of 32 steps passing, long tasks over a
+   desktop-4× pass 52.8 → 12.6 s), then loading (self-hosted pinned d3 plus preloads: the phone's first step 3.72 → 2.69
+   s), then preloading the late mono font (step 3's whole-page relayout), all in a worktree, with item 5. Pixel diffs are
+   a guardrail, not the goal; a change that looks just as good and keeps the data is fine after a side-by-side look (the
+   learner, 2026-09-28). Summarize the result in `review.md`.
+7. **Two behaviour bugs the performance review found:** the first glass step's choreography never plays when a reader
+   scrolls down from the top (`Figure.show` treats a first view as a cut; stage an empty glass whenever the figure has no
+   previous view; this changes what the reader sees, so show the learner); and the layer flipbook's counts row flickers
+   (each frame restarts its fade).
