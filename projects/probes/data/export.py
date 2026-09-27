@@ -237,7 +237,7 @@ for name, lab in [("real", ya), ("coin", coin)]:
     c = X[trn].mean(0)
     u = unit(w)
     v = top_pc(X[trn], [u])
-    pick_tr, pick_te = trn[:200], rng.choice(tst, 200, replace=False)
+    pick_tr, pick_te = trn, tst          # every training statement and every held-out one (the paper's histograms)
     xy = lambda I: (R((X[I] - c) @ u), R((X[I] - c) @ v))
     (tx, ty), (hx, hy) = xy(pick_tr), xy(pick_te)
     s_tr, s_te = X[trn] @ w + b, X[tst] @ w + b
@@ -253,7 +253,7 @@ for name, lab in [("real", ya), ("coin", coin)]:
                  "held_score_median": round(float(np.median(np.abs(s_te))), 2)}
 out["fit16"] = fit
 out["meta"]["fit16"] = ("layer 16; 300 training statements drawn from the training cities, with true or coin-flip labels, "
-                        "C = 1e4 for both; 200 of them and 200 held-out statements drawn; accuracy on all held-out cities")
+                        "C = 1e4 for both; all of them and all held-out statements drawn; accuracy on all held-out cities")
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(json.dumps(out, separators=(",", ":")))

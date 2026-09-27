@@ -2,6 +2,26 @@
 
 Newest first. Each entry: what was reviewed, by whom, what was found, what was done (or why not).
 
+
+## Paper as projection (2026-09-27), from the learner's reaction to the style frame
+
+- **The ask:** "the hist below [should] always be a projection of the dots above"; "a common, normalized hist would do
+  the work just fine" (the dot piles saturated, and Figs. 2, 3, 6, 7 put the paper on its own scale).
+- **Built:** the paper shares the glass's x and units; one histogram per class (true filled, false outlined with a paper
+  halo so it stays visible over the fill), normalized to sum to 1, with a bin edge at the boundary and one height scale per
+  view. It's recomputed every frame from the drawn positions, so the flip, the retraining turn and the slider all morph it.
+  Axis: distance from the boundary along the probe's direction, in units of h. The level sets continue onto the paper;
+  their spacing adapts (1, 2, 5, 10… logits) and is written in the glass's scale note, which replaced the legend entry.
+- **What the honest scale costs:** true-proportion views (Figs. 3, 6, 7) now show narrow histograms (truth is a narrow
+  direction beside the large variance), so they get finer bins (4 px). Fig. 2's coin-flip histogram is a narrow spike at
+  the shared scale: that *is* the "barely differ" message, and ‖w‖ now shows as level sets 10 logits apart at the
+  true-label probe's 1-logit spacing. Fig. 2 draws every statement (300 / 748) so the spike has samples.
+- **Found on the way:** the first figure's "read" never played for a real reader (the first render is a cut at load, and
+  the stage is below the hero); it now waits as an empty glass until the stage is on screen. The axis title blinked when a
+  view kept the same axis; identical tick sets are now the same object, and the title is drawn once.
+- Films: `build/motion-h/read.png` (Fig. 1's read), `build/motion-f/flip.png` (the flip); stills `build/shots3/`,
+  `build/shots3m/`.
+
 ## 2026-09-26 · Style frame (hero + 7 steps) · art direction by Fable (design memo) + Opus; learner-sim fixes applied
 
 **Why:** the learner liked the prototype and asked for less "ruler" language (projections, the LR weights, SVD/PCA are fine),

@@ -1,6 +1,6 @@
 // The hero: 748 real hidden states in a view that ignores the probe's direction; their truth labels appear; the view
 // turns (an honest rotation through the layer-12 basis) until the probe's direction lies flat; its level sets draw in;
-// each statement's score falls through the glass onto a paper strip. No negation, no example counts, no steering:
+// each statement's position along it falls through the glass onto a paper strip, where it joins a histogram. No negation, no example counts, no steering:
 // it spoils none of the predicts.
 import * as d3 from "d3";
 import { Figure } from "./figure.js";
@@ -35,21 +35,18 @@ export function startHero(svgEl, DATA, { reduced = false, narrow = false } = {})
   const fit = (frame, aspect, pr) => fig.fitScale({ frame, aspect, probe: pr }, rows);
   const sc0 = fit(f0, "equal", null);
   const sc1 = fit(f1, "fit", probe);
-  const [GX] = fig.glassCenter();
-  const psc1 = { k: sc1.kx / probe.norm, x0: GX + (probe.thr - sc1.cx) * sc1.kx };
-  const psc0 = { k: psc1.k, x0: psc1.x0 };
   const order = idx.slice().sort((a, b) => dot(rows[a], w) - dot(rows[b], w)).map((i) => `h${i}`);
   const acc = accuracy(scores(rows, probe), y);
   const cap = document.getElementById("hero-caption");
   const say = (t) => { if (cap) cap.innerHTML = t; };
-  const final = `each statement's score falls onto the paper, one dot per statement · <b>${(100 * acc.acc).toFixed(1)}%</b> of ${acc.n} new statements read correctly`;
+  const final = `the paper is the shadow of the glass along the probe's direction: filled bars true, outlined false · <b>${(100 * acc.acc).toFixed(1)}%</b> of ${acc.n} new statements read correctly`;
   const big = { interrupt: () => big, style: () => big, transition: () => ({ duration: () => ({ style: () => {} }) }) };
 
   const base = { layer: 12, space: "hero", lattice: null, paperLabel: "", counts: false, glassLabel: "" };
-  const V0 = { ...base, pts: pts(false), frame: f0, sc: sc0, psc: psc0, probe: null, paper: false, choreo: "cut" };
-  const V1 = { ...base, pts: pts(true), frame: f0, sc: sc0, psc: psc0, probe: null, paper: false, choreo: "move" };
-  const V2 = { ...base, pts: pts(true), frame: f1, sc: sc1, psc: psc1, probe, paper: false, choreo: "move" };
-  const V3 = { ...base, pts: pts(true), frame: f1, sc: sc1, psc: psc1, probe, choreo: "read", _order: order };
+  const V0 = { ...base, pts: pts(false), frame: f0, sc: sc0, probe: null, paper: false, choreo: "cut" };
+  const V1 = { ...base, pts: pts(true), frame: f0, sc: sc0, probe: null, paper: false, choreo: "move" };
+  const V2 = { ...base, pts: pts(true), frame: f1, sc: sc1, probe, paper: false, choreo: "move" };
+  const V3 = { ...base, pts: pts(true), frame: f1, sc: sc1, probe, choreo: "read", _order: order };
 
   const sleep = (ms) => new Promise((r) => d3.timeout(r, reduced ? 0 : ms));
   let running = false;
@@ -68,7 +65,7 @@ export function startHero(svgEl, DATA, { reduced = false, narrow = false } = {})
     say("the view turns until the probe's direction lies flat");
     await sleep(400);
     paper.transition().duration(reduced ? 0 : 500).style("opacity", 0.96);
-    say("each statement's score falls onto the paper, one dot per statement");
+    say("each statement's position along the probe's direction falls onto the paper");
     await fig.show(V3);
     say(final);
     running = false;

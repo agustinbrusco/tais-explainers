@@ -102,7 +102,8 @@ re-run as project data scripts with one pinned protocol):
 ## The money shot: the cloud, the probe and the push
 A glass window holds ~300 real final-token states as points (filled = true, hollow = false) on the plane spanned by the
 probe's direction and the largest remaining spread. The probe is drawn as its **gold level sets** (one logit apart, ⊥ w),
-and each point's score lands on the paper below as one gold dot (see `script.md`, "Visual grammar"). The learner operates it:
+and the paper below is the glass's projection onto the probe's direction: one normalized histogram per class, in the grid's
+units (see `script.md`, "Visual grammar"). The learner operates it:
 - a **dataset switch** (cities | negated | translations) morphs the points while the probe stays, and the accuracy drops;
 - **retrain** (logistic regression | difference of means | both polarities) turns the probe (the view rotates to it), the scores recompute in
   causal order, then the accuracy lands;
@@ -268,14 +269,14 @@ better"; commit and push. Two changes asked for:
   read and saved with its label, accurate to practice (which token? averaged over tokens? per token?), because where a probe
   reads decides what it can measure.
 
+**Done since (2026-09-27):** the paper is the projection of the glass (`figure.js` `drawHist`/`drawAxis`): same x and
+units, one histogram per class normalized to sum to 1, one height scale per view (interpolated through transitions),
+recomputed every frame; the axis is the distance from the boundary in units of h; level sets continue onto the paper at an
+adaptive spacing stated in the glass's scale note; the separate paper scales are gone (Figs. 2, 3, 6, 7); Fig. 2 draws
+all 300 training and 748 held-out statements; hovering a bin shows its counts and its range in units and logits; the first
+figure waits as an empty glass until the stage is on screen, so its read is seen. Prose and `script.md` updated.
+
 **Next actions, in order:**
-1. **Paper = projection of the glass.** Replace the beeswarm with a common normalized histogram under the glass: true filled,
-   false outlined, gold-ink; bins in screen px with an edge at the boundary; one normalization per view, stable through a
-   transition (the max over start and end); drops fall into bins, and bins morph during the flip. The paper axis is in
-   hidden-state units along ŵ (0 = the boundary), the same units as the grid; logits appear only as the level sets'
-   spacing (legend). Remove every separate paper scale (Fig. 2's fan; Figs. 3, 6, 7), keep the counts row, and update the
-   prose that mentions the dots or the fan (Fig. 1's "one gold dot", step 2's "the fan of drops") and `script.md`'s visual
-   grammar.
 2. **New step, "From a statement to a data point"** (chapter I, before "A direction and a threshold"): the statement's
    tokens enter a sketch of the transformer (token columns × layer rows, the residual stream as the column); the state at
    layer ℓ and the chosen position is read out as a vector h (the real 1,536 numbers as a grid), paired with its label, and

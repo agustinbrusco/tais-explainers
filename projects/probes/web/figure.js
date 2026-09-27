@@ -7,10 +7,12 @@
 //   square = negated; a gold ring = a statement the probe was fitted to.
 //   gold = reading: a probe is drawn as its level sets (lines of equal score, one logit apart, perpendicular to w), the
 //   heavy one its decision boundary, which crosses the glass edge onto paper. Dashed = another probe's boundary (a ghost).
-//   paper = readable: each statement's score is one gold-ink dot, piled where it lands; counts come from those dots.
+//   paper = readable: the paper under the glass is its projection. It shares the glass's horizontal axis and units, and
+//   collects the points' positions along it as two histograms (true filled, false outlined), each normalized to its
+//   class, with a bin edge at the boundary. Counts come from the same scores.
 //   The grid is in the hidden state's own units: square cells = true proportions, wide cells = a stretched axis.
 import * as d3 from "d3";
-import { dot, frameAt, dodge, clamp } from "./lin.js";
+import { dot, frameAt, clamp } from "./lin.js";
 
 const TAU = Math.PI * 2;
 const ease = d3.easeCubicInOut;
@@ -31,9 +33,9 @@ function shapePath(r, m) {
 
 export const LAYOUT = {
   desktop: { W: 720, H: 592, glass: { x0: 10, y0: 58, x1: 710, y1: 370, rx: 12 }, pileTop: 384, floor: 498,
-             ptR: 3.4, dotR: 2.5, cardY: 10, font: 22 },
+             ptR: 3.4, dotR: 2.5, binW: 7, lvlPx: 9, cardY: 10, font: 22 },
   phone:   { phone: true, W: 720, H: 612, glass: { x0: 8, y0: 62, x1: 712, y1: 382, rx: 12 }, pileTop: 396, floor: 512,
-             ptR: 5.2, dotR: 4.2, cardY: 10, font: 24 },
+             ptR: 5.2, dotR: 4.2, binW: 10, lvlPx: 12, cardY: 10, font: 24 },
 };
 
 export class Figure {
@@ -43,7 +45,7 @@ export class Figure {
     this.tipEl = tip;
     this.readEl = readouts;
     this.reduced = reduced;
-    this.cur = null;            // what is on screen now: {frame, lattice, sc, psc, probe, ...}
+    this.cur = null;            // what is on screen now: {frame, lattice, sc, probe, lvlStep, ...}
     this.pts = new Map();       // key -> point state
     this.timer = null;
     this.id = `f${Math.random().toString(36).slice(2, 7)}`;
@@ -99,17 +101,27 @@ export class Figure {
     this.labAxisX = this.gGlassLab.append("text").attr("class", "glass-label axis-x").attr("x", G.x1 - 16).attr("y", G.y1 - 14).attr("text-anchor", "end");
     this.gLegend = s.append("g").attr("class", "legend");
     this.gGauge = this.gGlassLab.append("g").attr("class", "gauge");
+    defs.append("clipPath").attr("id", `${this.id}-band`).append("rect")
+      .attr("x", G.x0).attr("y", G.y1).attr("width", G.x1 - G.x0).attr("height", H - G.y1);
     const p = s.append("g").attr("class", "paper");
     this.gZeroP = p.append("g");
+    this.gHist = p.append("g").attr("class", "hist").attr("clip-path", `url(#${this.id}-band)`);
+    // false: a faint tint, then true's solid fill, then false's outline on top (with a paper halo, so it stays visible
+    // where the two overlap)
+    this.histF = this.gHist.append("path").attr("class", "hist-f");
+    this.histT = this.gHist.append("path").attr("class", "hist-t");
+    this.histFHalo = this.gHist.append("path").attr("class", "hist-halo");
+    this.histFLine = this.gHist.append("path").attr("class", "hist-line");
     this.gTrailsP = p.append("g").attr("class", "trails-p").attr("clip-path", clipP);
-    this.gDots = p.append("g").attr("class", "dots");
     this.gAxis = p.append("g").attr("class", "paxis");
     this.gCounts = p.append("g").attr("class", "counts");
     this.gHiP = p.append("g").attr("class", "hilite-p");
     this.gCards = s.append("g").attr("class", "cards");
 
-    // hover: the nearest point or paper dot shows its statement
+    // hover: the nearest point shows its statement; on paper, the bin under the pointer shows its counts
     this.svg.on("pointermove", (e) => this.hover(e)).on("pointerleave", () => this.unhover());
+    // text widths are measured when drawn: measure the legend again once the web fonts have loaded
+    document.fonts?.ready.then(() => { if (this.legendView) this.drawLegend(this.legendView); });
   }
 
   // ---- geometry ----
@@ -123,7 +135,43 @@ export class Figure {
     const [GX, GY] = this.glassCenter();
     return [GX + (x - st.sc.cx) * st.sc.kx, GY - (y - st.sc.cy) * st.sc.ky];
   }
-  paperX(score, st) { return st.psc.x0 + score * st.psc.k; }
+  /** Screen x where a probe's decision boundary meets the glass's lower edge: the zero of the paper's axis. */
+  boundaryX(probe, st) {
+    if (!probe) return null;
+    const z = this.levelLines(probe, st, [0])[0];
+    if (!z || Math.abs(z.b[1] - z.a[1]) < 1e-9) return null;
+    const G = this.L.glass;
+    const t = (G.y1 - z.a[1]) / (z.b[1] - z.a[1]);
+    return z.a[0] + t * (z.b[0] - z.a[0]);
+  }
+  /** Level-set spacing in logits: 1 when one logit spans enough screen, else the next of 2, 5, 10, 20, ... */
+  levelStep(probe, sc) {
+    if (!probe?.norm) return null;
+    const px = sc.kx / probe.norm;
+    for (const s of [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]) if (s * px >= (this.L.lvlPx ?? 9)) return s;
+    return 1000;
+  }
+  /** Bins of fixed screen width with an edge at x0, covering the glass's width; weights summed per class. */
+  histogram(items, x0, bw = this.binW ?? this.L.binW ?? 7) {
+    const G = this.L.glass;
+    const i0 = Math.floor((G.x0 - x0) / bw), i1 = Math.ceil((G.x1 - x0) / bw);
+    const n = Math.max(1, i1 - i0);
+    const t = new Float64Array(n), f = new Float64Array(n);
+    for (const it of items) {
+      if (!it.w || it.f == null || it.x < G.x0 || it.x > G.x1) continue;
+      const i = Math.floor((it.x - x0) / bw) - i0;
+      if (i < 0 || i >= n) continue;
+      (it.f ? t : f)[i] += it.w;
+    }
+    return { t, f, xb: x0 + i0 * bw, bw, n };
+  }
+  /** Tick values for the paper's axis: distance from the boundary along the horizontal, in units of h. */
+  axisTicks(view, st, x0) {
+    if (view.paper === false || x0 == null) return null;
+    const G = this.L.glass;
+    const lo = (G.x0 + 10 - x0) / st.sc.kx, hi = (G.x1 - 10 - x0) / st.sc.kx;
+    return { ticks: d3.ticks(lo, hi, this.L.phone ? 5 : 7), label: view.paperLabel ?? "" };
+  }
 
   /** Glass scale for a view: fit the given coordinate rows (quantiles) into the glass, equal aspect or stretched. */
   fitScale(view, rows) {
@@ -148,9 +196,10 @@ export class Figure {
 
   // ---- the main entry: move to a new view ----
   /**
-   * view = { key, layer, pts: [{key, c, truth, shape, ring, text}], frame, lattice?, sc (glass scale), psc (paper scale),
+   * view = { key, layer, pts: [{key, c, truth, shape, ring, text}], frame, lattice?, sc (glass scale),
    *          probe: {coef, thr, norm?, kind}, ghosts: [...], means: [...], cards: [...], groups: [...],
-   *          paperLabel, glassLabel, gridNote, readouts (html), choreo: "cut"|"move"|"read"|"flip"|"rotate" }
+   *          paper (false hides it), paperLabel, readouts (html), choreo: "cut"|"move"|"read"|"flip"|"rotate" }
+   * The paper has no scale of its own: it is the glass's projection (same x, same units).
    * Returns a promise that settles when the choreography has landed (d3.timeout follows the page clock).
    */
   show(view) {
@@ -179,62 +228,76 @@ export class Figure {
     const leaving = [...this.pts.values()].filter((s) => !next.has(s.key));
     for (const s of leaving) { s.c0 = s.c; s.c1 = s.c; s.op0 = s.op; s.leaving = true; }
 
-    // --- scores and piles at the target ---
-    const dotR = L.dotR, floor = L.floor, maxH = L.floor - L.pileTop;
+    // --- scores, and the paper's histogram at the target ---
+    // The paper is the glass's projection: a point's shadow lands at its own screen x. Each class is normalized to sum
+    // to 1 (weights 1/n per statement), and one height scale K fits the view's tallest bin into the band.
     const tProbe = view.probe;
     const list = [...next.values()];
-    const kS = view.paperUnits ? 1 : (tProbe?.norm ?? 1);
-    const sc1 = (s) => (tProbe ? kS * (dot(s.c1, tProbe.coef) - tProbe.thr) : 0);
+    const sc1 = (s) => (tProbe ? (tProbe.norm ?? 1) * (dot(s.c1, tProbe.coef) - tProbe.thr) : 0);
     list.forEach((s) => { s.score1 = sc1(s); });
-    const xs1 = list.map((s) => this.paperX(s.score1, tgt));
-    const hs = view.paper === false ? list.map(() => 0) : dodge(xs1, dotR, maxH);
-    list.forEach((s, i) => { s.px1 = xs1[i]; s.py1 = floor - dotR - hs[i]; });
+    const nT = list.filter((s) => s.fill1 === 1).length, nF = list.filter((s) => s.fill1 === 0).length;
     list.forEach((s) => {
       const old = this.pts.get(s.key);
-      s.px0 = old?.pxNow ?? s.px1; s.py0 = old?.pyNow ?? s.py1;
-      s.dop0 = old ? old.dopNow : 0;
-      s.dop1 = view.paper === false ? 0 : 1;
+      s.nw0 = old ? (old.nwNow ?? 0) : 0;
+      s.nw1 = view.paper === false || s.fill1 == null ? 0 : 1 / Math.max(1, s.fill1 ? nT : nF);
     });
+    const x0t = this.boundaryX(tProbe, tgt);
+    const band = L.floor - L.pileTop;
+    this.binW = view.binW ?? L.binW ?? 7;
+    let K1 = this.K ?? 0;
+    if (x0t != null && view.paper !== false) {
+      const H1 = this.histogram(list.map((s) => ({ x: this.toScreen(s.c1, tgt)[0], f: s.fill1, w: s.nw1 })), x0t);
+      K1 = (0.86 * band) / Math.max(1e-9, d3.max(H1.t), d3.max(H1.f));
+    }
+    const paperWas = !!prev && prev.paper !== false && !!this.K;
+    const K0 = paperWas ? this.K : K1;
+    this.K = K1;
+    this.lvlStep = this.levelStep(tProbe, tgt.sc);
+    const axOld = this.axisNow ?? null;
+    let axNew = this.axisTicks(view, tgt, x0t);
+    // an unchanged axis (same ticks, same title) is the same object, so it neither fades nor blinks
+    if (axOld && axNew && axOld.label === axNew.label && axOld.ticks.length === axNew.ticks.length &&
+        axOld.ticks.every((t, i) => t === axNew.ticks[i])) axNew = axOld;
+    this.axisNow = axNew;
 
     // --- the timeline ---
     const T = timeline(choreo, view, this.dur.bind(this));
     // a different space (another layer's basis, or another dataset's plane) can't be interpolated: cross-fade instead
     const sameSpace = !!prev && prev.space === view.space;
-    const st0 = sameSpace ? prev : { frame: tgt.frame, lattice: tgt.lattice, sc: tgt.sc, psc: tgt.psc };
+    const st0 = sameSpace ? prev : { frame: tgt.frame, lattice: tgt.lattice, sc: tgt.sc };
     const planeSame = sameSpace ? Math.abs(detPlane(prev.frame, tgt.frame)) > 0.999 : false;
     this.prevState = prev && !sameSpace ? { frame: prev.frame, sc: prev.sc } : null;
     for (const s of leaving) s.oldSpace = !sameSpace;
     this.pts = new Map([...next, ...leaving.map((s) => [s.key, s])]);
-    // what doesn't change stays put: the same probe keeps its level sets, the same paper scale keeps its axis
+    // what doesn't change stays put: the same probe keeps its level sets
     const sameProbe = sameSpace && !!prev.probe && !!view.probe && prev.probe.thr === view.probe.thr &&
       prev.probe.coef.every((x, i) => x === view.probe.coef[i]);
-    const samePaper = sameSpace && Math.abs(prev.psc.k - tgt.psc.k) < 1e-9 && Math.abs(prev.psc.x0 - tgt.psc.x0) < 1e-6 &&
-      prev.paperLabel === view.paperLabel && prev.paper !== false && view.paper !== false;
+    const prevStep = prev?.lvlStep ?? null;
+    this.viewNow = view;
     this.renderStatic(view, T);
     const start = performance.now();
     const step = (elapsed) => {
       const ph = (name) => T.phase(name, elapsed);
       const pm = ease(ph("move"));
-      const st = {
-        frame: frameAt(st0.frame, tgt.frame, pm),
-        sc: lerpSc(st0.sc, tgt.sc, pm),
-        psc: { x0: lerpN(st0.psc.x0, tgt.psc.x0, pm), k: lerpN(st0.psc.k, tgt.psc.k, pm) },
-      };
+      const st = { frame: frameAt(st0.frame, tgt.frame, pm), sc: lerpSc(st0.sc, tgt.sc, pm) };
       this.now = st;
       this.drawGrid(st0, tgt, st, planeSame, pm, ph("grid"));
-      this.drawLevels(view, st, sameProbe ? 1 : ph("probe"), prev);
+      const keepLv = sameProbe && prevStep === this.lvlStep;
+      this.drawLevels(view, st, keepLv ? 1 : ph("probe"));
       // a retrained probe: the old level sets turn with the view, then give way to the new ones
-      this.drawOldLevels(sameSpace && !sameProbe ? prev.probe : null, st, 1 - ph("probe"));
+      this.drawOldLevels(sameSpace && !sameProbe ? prev.probe : null, st, 1 - ph("probe"), prevStep);
       this.drawGhosts(view, st, ph("probe"));
       this.drawMeans(view, st, ph("probe"));
       this.drawPoints(st, T, elapsed);
-      this.drawDots(st, T, elapsed, view);
+      const pp = ease(ph("paper"));
+      this.drawHist(st, T, elapsed, view, lerpN(K0, K1, choreo === "read" && !paperWas ? 1 : pp));
+      this.drawAxis(view, st, axOld, axNew, paperWas ? pp : ph("axis"));
       this.drawCards(view, st, ph("cards"));
       this.drawGroups(view, st, ph("cards"));
       return elapsed >= T.total;
     };
     step(this.reduced || choreo === "cut" ? T.total : 0);
-    this.cur = { ...tgt, frame: tgt.frame, sc: tgt.sc, psc: tgt.psc };
+    this.cur = { ...tgt, frame: tgt.frame, sc: tgt.sc, lvlStep: this.lvlStep };
     // readouts land last; until then the old ones stay, dimmed, so the panel never goes blank
     if (this.readEl) {
       const r = d3.select(this.readEl).interrupt();
@@ -247,7 +310,6 @@ export class Figure {
         r.html(html).style("opacity", 0).transition().delay(T.readout).duration(this.dur(450)).style("opacity", 1);
       } else r.html(html).style("opacity", 1);
     }
-    this.drawAxis(view, T, samePaper);
     this.drawCounts(view, T);
     if (this.reduced || choreo === "cut") { this.finish(); return Promise.resolve(); }
     return new Promise((res) => {
@@ -262,9 +324,8 @@ export class Figure {
 
   finish() {
     for (const s of [...this.pts.values()]) {
-      if (s.leaving) { s.el?.remove(); s.dotEl?.remove(); s.ringEl?.remove(); this.pts.delete(s.key); continue; }
-      s.c = s.c1; s.op = 1; s.fillNow = s.fill1; s.mNow = s.m1; s.ringNow = s.ring1;
-      s.pxNow = s.px1; s.pyNow = s.py1; s.dopNow = s.dop1;
+      if (s.leaving) { s.el?.remove(); s.ringEl?.remove(); this.pts.delete(s.key); continue; }
+      s.c = s.c1; s.op = 1; s.fillNow = s.fill1; s.mNow = s.m1; s.ringNow = s.ring1; s.nwNow = s.nw1;
     }
     this.gTrailsG.selectAll("*").remove();
     this.gTrailsP.selectAll("*").remove();
@@ -314,7 +375,10 @@ export class Figure {
     const stepNow = this.gridStep(st.sc);
     const stretch = st.sc.kx / st.sc.ky;
     const units = stepNow >= 1 ? `${stepNow} unit${stepNow === 1 ? "" : "s"}` : `${stepNow} units`;
-    this.labGrid.text(`grid ${units} · ${stretch > 1.25 ? `↔ ×${stretch < 9.5 ? stretch.toFixed(1) : Math.round(stretch)}` : "1:1"}`);
+    const vw = this.viewNow;
+    const lv = vw?.probe?.norm && vw.levels !== false && this.lvlStep
+      ? ` · level sets ${this.lvlStep} logit${this.lvlStep === 1 ? "" : "s"} apart` : "";
+    this.labGrid.text(`grid ${units} · ${stretch > 1.25 ? `↔ ×${stretch < 9.5 ? stretch.toFixed(1) : Math.round(stretch)}` : "1:1"}${lv}`);
     void pg;
   }
 
@@ -333,34 +397,37 @@ export class Figure {
 
   drawLevels(view, st, p) {
     const probe = view.probe;
+    const G = this.L.glass, floor = this.L.floor;
     if (!probe) { this.gLevels.selectAll("*").remove(); this.gZeroP.selectAll("*").remove(); return; }
-    const js = probe.norm && view.levels !== false ? [-3, -2, -1, 0, 1, 2, 3] : [0];
+    const k = this.lvlStep ?? 1;
+    const js = probe.norm && view.levels !== false ? [-3, -2, -1, 0, 1, 2, 3].map((m) => m * k) : [0];
     const lines = this.levelLines(probe, st, js);
-    const alpha = (j) => (j === 0 ? 1 : [0, 0.42, 0.26, 0.15][Math.abs(j)]);
+    const alpha = (j) => (j === 0 ? 1 : [0, 0.42, 0.26, 0.15][Math.abs(j / k)]);
     this.gLevels.selectAll("line").data(lines, (d) => d.j).join("line")
       .attr("class", (d) => (d.j === 0 ? "lvl zero" : "lvl"))
       .attr("x1", (d) => d.a[0]).attr("y1", (d) => d.a[1]).attr("x2", (d) => d.b[0]).attr("y2", (d) => d.b[1])
-      .style("opacity", (d) => alpha(d.j) * clamp(p * 1.4 - Math.abs(d.j) * 0.12, 0, 1));
-    // the boundary crosses the glass edge onto paper: from the glass bottom to the score-0 tick of the paper axis
-    const z = lines.find((d) => d.j === 0);
-    const G = this.L.glass;
-    if (!z || view.paper === false) { this.gZeroP.selectAll("*").remove(); return; }
-    const comb = view.psc?.matched ? lines.filter((d) => d.j !== 0 && Math.abs(d.a[0] - d.b[0]) < 1) : [];
-    this.gZeroP.selectAll("line.comb").data(comb, (d) => d.j).join("line").attr("class", "comb")
-      .attr("x1", (d) => d.a[0]).attr("x2", (d) => d.a[0]).attr("y1", G.y1).attr("y2", G.y1 + 7)
-      .style("opacity", (d) => (Math.abs(d.j) === 1 ? 0.9 : Math.abs(d.j) === 2 ? 0.6 : 0.4) * clamp(p * 1.4, 0, 1));
-    const t = (G.y1 - z.a[1]) / (z.b[1] - z.a[1]);
-    const xe = z.a[0] + t * (z.b[0] - z.a[0]);
-    const x0 = this.paperX(0, st);
-    const d = [[xe, G.y1], [xe, G.y1 + 8], [x0, this.L.pileTop - 4], [x0, this.L.floor + 6]];
-    this.gZeroP.selectAll("path.zero-paper").data([d]).join("path").attr("class", "zero-paper")
-      .attr("d", (d) => d3.line()(d)).style("opacity", clamp(p * 1.4, 0, 1));
+      .style("opacity", (d) => alpha(d.j) * clamp(p * 1.4 - Math.abs(d.j / k) * 0.12, 0, 1));
+    if (view.paper === false) { this.gZeroP.selectAll("*").remove(); return; }
+    // the level sets continue onto the paper as the lines the shadows fall between: exact only while the probe lies
+    // along the horizontal (the view's end state), so they fade in with how upright they are
+    const upright = (d) => {
+      const dx = Math.abs(d.b[0] - d.a[0]), dy = Math.abs(d.b[1] - d.a[1]);
+      return clamp(1 - (dx / Math.max(1e-9, dy)) * 25, 0, 1);
+    };
+    const atEdge = (d) => d.a[0] + ((G.y1 - d.a[1]) / (d.b[1] - d.a[1])) * (d.b[0] - d.a[0]);
+    const cont = lines.filter((d) => Math.abs(d.b[1] - d.a[1]) > 1e-6).map((d) => ({ ...d, x: atEdge(d), up: upright(d) }))
+      .filter((d) => d.x > G.x0 && d.x < G.x1);
+    this.gZeroP.selectAll("line.lvl-p").data(cont, (d) => d.j).join("line")
+      .attr("class", (d) => (d.j === 0 ? "lvl-p zero" : "lvl-p"))
+      .attr("x1", (d) => d.x).attr("x2", (d) => d.x).attr("y1", G.y1).attr("y2", (d) => (d.j === 0 ? floor + 6 : floor))
+      .style("opacity", (d) => (d.j === 0 ? 1 : alpha(d.j) * 0.9 * d.up) * clamp(p * 1.4, 0, 1));
   }
 
-  drawOldLevels(probe, st, a) {
+  drawOldLevels(probe, st, a, step = 1) {
     if (!probe || a <= 0.01) { this.gLevelsOld.selectAll("*").remove(); return; }
-    const js = probe.norm ? [-3, -2, -1, 0, 1, 2, 3] : [0];
-    const alpha = (j) => (j === 0 ? 1 : [0, 0.42, 0.26, 0.15][Math.abs(j)]);
+    const k = step ?? 1;
+    const js = probe.norm ? [-3, -2, -1, 0, 1, 2, 3].map((m) => m * k) : [0];
+    const alpha = (j) => (j === 0 ? 1 : [0, 0.42, 0.26, 0.15][Math.abs(j / k)]);
     this.gLevelsOld.selectAll("line").data(this.levelLines(probe, st, js), (d) => d.j).join("line")
       .attr("class", (d) => (d.j === 0 ? "lvl zero" : "lvl"))
       .attr("x1", (d) => d.a[0]).attr("y1", (d) => d.a[1]).attr("x2", (d) => d.b[0]).attr("y2", (d) => d.b[1])
@@ -473,71 +540,95 @@ export class Figure {
     }
   }
 
-  drawDots(st, T, elapsed, view) {
-    const r = this.L.dotR, G = this.L.glass;
-    const ink = css("overseer-ink");
-    const all = [...this.pts.values()];
-    const trailsG = [], trailsP = [];
-    const drops = T.drops;     // a "read": each dot falls from its point, in score order
-    for (const s of all) {
-      if (view.paper === false && !s.dotEl) continue;
-      if (!s.dotEl) s.dotEl = this.gDots.append("path").attr("class", "dot").node();
-      let x, y, op;
-      if (drops && s.dop0 === 0 && !s.leaving) {
-        const q = T.dropProgress(elapsed, s);          // 0 before its turn, 1 when landed
-        if (q <= 0) { x = s.px1; y = s.py1; op = 0; }
-        else {
-          // fall along the level set to the glass edge, then slide to the pile
-          const p0 = [s.X, s.Y], p1 = [s.X, G.y1], p2 = [s.px1, s.py1];
-          const l1 = Math.hypot(p1[1] - p0[1], 0), l2 = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
-          const e = d3.easeQuadIn(Math.min(1, q));
-          const dAlong = e * (l1 + l2);
-          if (dAlong <= l1) { x = p0[0]; y = p0[1] + dAlong; }
-          else { const u = (dAlong - l1) / Math.max(1e-6, l2); x = p1[0] + (p2[0] - p1[0]) * u; y = p1[1] + (p2[1] - p1[1]) * u; }
-          op = 1;
-          if (q < 1) {
-            trailsG.push([p0, [x, Math.min(y, G.y1)]]);
-            if (y > G.y1) trailsP.push([[p1[0], G.y1], [x, y]]);
-          }
-        }
-      } else {
-        const pp = ease(T.phase("paper", elapsed));
-        x = s.px0 + (s.px1 - s.px0) * pp; y = s.py0 + (s.py1 - s.py0) * pp;
-        op = s.leaving ? s.dop0 * (1 - T.phase("exit", elapsed)) : s.dop0 + (s.dop1 - s.dop0) * T.phase(s.isNew ? "dotsIn" : "paper", elapsed);
+  /** The paper: the points' positions along the glass's horizontal, as one histogram per class. Recomputed every frame
+   *  from where the points are drawn, so it is always the projection of the glass above it. In a "read", each point's
+   *  shadow falls from the point to the top of its bin and joins it when it lands. */
+  drawHist(st, T, elapsed, view, K) {
+    const G = this.L.glass, floor = this.L.floor, top = this.L.pileTop;
+    const x0 = this.boundaryX(view.probe, st) ?? (G.x0 + G.x1) / 2;
+    const items = [], falling = [];
+    for (const s of this.pts.values()) {
+      let w;
+      if (s.leaving) w = s.nw0 * (1 - T.phase("exit", elapsed));
+      else if (T.drops && s.nw0 === 0 && s.nw1 > 0) {
+        const q = T.dropProgress(elapsed, s);
+        if (q >= 1) w = s.nw1;
+        else { w = 0; if (q > 0) falling.push([s, q]); }
+      } else if (s.isNew) w = s.nw1 * T.phase("dotsIn", elapsed);
+      else w = s.nw0 + (s.nw1 - s.nw0) * ease(T.phase("paper", elapsed));
+      s.nwNow = w;
+      items.push({ x: s.X, f: s.fillNow, w });
+    }
+    const H = this.histogram(items, x0);
+    const hMax = floor - top + 10;
+    // one closed step outline per run of non-empty bins, so nothing is drawn along the floor between them
+    const path = (arr) => {
+      let d = "", open = false;
+      for (let i = 0; i <= H.n; i++) {
+        const h = i < H.n ? Math.min(hMax, arr[i] * K) : 0;
+        const x = (H.xb + i * H.bw).toFixed(1);
+        if (h > 0.05) {
+          d += open ? `V${(floor - h).toFixed(1)}` : `M${x},${floor}V${(floor - h).toFixed(1)}`;
+          d += `H${(H.xb + (i + 1) * H.bw).toFixed(1)}`;
+          open = true;
+        } else if (open) { d += `V${floor}Z`; open = false; }
       }
-      s.pxNow = x; s.pyNow = y; s.dopNow = op;
-      const fill = s.fillNow ? ink : "#FAF8F2";
-      d3.select(s.dotEl).attr("transform", `translate(${x.toFixed(1)},${y.toFixed(1)})`)
-        .attr("d", shapePath(r, s.mNow ?? 0)).style("fill", s.fillNow == null ? "rgba(133,90,0,.45)" : fill)
-        .style("stroke", ink).style("opacity", op);
+      return d;
+    };
+    const on = view.paper !== false;
+    const dT = on ? path(H.t) : "", dF = on ? path(H.f) : "";
+    this.histT.attr("d", dT);
+    this.histF.attr("d", dF); this.histFHalo.attr("d", dF); this.histFLine.attr("d", dF);
+    // falling shadows: a short gold streak from the point down to the current top of its bin
+    const trailsG = [], trailsP = [];
+    for (const [s, q] of falling) {
+      const i = Math.floor((s.X - x0) / H.bw) - Math.round((H.xb - x0) / H.bw);
+      const land = floor - Math.min(hMax, ((s.fillNow ? H.t : H.f)[i] ?? 0) * K);
+      const y = s.Y + (land - s.Y) * d3.easeQuadIn(q);
+      const seg = [[s.X, Math.max(s.Y, y - 16)], [s.X, y]];
+      if (y <= G.y1) trailsG.push(seg);
+      else if (seg[0][1] >= G.y1) trailsP.push(seg);
+      else { trailsG.push([seg[0], [s.X, G.y1]]); trailsP.push([[s.X, G.y1], seg[1]]); }
     }
     this.gTrailsG.selectAll("line").data(trailsG).join("line").attr("class", "trail")
       .attr("x1", (d) => d[0][0]).attr("y1", (d) => d[0][1]).attr("x2", (d) => d[1][0]).attr("y2", (d) => d[1][1]);
     this.gTrailsP.selectAll("line").data(trailsP).join("line").attr("class", "trail-p")
       .attr("x1", (d) => d[0][0]).attr("y1", (d) => d[0][1]).attr("x2", (d) => d[1][0]).attr("y2", (d) => d[1][1]);
+    this.hist = { ...H, x0, K };
   }
 
-  drawAxis(view, T, keep = false) {
+  /** The paper's axis: distance from the boundary along the horizontal, in units of h (the glass grid's units). Tick
+   *  values are chosen at the view's end state; during a transition they slide with the scale, and a changed set
+   *  cross-fades. */
+  drawAxis(view, st, axOld, axNew, p) {
     const { floor, glass: G } = this.L;
-    const st = this.cur;
-    this.gAxis.selectAll("*").remove();
-    if (view.paper === false) return;
-    const x0 = this.paperX(0, st);
-    const lo = (G.x0 + 8 - st.psc.x0) / st.psc.k, hi = (G.x1 - 8 - st.psc.x0) / st.psc.k;
-    const ticks = d3.ticks(lo, hi, 7);
-    const ax = this.gAxis.style("opacity", 0);
-    ax.append("line").attr("class", "floor").attr("x1", G.x0).attr("x2", G.x1).attr("y1", floor).attr("y2", floor);
-    for (const t of ticks) {
-      const x = this.paperX(t, st);
-      ax.append("line").attr("class", t === 0 ? "tick zero" : "tick").attr("x1", x).attr("x2", x).attr("y1", floor).attr("y2", floor + 7);
-      ax.append("text").attr("class", t === 0 ? "tick-label zero" : "tick-label").attr("x", x).attr("y", floor + 30)
-        .attr("text-anchor", "middle").text(t > 0 ? `+${fmtTick(t)}` : fmtTick(t));
-    }
-    ax.append("text").attr("class", "axis-title").attr("x", (G.x0 + G.x1) / 2).attr("y", floor + 58).attr("text-anchor", "middle")
-      .text(view.paperLabel ?? "");
-    void x0;
-    if (keep) ax.interrupt().style("opacity", 1);
-    else ax.transition().delay(T.axis).duration(this.dur(400)).style("opacity", 1);
+    const x0 = this.boundaryX(view.probe, st);
+    const sets = [];
+    if (axOld && axOld !== axNew && p < 1) sets.push({ ...axOld, op: 1 - p, id: "old" });
+    if (axNew) sets.push({ ...axNew, op: axOld === axNew ? 1 : p, id: "new" });
+    const same = !!axOld && !!axNew && axOld.label === axNew.label;
+    const ax = this.gAxis;
+    // the title: kept when it doesn't change, cross-faded when it does
+    const titles = [];
+    if (axNew) titles.push({ id: axNew.label, text: axNew.label, op: same ? 1 : p });
+    if (axOld && !same && p < 1) titles.push({ id: axOld.label, text: axOld.label, op: 1 - p });
+    ax.selectAll("text.axis-title").data(x0 == null ? [] : titles, (d) => d.id).join("text").attr("class", "axis-title")
+      .attr("x", (G.x0 + G.x1) / 2).attr("y", floor + 58).attr("text-anchor", "middle").text((d) => d.text).style("opacity", (d) => d.op);
+    ax.selectAll("line.floor").data(axNew || axOld ? [0] : []).join("line").attr("class", "floor")
+      .attr("x1", G.x0).attr("x2", G.x1).attr("y1", floor).attr("y2", floor)
+      .style("opacity", axNew ? (axOld ? 1 : p) : 1 - p);
+    const g = ax.selectAll("g.tickset").data(x0 == null ? [] : sets, (d) => d.id).join("g").attr("class", "tickset");
+    g.style("opacity", (d) => d.op);
+    g.each(function (d) {
+      const xs = d.ticks.map((t) => ({ t, x: x0 + t * st.sc.kx })).filter((q) => q.x > G.x0 + 4 && q.x < G.x1 - 4);
+      const sel = d3.select(this);
+      sel.selectAll("line").data(xs, (q) => q.t).join("line").attr("class", (q) => (q.t === 0 ? "tick zero" : "tick"))
+        .attr("x1", (q) => q.x).attr("x2", (q) => q.x).attr("y1", floor).attr("y2", floor + 7);
+      sel.selectAll("text.tick-label").data(xs, (q) => q.t).join("text")
+        .attr("class", (q) => (q.t === 0 ? "tick-label zero" : "tick-label"))
+        .attr("x", (q) => q.x).attr("y", floor + 30).attr("text-anchor", "middle")
+        .text((q) => (q.t > 0 ? `+${fmtTick(q.t)}` : fmtTick(q.t)));
+    });
   }
 
   drawCounts(view, T) {
@@ -614,8 +705,10 @@ export class Figure {
   renderStatic(view, T) {
     const G = this.L.glass;
     this.labLayer.text(this.L === undefined || this.L.phone ? "" : view.axes?.y ?? "");
-    this.labAxisX.text(view.axes?.x ?? "");
+    // the paper's title names the horizontal axis; the glass names it only when there is no paper
+    this.labAxisX.text(view.paper === false ? view.axes?.x ?? "" : "");
     this.drawLegend(view);
+    this.legendView = view;
     // a gauge of the model's depth: 28 ticks, the read layer in gold
     const n = 28, x1 = G.x1 - 18, w = 4.2;
     const lay = Number(view.layer ?? 0);
@@ -641,10 +734,13 @@ export class Figure {
       else if (k === "sq-true" || k === "sq-false") gi.append("rect").attr("x", -r * 0.9).attr("y", -r * 0.9).attr("width", r * 1.8).attr("height", r * 1.8).attr("class", `lg-pt ${k.slice(3)}`);
       else if (k === "ring") { gi.append("circle").attr("r", r - 1.5).attr("class", "lg-pt true"); gi.append("circle").attr("r", r + 2.5).attr("class", "lg-ring"); }
       else if (k === "lvl") { [-6, -2, 2, 6].forEach((dx, j) => gi.append("line").attr("x1", dx).attr("x2", dx).attr("y1", -9).attr("y2", 9).attr("class", j === 1 ? "lg-lvl zero" : "lg-lvl")); }
+      else if (k === "bnd") gi.append("line").attr("x1", 0).attr("x2", 0).attr("y1", -9).attr("y2", 9).attr("class", "lg-lvl zero");
       else if (k === "ghost") gi.append("line").attr("x1", -10).attr("x2", 10).attr("y1", 8).attr("y2", -8).attr("class", "lg-ghost");
       else if (k === "mean") { gi.append("circle").attr("r", 6).attr("class", "lg-mean"); gi.append("path").attr("d", "M-3.5,0H3.5M0,-3.5V3.5").attr("class", "lg-mean-x"); }
-      const t = gi.append("text").attr("class", "lg-text").attr("x", 14).attr("y", 7).text(it.text);
-      x += 14 + (t.node().getComputedTextLength?.() ?? it.text.length * 11) + 22;
+      const step = this.lvlStep ?? 1;
+      const text = it.text.replace("{step}", `${step} logit${step === 1 ? "" : "s"}`);
+      const t = gi.append("text").attr("class", "lg-text").attr("x", 14).attr("y", 7).text(text);
+      x += 14 + (t.node().getComputedTextLength?.() ?? text.length * 11) + 22;
     }
     const span = x - 22 - (this.L.glass.x0 + 6), room = this.L.glass.x1 - this.L.glass.x0 - 12;
     if (span > room) g.attr("transform", `translate(${this.L.glass.x0 + 6},0) scale(${room / span},1) translate(${-(this.L.glass.x0 + 6)},0)`);
@@ -659,30 +755,46 @@ export class Figure {
     const m = this.svg.node().getScreenCTM();
     if (!m) return;
     const p = pt.matrixTransform(m.inverse());
+    const G = this.L.glass;
+    const box = this.svg.node().getBoundingClientRect();
+    const kk = box.width / this.L.W;
+    const st = this.cur;
+    // on paper: the bin under the pointer, with its counts and its distance from the boundary
+    if (p.y > G.y1 && p.y < this.L.floor + 4 && this.hist && st.probe && st.paper !== false) {
+      const H = this.hist, i = Math.floor((p.x - H.xb) / H.bw);
+      if (i < 0 || i >= H.n) return this.unhover();
+      const lo = H.xb + i * H.bw, hi = lo + H.bw;
+      const inBin = [...this.pts.values()].filter((s) => !s.leaving && s.fill1 != null && s.X >= lo && s.X < hi);
+      if (!inBin.length) return this.unhover();
+      const nt = inBin.filter((s) => s.fill1).length, nf = inBin.length - nt;
+      const d0 = (lo - H.x0) / st.sc.kx, d1 = (hi - H.x0) / st.sc.kx;
+      const f = (v) => `${v > 0 ? "+" : ""}${Math.abs(v) < 10 ? v.toFixed(2) : v.toFixed(1)}`;
+      this.tipEl.hidden = false;
+      this.tipEl.innerHTML = `<span class="tip-text">● ${nt} true · ○ ${nf} false</span><span class="tip-meta">${f(d0)} to ${f(d1)} units of h from the boundary${
+        st.probe.norm ? ` · ${f(d0 * st.probe.norm)} to ${f(d1 * st.probe.norm)} logits` : ""}</span>`;
+      this.tipEl.style.left = `${clamp(((lo + hi) / 2) * kk, 90, box.width - 90)}px`;
+      this.tipEl.style.top = `${(this.L.pileTop - 6) * kk}px`;
+      this.gHiP.selectAll("rect").data([0]).join("rect").attr("class", "hi-bin").attr("x", lo).attr("width", H.bw)
+        .attr("y", this.L.pileTop - 4).attr("height", this.L.floor - this.L.pileTop + 4);
+      this.gHiG.selectAll("*").remove();
+      return;
+    }
     let best = null, bd = 12 * 12;
     for (const s of this.pts.values()) {
       if (s.leaving || !s.op) continue;
-      for (const [x, y] of [[s.X, s.Y], [s.pxNow, s.pyNow]]) {
-        const d = (x - p.x) ** 2 + (y - p.y) ** 2;
-        if (d < bd) { bd = d; best = s; }
-      }
+      const d = (s.X - p.x) ** 2 + (s.Y - p.y) ** 2;
+      if (d < bd) { bd = d; best = s; }
     }
     if (!best || !best.text) return this.unhover();
-    const st = this.cur;
-    const kS = st.paperUnits ? 1 : (st.probe?.norm ?? 1);
-    const score = st.probe ? kS * (dot(best.c1, st.probe.coef) - st.probe.thr) : null;
+    const score = st.probe ? (st.probe.norm ?? 1) * (dot(best.c1, st.probe.coef) - st.probe.thr) : null;
     this.tipEl.hidden = false;
     this.tipEl.innerHTML = `<span class="tip-text">${best.text}</span><span class="tip-meta">${best.fill1 ? "true" : "false"}${
-      score == null ? "" : ` · score ${score > 0 ? "+" : ""}${score.toFixed(1)}${kS === 1 && !st.probe.norm || st.paperUnits ? " units" : ""}`}</span>`;
-    const box = this.svg.node().getBoundingClientRect();
-    const k = box.width / this.L.W;
-    const left = clamp(best.X * k, 90, box.width - 90);
-    this.tipEl.style.left = `${left}px`;
-    this.tipEl.style.top = `${best.Y * k - 14}px`;
-    const r = this.L.ptR + 4;
-    this.gHiG.selectAll("circle").data([best]).join("circle").attr("class", "hi").attr("r", r).attr("cx", best.X).attr("cy", best.Y);
-    this.gHiP.selectAll("circle").data(best.pxNow != null ? [best] : []).join("circle").attr("class", "hi-p").attr("r", this.L.dotR + 3.5)
-      .attr("cx", best.pxNow).attr("cy", best.pyNow);
+      score == null ? "" : st.probe.norm ? ` · score ${score > 0 ? "+" : ""}${score.toFixed(1)} logits`
+        : ` · ${score > 0 ? "+" : ""}${score.toFixed(2)} units from the boundary`}</span>`;
+    this.tipEl.style.left = `${clamp(best.X * kk, 90, box.width - 90)}px`;
+    this.tipEl.style.top = `${best.Y * kk - 14}px`;
+    this.gHiG.selectAll("circle").data([best]).join("circle").attr("class", "hi").attr("r", this.L.ptR + 4).attr("cx", best.X).attr("cy", best.Y);
+    this.gHiP.selectAll("*").remove();
   }
   unhover() {
     if (this.tipEl) this.tipEl.hidden = true;
@@ -693,11 +805,11 @@ export class Figure {
 // ---- choreography: named phases on one clock ----
 function timeline(choreo, view, dur) {
   const P = {};
-  let total, readout, axis, drops = false;
+  let total, readout, drops = false;
   const set = (name, t0, d) => { P[name] = [dur(t0), Math.max(1, dur(d))]; };
   if (choreo === "cut") {
-    ["move", "travel", "enter", "exit", "stay", "fill", "probe", "paper", "dotsIn", "cards", "rings", "grid"].forEach((n) => set(n, 0, 0));
-    total = 0; readout = 0; axis = 0;
+    ["move", "travel", "enter", "exit", "stay", "fill", "probe", "paper", "dotsIn", "cards", "rings", "grid", "axis"].forEach((n) => set(n, 0, 0));
+    total = 0; readout = 0;
   } else if (choreo === "read") {
     // points appear; the probe's level sets draw in; each score falls in score order; counts and readouts land
     set("exit", 0, 400); set("enter", 0, 700); set("stay", 0, 1); set("move", 0, 900); set("travel", 0, 900); set("grid", 0, 700);
@@ -705,29 +817,30 @@ function timeline(choreo, view, dur) {
     set("probe", 700, 900);
     set("paper", 0, 900); set("dotsIn", 0, 1);
     set("cards", 3900, 600);
+    set("axis", 3500, 400);
     drops = { t0: dur(1700), span: dur(2000), each: dur(520) };
-    total = dur(4600); readout = dur(3900); axis = dur(3500);
+    total = dur(4600); readout = dur(3900);
   } else if (choreo === "flip") {
     // the probe holds; truth flips in place (fills and shapes); then each point travels to its twin; scores follow
     set("exit", 0, 500); set("enter", 0, 500); set("stay", 0, 1); set("move", 0, 1); set("grid", 0, 1); set("probe", 0, 400);
     set("fill", 700, 1100); set("rings", 0, 1);
     set("travel", 2000, 1300); set("paper", 2000, 1300); set("dotsIn", 2000, 1300);
-    set("cards", 3300, 500);
-    total = dur(4400); readout = dur(3400); axis = dur(3300);
+    set("cards", 3300, 500); set("axis", 2000, 1300);
+    total = dur(4400); readout = dur(3400);
   } else if (choreo === "rotate") {
     // the view turns rigidly (grid and ghost with it); the new probe draws in; scores re-sort on paper
     set("exit", 0, 500); set("enter", 0, 500); set("stay", 0, 1); set("move", 200, 1700); set("travel", 200, 1700); set("grid", 0, 1);
     set("fill", 0, 400); set("rings", 0, 400);
     set("probe", 1500, 800); set("paper", 1900, 900); set("dotsIn", 1900, 600);
-    set("cards", 2600, 500);
-    total = dur(3300); readout = dur(2800); axis = dur(2700);
+    set("cards", 2600, 500); set("axis", 1900, 900);
+    total = dur(3300); readout = dur(2800);
   } else {
     // "move": one eased transition of everything
     set("exit", 0, 500); set("enter", 250, 650); set("stay", 0, 1); set("move", 0, 1100); set("travel", 0, 1100); set("grid", 0, 1100);
     set("fill", 300, 700); set("rings", 400, 500);
     set("probe", 500, 700); set("paper", 300, 900); set("dotsIn", 500, 600);
-    set("cards", 1100, 400);
-    total = dur(1500); readout = dur(1100); axis = dur(900);
+    set("cards", 1100, 400); set("axis", 300, 900);
+    total = dur(1500); readout = dur(1100);
   }
   const cut = choreo === "cut";
   const phase = (name, t) => { const p = P[name]; if (!p || cut) return 1; return clamp((t - p[0]) / p[1], 0, 1); };
@@ -750,7 +863,7 @@ function timeline(choreo, view, dur) {
     const t0 = drops.t0 + (i / n) * drops.span;
     return clamp((t - t0) / Math.max(1, drops.each), 0, 1);
   };
-  return { phase, stagger, total, readout, axis, drops, dropProgress };
+  return { phase, stagger, total, readout, drops, dropProgress };
 }
 
 // ---- helpers ----

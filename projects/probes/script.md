@@ -31,7 +31,7 @@ numbers drawn on paper. "Illustrative" = drawn to carry the idea, badged so.
 | 0 | Hero | canvas, two acts (below) | a probe reads; its direction can also write | C-I-6, C-III-20 |
 | 1 | The cheapest reader | paper: three production cascades; Anthropic's and Google DeepMind's start with a probe (gold level sets), OpenAI's with a classifier box (architecture undisclosed); cost bars | probes guard real traffic; the question of the piece | C-PRO-1..7 |
 | 2 | Two statements, 1,536 numbers each | two cards over glass; each card's real L12 state as a 32 × 48 grid; then their difference | hidden states are numbers; you can't see truth in them by eye | C-I-2, C-I-3, C-I-9 |
-| 3 | A direction and a threshold | the grids fold into points; 748 held-out statements; the probe's gold level sets (one logit apart, ⊥ w) and its boundary; each score falls onto paper as one dot (beeswarm), counts per side; drag the direction's angle | a probe = w and b; score = projection onto ŵ; level sets ⊥ w | C-I-1, C-I-6, C-VIZ-1/2 |
+| 3 | A direction and a threshold | the grids fold into points; 748 held-out statements; the probe's gold level sets (one logit apart, ⊥ w) and its boundary; each point's shadow falls onto the paper, which is the projection onto ŵ (one normalized histogram per class, same units as the grid), counts per side; drag the direction's angle | a probe = w and b; score = projection onto ŵ; level sets ⊥ w | C-I-1, C-I-6, C-VIZ-1/2 |
 | 4 | Why linear? | the residual stream as a bus; attention and MLP read it through linear projections (the same operation as the probe); a non-linear probe beside it that can compute | linear = what the next layer can read in one step; an expressive probe can compute what it reports | C-I-4, C-I-5 |
 | 5 | Which layer? | layer slider 0–28 (auto-plays once): at L0 all 300 states sit on one point; they spread and split; real accuracy curves below. **Q1** "At layer 0, what does the cloud look like?" | where a concept becomes readable; the L0 sanity check | C-I-6..8 |
 | 6 | **P1** How many examples? | the cloud greyed, labels hidden; "n = ?" | (predict) | C-II-1 |
@@ -68,9 +68,10 @@ numbers drawn on paper. "Illustrative" = drawn to carry the idea, badged so.
   "A probe reads a model. Its direction can also write."
 - **2 Two statements.** (0–1.0) two cards; (1.0–2.5) numbers pour from each card into the glass and settle as grids;
   (2.5–4.5) hold on the pair; (4.5–6.0) the difference grid fades in between them; hold.
-- **3 The probe.** (0–0.7) points appear; (0.7–1.6) the level sets draw in, boundary first; (1.7–3.7) each score falls from
-  its point along its level set, through the glass edge, and piles on paper, in score order; (3.5–3.9) the axis; (3.9–4.4)
-  counts and the readout "99.5%" land. (Built in the style frame.)
+- **3 The probe.** (0–0.7) points appear; (0.7–1.6) the level sets draw in, boundary first; (1.7–3.7) each point's shadow
+  falls straight down, through the glass edge, into its bin on paper, in score order, so the two histograms build from left
+  to right; (3.5–3.9) the axis; (3.9–4.4) counts and the readout "99.5%" land. The first figure waits, as an empty glass,
+  until the stage is on screen. (Built; filmed.)
 - **5 Which layer?** (0–1.0) the slider knob at 0, all points on one spot, label "every last token is '.'"; (1.0–7.0) the
   knob travels to 28 (one layer every ~0.2 s, cloud and curve advance together; the curve point lands with its layer);
   (7.0–8.0) the knob returns to 12, hold.
@@ -140,9 +141,14 @@ Meaning lives in form, not captions (the learner, 2026-09-26: "meanings encoded 
 - **A probe is a covector, drawn as its level sets:** gold lines of equal score, one logit apart, perpendicular to w; the
   heavy one is the boundary, which crosses the glass edge onto paper. Their spacing is 1/‖w‖ (sharpness = confidence), and
   "moving along a level set doesn't change the score" is visible. **Arrows are for writing** (violet steering vectors).
-- **Paper** = readable: each statement's score is one gold-ink dot, piled where it lands (a beeswarm); counts per side come
-  from the dots, so the readout can't disagree with the drawing. Drops fall along the level set, then slide to the pile (a
-  fan when the paper has its own scale: the ×‖w‖ amplification in the coin-flip beat).
+- **Paper** = readable, and always the projection of the glass above it (the learner, 2026-09-26): it shares the glass's
+  horizontal axis and units (distance from the boundary along ŵ, in units of h) and collects the points' positions as one
+  histogram per class, true filled and false outlined, each normalized to sum to one, with a bin edge at the boundary. It
+  is recomputed every frame from where the points are drawn, so it morphs with every flip, rotation and slider move. The
+  level sets continue onto it; their spacing (1, 2, 5, 10… logits, whatever keeps them readable) is stated in the glass's
+  scale note beside the grid ("grid 5 units · ↔ ×7.0 · level sets 1 logit apart"), which is how ‖w‖ becomes visible (the
+  coin-flip probe's are 10 logits apart at the true-label probe's spacing). Counts per side come from the same scores. In a
+  read, each shadow falls straight down to its bin. No view gives the paper a scale of its own.
 - **Gold ring** = a statement the probe was fitted to. **Dashed** = the counterfactual: another probe's boundary (a ghost),
   the old direction after retraining, the unsteered answer.
 - **Grid in hidden-state units:** square cells = true proportions, wide cells = a stretched axis (noted "↔ ×k"); it turns

@@ -55,8 +55,6 @@ sub { font-size: .7em; }
 /* a probe: its level sets. The heavy line is the boundary, glowing because it is where the reading happens */
 .lvl { stroke: var(--overseer); stroke-width: 1.1; }
 .lvl.zero { stroke-width: 2.6; filter: drop-shadow(0 0 3px rgba(245, 192, 74, .55)); }
-.zero-paper { fill: none; stroke: var(--overseer-ink); stroke-width: 2; }
-.comb { stroke: var(--overseer-ink); stroke-width: 1.2; }
 .glass-label.axis-x { fill: #8a93a3; }
 /* the legend on the paper band above the glass: only what's on screen */
 .legend .lg-text { fill: var(--ink2); font: 500 19px var(--font-mono); }
@@ -68,8 +66,8 @@ sub { font-size: .7em; }
 .legend .lg-ghost { stroke: var(--overseer-ink); stroke-width: 1.6; stroke-dasharray: 4 3; }
 .legend .lg-mean { fill: var(--sheet); stroke: var(--overseer-ink); stroke-width: 1.6; }
 .legend .lg-mean-x { stroke: var(--overseer-ink); stroke-width: 1.4; }
-.trail { stroke: var(--overseer); stroke-width: .8; stroke-opacity: .5; }
-.trail-p { stroke: var(--overseer-ink); stroke-width: .8; stroke-opacity: .45; }
+.trail { stroke: var(--overseer); stroke-width: 1.6; stroke-opacity: .85; stroke-linecap: round; }
+.trail-p { stroke: var(--overseer-ink); stroke-width: 1.6; stroke-opacity: .8; stroke-linecap: round; }
 .ghost line { stroke: var(--overseer); stroke-width: 1.6; stroke-dasharray: 7 7; stroke-opacity: .7; }
 .ghost-label { fill: var(--overseer); font: 500 20px var(--font-mono); opacity: .85; paint-order: stroke; stroke: #0b1019; stroke-width: 5px; }
 .arc path { fill: none; stroke: var(--overseer); stroke-width: 1.4; }
@@ -80,10 +78,16 @@ sub { font-size: .7em; }
 .mseg { stroke: var(--overseer); stroke-width: 1.4; stroke-opacity: .8; }
 .group-label { fill: #d7dde6; font: 500 20px var(--font-mono); paint-order: stroke; stroke: #0b1019; stroke-width: 6px; stroke-linejoin: round; }
 .hi { fill: none; stroke: #fff; stroke-width: 1.6; }
-.hi-p { fill: none; stroke: var(--ink); stroke-width: 1.4; }
 
-/* the paper under the glass: one gold-ink dot per statement, piled where its score lands */
-.dot { stroke-width: 1; }
+/* the paper under the glass is its projection: the points' positions along the horizontal, as one histogram per class
+   (normalized to sum to 1), true filled and false outlined, in gold ink because the probe reads along that axis */
+.hist-t { fill: var(--overseer-ink); fill-opacity: .82; stroke: var(--overseer-ink); stroke-width: 1; stroke-linejoin: round; }
+.hist-f { fill: var(--overseer-ink); fill-opacity: .07; stroke: none; }
+.hist-halo { fill: none; stroke: var(--sheet); stroke-width: 4; stroke-linejoin: round; stroke-opacity: .9; }
+.hist-line { fill: none; stroke: var(--overseer-ink); stroke-width: 1.6; stroke-linejoin: round; }
+.lvl-p { stroke: var(--overseer-ink); stroke-width: 1; }
+.lvl-p.zero { stroke-width: 2; }
+.hi-bin { fill: var(--ink); fill-opacity: .06; stroke: var(--ink3); stroke-width: 1; stroke-dasharray: 2 3; }
 .paxis .floor { stroke: var(--ink3); stroke-width: 1; }
 .paxis .tick { stroke: var(--ink3); stroke-width: 1; }
 .paxis .tick.zero { stroke: var(--overseer-ink); stroke-width: 2; }

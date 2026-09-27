@@ -41,8 +41,10 @@
           state on a hyperplane perpendicular to <var>w</var> gets the same score. The gold lines are those level sets,
           one logit apart, and the heavy one is the decision boundary.</p>
         <p>Here <var>w</var> and <var>b</var> are what logistic regression learns from 748 labelled statements about
-          other cities. The view is turned so that <var>ŵ</var> points right. A statement's horizontal position is its
-          projection, and its score falls through the glass onto the paper as one gold dot.</p>
+          other cities. The view is turned so that <var>ŵ</var> points right: a statement's horizontal position is its
+          projection onto <var>ŵ</var>. The paper under the glass collects those projections on the same axis, in the
+          grid's units, measured from the boundary: filled bars for true statements, outlined bars for false, each class
+          scaled to sum to one.</p>
         <p>Of the 748 statements about cities the probe never saw, it reads
           <span class="n" data-n="aff12_count">744</span> correctly: <span class="n" data-n="aff12">99.5%</span>.</p>
         <p class="caveat"><strong>Honest geometry</strong> The plane holds <var>ŵ</var> (across) and the direction of
@@ -71,7 +73,10 @@
           statements barely differ (new ones sit a median <span class="n" data-n="coin_dist">0.21</span> units from its
           boundary, against <span class="n" data-n="real_dist">3.4</span> for a probe fitted to true labels) and scaled
           <var>w</var> up until those slivers became large scores: ‖<var>w</var>‖ = <span class="n" data-n="coin_norm">43</span>
-          against <span class="n" data-n="real_norm">5.2</span>. The fan of drops is that amplification.</p>
+          against <span class="n" data-n="real_norm">5.2</span>. Both halves of that are visible at one scale: the
+          coin-flip statements fill a sliver of the axis, and the gold level sets across it are
+          <span class="n" data-n="coin_step">10 logits</span> apart, where the true-label probe's are
+          <span class="n" data-n="real_step">1 logit</span> apart.</p>
         <div class="toggles" data-for="fit">
           <span>labels</span>
           <button data-k="labels" data-v="coin" class="on">coin flips</button>

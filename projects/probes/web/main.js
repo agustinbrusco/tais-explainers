@@ -87,28 +87,13 @@ function scaleFor(frame, rows, { aspect = "fit", centre = null, probe = null, k 
   if (k) { sc.kx = k.kx; sc.ky = k.ky; }
   return sc;
 }
-/** Paper scale that puts each dot straight below its point (the probe lies along the frame's u). */
-function matched(sc, probe, units = false) {
-  const [GX] = fig.glassCenter();
-  const n = units ? 1 : (probe.norm ?? 1);
-  return { k: sc.kx / n, x0: GX + (probe.thr - sc.cx) * sc.kx, matched: true };
-}
-/** Paper scale of its own (true-proportion views squeeze projections): fits the scores' 99.5% range. */
-function fitPaper(rowsList, probe, units = false, extra = 1.08) {
-  const n = units ? 1 : (probe.norm ?? 1);
-  const s = rowsList.map((c) => Math.abs(n * (dot(c, probe.coef) - probe.thr))).sort(d3.ascending);
-  return paperRange(d3.quantile(s, 0.995) * extra);
-}
-function paperRange(R) {
-  const G = layout.glass;
-  return { k: (G.x1 - G.x0 - 60) / (2 * R), x0: (G.x0 + G.x1) / 2 };
-}
 const AX_FLIP = { x: "onto ŵ →", y: "largest remaining variance ↑" };
 const LG = {
   tf: [{ glyph: "true", text: "true" }, { glyph: "false", text: "false" }],
-  lvl: { glyph: "lvl", text: "level sets, 1 logit apart" },
+  lvl: { glyph: "lvl", text: "level sets, {step} apart" },
 };
 
+const PAPER = (dir = "ŵ") => `distance from the boundary along ${dir}, in units of h`;
 const RO = (big, label, cls = "gold") => `<div class="ro"><b class="big ${cls}">${big}</b><span>${label}</span></div>`;
 const ARROW = `<div class="ro-arrow" aria-hidden="true">→</div>`;
 
@@ -137,9 +122,9 @@ function viewAff(l, extra = {}) {
   const pts = pointsFor(l, "aff", "p", "c");
   const order = pts.slice().sort((a, b) => dot(a.c, p.coef) - dot(b.c, p.coef)).map((q) => q.key);
   return {
-    layer: l, space: `L${l}`, pts, frame: fr, sc, psc: matched(sc, p), probe: p, _order: order,
-    paperLabel: "score w·h + b, in logits · one dot per statement",
-    axes: AX_FLIP, legend: [...LG.tf, LG.lvl], ...extra,
+    layer: l, space: `L${l}`, pts, frame: fr, sc, probe: p, _order: order,
+    paperLabel: PAPER(),
+    axes: AX_FLIP, legend: [...LG.tf], ...extra,
   };
 }
 
@@ -160,8 +145,9 @@ const views = [
   () => {
     const f = F[ui.fit.labels], part = ui.fit.show === "train" ? f.train : f.held;
     const real = F.real;
+    const keep = (i) => !narrow || i % 3 === 0;          // phones draw a third
     const pts = part.x.map((x, i) => ({ key: `fit:${ui.fit.labels}:${ui.fit.show}${i}`, c: [x, part.y[i]], truth: part.label[i],
-      shape: "c", ring: ui.fit.show === "train", text: part.text[i] }));
+      shape: "c", ring: ui.fit.show === "train", text: part.text[i] })).filter((_, i) => keep(i));
     const frame = { u: [1, 0], v: [0, 1] };
     const probe = { coef: [1, 0], thr: f.thr, norm: f.norm, kind: "lr" };
     // one glass scale for both label conditions (the true-label view's), so the coin-flip sliver is seen at true width
@@ -170,21 +156,19 @@ const views = [
     const rowsCur = [...f.train.x.map((x, i) => [x, f.train.y[i]]), ...f.held.x.map((x, i) => [x, f.held.y[i]])];
     const ys = rowsCur.map((r) => r[1]).sort(d3.ascending);
     const sc = { ...scR, cx: f.thr, cy: (d3.quantile(ys, 0.01) + d3.quantile(ys, 0.99)) / 2 };
-    const G = layout.glass;
-    const psc = { k: (G.x1 - G.x0 - 40) / 2 / 60, x0: (G.x0 + G.x1) / 2 };       // paper: ±60 logits, fixed for both
     const order = pts.slice().sort((a, b) => a.c[0] - b.c[0]).map((q) => q.key);
     const a = f.acc;
     return {
-      layer: 16, space: `fit:${ui.fit.labels}`, pts, frame, sc, psc, probe, _order: order, choreo: "read", lattice: frame,
-      paperLabel: "score w·h + b, in logits · one scale for both label sets",
+      layer: 16, space: `fit:${ui.fit.labels}`, pts, frame, sc, probe, _order: order, choreo: "read", lattice: frame, binW: narrow ? 8 : 5,
+      paperLabel: PAPER(),
       axes: AX_FLIP,
       legend: [{ glyph: "true", text: ui.fit.labels === "coin" ? "heads" : "true" }, { glyph: "false", text: ui.fit.labels === "coin" ? "tails" : "false" },
-        ...(ui.fit.show === "train" ? [{ glyph: "ring", text: "fitted to (200 of 300 drawn)" }] : [{ glyph: "lvl", text: "level sets, 1 logit apart" }])],
+        ...(ui.fit.show === "train" ? [{ glyph: "ring", text: "fitted to" }] : [])],
       fig: "Fig. 2", title: ui.fit.labels === "coin" ? "Fitted to coin-flip labels" : "The same recipe, true labels",
       badge: badge("real", `layer 16 · 300 training statements · C = 10⁴ · labels: ${ui.fit.labels === "coin" ? "coin flips" : "true / false"}`),
       readouts: RO(fmt.pct1(a.train), "training statements", "ink") +
         RO(fmt.pct1(a.held), "new statements", ui.fit.labels === "coin" ? "ink" : "gold") +
-        RO(`‖w‖ = ${f.norm < 10 ? f.norm.toFixed(1) : Math.round(f.norm)}`, `new statements: median ${f.held_dist_median} units from the boundary`, "ink"),
+        RO(`‖w‖ = ${f.norm < 10 ? f.norm.toFixed(1) : Math.round(f.norm)}`, `logits per unit of h (${ui.fit.labels === "coin" ? `true labels: ${real.norm.toFixed(1)}` : `coin flips: ${Math.round(F.coin.norm)}`})`, "ink"),
       six: { 1: "now" },
     };
   },
@@ -205,8 +189,8 @@ const views = [
     const pts = pointsFor(l, "neg", "p", "s");
     const e = E[l].w;
     return {
-      layer: l, space: `L${l}`, pts, frame: fr, sc, psc: matched(sc, p), probe: p, choreo: "flip", cards: krasCards(l, "neg"),
-      paperLabel: "score w·h + b, in logits · one dot per statement", axes: AX_FLIP,
+      layer: l, space: `L${l}`, pts, frame: fr, sc, probe: p, choreo: "flip", cards: krasCards(l, "neg"),
+      paperLabel: PAPER(), axes: AX_FLIP,
       fig: "Fig. 5", title: `The same probe on “is not in”`,
       badge: badge("real", `layer ${l} · trained on “is in” only · tested on “is not in”`),
       readouts: RO(fmt.pct1(e.aff.acc), "“is in”", "ink") + ARROW + RO(fmt.pct1(e.neg.acc), "“is not in”", "ink") +
@@ -238,14 +222,14 @@ function regView(ci) {
   const order = pts.slice().sort((a, b) => dot(a.c, u) - dot(b.c, u)).map((p) => p.key);
   const angle = Math.round(q.angle);
   return {
-    layer: l, space: `L${l}`, pts, frame, sc, psc: paperRange(REG_R), probe, paperUnits: true, _order: order,
+    layer: l, space: `L${l}`, pts, frame, sc, probe, _order: order, levels: false, binW: narrow ? 6 : 4,
     choreo: "move", lattice: null,
     ghosts: ci === 0 ? [] : [{ ...dmu, id: "dmu", angle: `${angle}°` }],
     means: [{ c: means.aff_true, label: "μ true", dx: 12, dy: -12 }, { c: means.aff_false, label: "μ false", dx: -12, dy: 26, anchor: "end" }],
     meanSegment: true,
-    paperLabel: "projection onto ŵ minus the threshold, in units of h",
+    paperLabel: PAPER(),
     axes: { x: "onto ŵ →", y: "Δμ, the part ⊥ ŵ ↑" },
-    legend: [...LG.tf, { glyph: "lvl", text: "logistic regression" }, { glyph: "ghost", text: "Δμ's boundary" }, { glyph: "mean", text: "class means" }],
+    legend: [...LG.tf, { glyph: "bnd", text: "w's boundary" }, { glyph: "ghost", text: "Δμ's boundary" }, { glyph: "mean", text: "class means" }],
     fig: "Fig. 3", title: ci === 0 ? "Strong penalty: w points along Δμ" : `Logistic regression, ${angle}° from Δμ`,
     badge: badge("real", `layer 12 · 748 held-out cities · plane of ŵ and Δμ, true angles`),
     readouts: RO(`${angle}°`, "w vs Δμ, in all 1,536 dimensions", "gold") +
@@ -254,12 +238,6 @@ function regView(ci) {
     six: { 1: "done" },
   };
 }
-// one paper range for the whole path, so the slider only turns the view
-const REG_R = (() => {
-  const G = 1.08;
-  const m = d3.max(pathEval, (q) => d3.quantile(Ls(12).coords.aff.map((c) => Math.abs(dot(c, q.coef) - q.thr)).sort(d3.ascending), 0.995));
-  return m * G;
-})();
 const cLabel = (C) => (C >= 1 ? d3.format("~g")(C) : C >= 1e-3 ? d3.format("~g")(C) : `10${sup(Math.round(Math.log10(C)))}`);
 const sup = (n) => String(n).split("").map((ch) => "⁰¹²³⁴⁵⁶⁷⁸⁹"["0123456789".indexOf(ch)] ?? (ch === "-" ? "⁻" : ch)).join("");
 
@@ -288,9 +266,9 @@ function fixView(l, set, stage) {
       RO(fmt.pct1(e2.negsp.acc), `their negations · AUROC ${e2.negsp.auroc.toFixed(2)}`, e2.negsp.acc < 0.7 ? "ink" : "gold") +
       RO(`${fmt.pct1(e1.sp.acc)} · ${fmt.pct1(e1.negsp.acc)}`, "before retraining", "ink");
   return {
-    layer: l, space: `L${l}`, pts, frame, lattice: A, sc, psc: fitPaper(rows, probe), probe, choreo: stage === "A" ? "move" : "rotate",
+    layer: l, space: `L${l}`, pts, frame, lattice: A, sc, probe, choreo: stage === "A" ? "move" : "rotate",
     ghosts: stage === "B" ? [{ ...probeOf(l, "w"), id: "w-old", angle: `${turn}°` }] : [],
-    paperLabel: "score w·h + b, in logits",
+    paperLabel: PAPER(stage === "A" ? "the old ŵ" : "the new ŵ"),
     axes: stage === "A" ? { x: "onto the old ŵ →", y: "the new ŵ, part ⊥ the old ↑" } : { x: "onto the new ŵ →", y: "" },
     legend: [{ glyph: "true", text: cities ? "“is in”" : "Spanish word" }, { glyph: "sq-true", text: "negated" }, { glyph: "false", text: "hollow = false" },
       ...(stage === "B" ? [{ glyph: "ghost", text: "old boundary" }] : [])],
@@ -311,14 +289,14 @@ function gpView(l) {
   const sc = scaleFor(frame, rows, { aspect: "equal", probe });
   const e = E[l].tG;
   return {
-    layer: l, space: `L${l}`, pts, frame, sc, psc: fitPaper(rows, probe, true), probe, paperUnits: true, choreo: "move",
+    layer: l, space: `L${l}`, pts, frame, sc, probe, choreo: "move",
     ghosts: [{ ...probeOf(l, "w"), id: "w-aff" }],
     groups: [
       { label: "is in · true", test: (s) => s.shape === "c" && s.fill1 === 1, corner: "tr" },
       { label: "is in · false", test: (s) => s.shape === "c" && s.fill1 === 0, corner: "bl" },
       { label: "is not in · true", test: (s) => s.shape === "s" && s.fill1 === 1, corner: "br" },
       { label: "is not in · false", test: (s) => s.shape === "s" && s.fill1 === 0, corner: "tl" }],
-    paperLabel: "projection onto g, minus the threshold, in units of h",
+    paperLabel: PAPER("ĝ"),
     axes: { x: "g, general truth →", y: "" },
     legend: [{ glyph: "true", text: "“is in”" }, { glyph: "sq-true", text: "“is not in”" }, { glyph: "false", text: "hollow = false" }, { glyph: "ghost", text: "old probe's boundary" }],
     fig: "Fig. 7", title: "General truth and polarity",
@@ -345,6 +323,19 @@ async function render(i, prev) {
   d3.select("#fig-badge").html(v.badge);
   d3.selectAll("#six li").attr("class", function () { return v.six[this.dataset.q] ?? ""; });
   echoGuesses();
+  // the first figure waits, as an empty glass, until the stage is on screen, so its choreography is seen
+  if (prev === -1 && !reduced) {
+    const panel = document.querySelector(".stage .panel");
+    const r = panel.getBoundingClientRect();
+    if (!(r.top < innerHeight * 0.75 && r.bottom > 0)) {
+      await fig.show({ ...v, pts: [], probe: null, paper: false, cards: [], ghosts: [], means: [], groups: [], readouts: "", choreo: "cut" });
+      await new Promise((res) => {
+        const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); res(); } }, { threshold: 0.4 });
+        io.observe(panel);
+      });
+      if (my !== token) return;
+    }
+  }
   // multi-stage choreography where one read must land before the next
   if (i === 1 && prev !== 1 && ui.fit.show === "held" && !reduced) {
     const saved = ui.fit.show;
@@ -364,6 +355,13 @@ async function render(i, prev) {
   }
   if (my !== token) return;
   await fig.show(v);
+}
+
+// the level-set spacing each label condition of Fig. 2 is drawn with (it depends on ‖w‖ and the shared scale)
+{
+  const saved = ui.fit.labels, stepTxt = (k) => `${k} logit${k === 1 ? "" : "s"}`;
+  for (const lb of ["coin", "real"]) { ui.fit.labels = lb; const v = views[1](); NUM[`${lb}_step`] = stepTxt(fig.levelStep(v.probe, v.sc)); }
+  ui.fit.labels = saved;
 }
 
 // ---- prose numbers, checks, guesses, ledger ----
