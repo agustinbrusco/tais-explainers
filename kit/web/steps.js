@@ -59,7 +59,16 @@ export function mountSteps({ render, root = document }) {
 
   function scrollToStep(i, scroll) {
     quietUntil = performance.now() + 900;
-    sections[i].scrollIntoView({ behavior: scroll === "instant" ? "instant" : "smooth", block: narrow ? "start" : "center" });
+    const behavior = scroll === "instant" ? "instant" : "smooth";
+    if (narrow) { sections[i].scrollIntoView({ behavior, block: "start" }); return; }
+    // centre a step that fits, but never past its own top, or its chapter's heading when it opens one: a long step (or a
+    // chapter heading above it) used to land with its title off screen (the learner, 2026-10-04)
+    const s = sections[i], prev = s.previousElementSibling;
+    const head = prev?.classList.contains("chapter") ? prev : s;
+    const r = s.getBoundingClientRect();
+    const centred = scrollY + r.top + r.height / 2 - innerHeight / 2;
+    const fromTop = scrollY + head.getBoundingClientRect().top - innerHeight * 0.08;
+    scrollTo({ top: Math.max(0, Math.min(centred, fromTop)), behavior });
   }
 
   let rendering = Promise.resolve();

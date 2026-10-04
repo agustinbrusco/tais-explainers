@@ -74,6 +74,20 @@ const go = async (i) => { await page.evaluate((j) => window.explainer.goto(j, { 
   check((await pos()).startsWith("true |"), "a jump to the top from step 6 is before step 1 again", await pos());
   await page.keyboard.press("ArrowRight"); await page.waitForTimeout(1200);
   check(await pos() === `false | 0 | #0 | 1 / ${n}`, "→ after that jump goes to step 1", await pos());
+  // 1c. Arriving at a step (→, a click, a deep link) shows its title, and its chapter's heading when it opens one, and
+  //     leaves the step in the reading band, so the next scroll doesn't select a neighbour (kit/web/steps.js)
+  const bad = [];
+  for (let i = 0; i < n; i++) {
+    await page.evaluate((j) => window.explainer.goto(j, { scroll: "instant" }), i); await page.waitForTimeout(150);
+    const r = await page.evaluate((j) => {
+      const s = document.querySelectorAll("[data-step]")[j], prev = s.previousElementSibling;
+      const head = prev?.classList.contains("chapter") ? prev : s.querySelector("h2") ?? s;
+      const b = s.getBoundingClientRect();
+      return { top: head.getBoundingClientRect().top, inBand: b.top < innerHeight * 0.55 && b.bottom > innerHeight * 0.45 };
+    }, i);
+    if (r.top < 0 || !r.inBand) bad.push(`${i + 1}: heading top ${Math.round(r.top)}, in band ${r.inBand}`);
+  }
+  check(!bad.length, "every step lands with its title (and chapter heading) on screen, inside the reading band", bad.join("; "));
 }
 const ro = async () => (await page.textContent("#readouts")).replace(/\s+/g, " ").trim();
 const S = Object.fromEntries((await page.evaluate(() => window.probesSteps())).map((k, i) => [k, i]));
