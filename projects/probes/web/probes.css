@@ -13,8 +13,6 @@ sub { font-size: .7em; }
 .hero h1 em { color: var(--overseer); font-style: italic; }
 .hero .lede { max-width: 29rem; }
 .hero .wip { margin: 1.4rem 0 0; font: 500 .66rem/1.4 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-.hero .scene-caption { right: 1.6rem; bottom: 1.1rem; max-width: 30rem; transition: opacity .4s; }
-.hero .scene-caption b { color: var(--overseer); font-weight: 600; }
 .hero-replay { position: absolute; right: 1.4rem; top: 1.2rem; z-index: 3; font: 500 .7rem var(--font-mono); letter-spacing: .08em;
   color: var(--muted); background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .12); border-radius: 999px;
   padding: .35rem .75rem; cursor: pointer; }
@@ -240,7 +238,6 @@ sub { font-size: .7em; }
 /* ---- phones ---- */
 @media (max-width: 860px) {
   .hero .hero-scene { grid-column: 1; grid-row: 2; padding: 0 .6rem .6rem; height: 380px; }
-  .hero .scene-caption { position: static; margin: 0 1.2rem 1rem; text-align: left; }
   .hero-replay { top: auto; bottom: 1rem; right: 1rem; }
   .stage { height: 58vh; }
   .stage .panel { max-width: none; }

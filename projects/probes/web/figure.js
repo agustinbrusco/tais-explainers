@@ -238,7 +238,7 @@ export class Figure {
   /**
    * view = { key, layer, pts: [{key, c, truth, shape, ring, text}], frame, lattice?, sc (glass scale),
    *          probe: {coef, thr, norm?, kind}, ghosts: [...], means: [...], cards: [...], groups: [...],
-   *          paper (false hides it), paperLabel, readouts (html), choreo: "cut"|"move"|"read"|"flip"|"rotate" }
+   *          paper (false hides it), paperLabel, readouts (html), choreo: "cut"|"move"|"read"|"flip"|"rotate"|"turn" }
    * The paper has no scale of its own: it is the glass's projection (same x, same units).
    * Returns a promise that settles when the choreography has landed (d3.timeout follows the page clock).
    */
@@ -978,6 +978,13 @@ function timeline(choreo, view, dur) {
     set("travel", 2000, 1300); set("paper", 2000, 1300); set("dotsIn", 2000, 1300);
     set("cards", 3300, 500); set("axis", 2000, 1300);
     total = dur(4400); readout = dur(3400);
+  } else if (choreo === "turn") {
+    // the hero's turn, phased like the home card: the view turns alone and lands; only then does the probe draw in
+    set("exit", 0, 500); set("enter", 0, 500); set("stay", 0, 1); set("move", 0, 2400); set("travel", 0, 2400); set("grid", 0, 2400);
+    set("fill", 0, 1); set("rings", 0, 1);
+    set("probe", 3000, 900); set("paper", 3000, 900); set("dotsIn", 3000, 600);
+    set("cards", 3900, 400); set("axis", 3000, 900);
+    total = dur(3900); readout = dur(3900);
   } else if (choreo === "rotate") {
     // the view turns rigidly (grid and ghost with it); the new probe draws in; scores re-sort on paper
     set("exit", 0, 500); set("enter", 0, 500); set("stay", 0, 1); set("move", 200, 1700); set("travel", 200, 1700); set("grid", 0, 1);

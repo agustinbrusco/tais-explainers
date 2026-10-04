@@ -66,11 +66,14 @@ numbers drawn on paper. "Illustrative" = drawn to carry the idea, badged so.
 | 29 | Check yourself | the six-question card, filled; five questions, one transfer | | — |
 
 ## Reads (animated beats; times from the moment the step becomes active)
-- **0 Hero.** Act 1: (0.0–1.5) a field of ~300 real points drifts in perspective, grey; (1.5–3.0) the view turns (an honest rotation
-  through the basis) until the probe's direction lies flat; (3.0–5.5) its gold level sets draw in and the scores fall onto a paper strip; (5.5–7)
-  hold, title. Act 2: (7.0–8.5) one filled point is picked out; (8.5–10.5) a violet arrow grows from it and pushes it toward the false side;
-  (10.5–12.5) under the glass, a paper bar for the model's own answer falls (real, from our push; which readout is honest and legible, zero-shot P(TRUE) or the few-shot margin, is decided in the prototype); (12.5–14) hold, caption
-  "A probe reads a model. Its direction can also write."
+- **0 Hero.** (Act 2, the steering push, was cut. No captions, the learner 2026-10-04: the picture carries it, one move at a time,
+  phased like the home card.) (0–1.6) the real held-out states, filled true and hollow false, from an angle where the classes
+  overlap; (1.6–4.0) the view turns alone (an honest rotation) until the probe's direction lies flat; (4.0–4.6) it lands,
+  nothing else moves; (4.6–5.5) the probe's level sets draw in; (5.5–6.4) hold; (6.4–7.0) the paper strip fades in;
+  (8.1–10.4) the scores fall in score order; then it holds.
+- **1 The cheapest reader.** (0–0.8) the model's layers, then the probe; (1.3–5.9) a sparse, slow stream of exchanges, a gold
+  ring on each as it passes the probe; (5.9) the stream freezes; (5.7–7.2) the two flagged exchanges, alone, drop to "further
+  checks"; (7.6–8.7) the three lab cards, one by one.
 - **2 Two statements.** (0–1.0) two cards; (1.0–2.5) numbers pour from each card into the glass and settle as grids;
   (2.5–4.5) hold on the pair; (4.5–6.0) the difference grid fades in between them; hold.
 - **2 From a statement to a data point.** (0–0.9) the tokens type in as chips; (0.9–2.7) the forward pass lights the

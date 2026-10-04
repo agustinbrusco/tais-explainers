@@ -1,10 +1,10 @@
-// The hero: real hidden states of every held-out statement in a view that ignores the probe's direction; their truth labels appear; the view
+// The hero: real hidden states of every held-out statement, filled true and hollow false, in a view that ignores the probe's direction; the view
 // turns (an honest rotation through the layer-12 basis) until the probe's direction lies flat; its level sets draw in;
 // each statement's position along it falls through the glass onto a paper strip, where it joins a histogram. No negation, no example counts, no steering:
 // it spoils none of the predicts.
 import * as d3 from "d3";
 import { Figure } from "./figure.js";
-import { dot, unit, orthTo, auroc, scores, accuracy } from "./lin.js";
+import { dot, unit, orthTo, auroc } from "./lin.js";
 
 export function startHero(svgEl, DATA, { reduced = false, narrow = false } = {}) {
   const W = 640, H = narrow ? 560 : 600;
@@ -31,22 +31,16 @@ export function startHero(svgEl, DATA, { reduced = false, narrow = false } = {})
   const f1 = { u: w, v };
   const probe = { ...P.w, kind: "lr" };
 
-  const pts = (truth) => idx.map((i) => ({ key: `h${i}`, c: rows[i], truth: truth ? y[i] : null, shape: "c", text: DATA.text.aff[i] }));
+  const pts = () => idx.map((i) => ({ key: `h${i}`, c: rows[i], truth: y[i], shape: "c", text: DATA.text.aff[i] }));
   const fit = (frame, aspect, pr) => fig.fitScale({ frame, aspect, probe: pr }, rows);
   const sc0 = fit(f0, "equal", null);
   const sc1 = fit(f1, "fit", probe);
   const order = idx.slice().sort((a, b) => dot(rows[a], w) - dot(rows[b], w)).map((i) => `h${i}`);
-  const acc = accuracy(scores(rows, probe), y);
-  const cap = document.getElementById("hero-caption");
-  const say = (t) => { if (cap) cap.innerHTML = t; };
-  const final = `the paper is the shadow of the glass along the probe's direction: filled bars true, outlined false · <b>${(100 * acc.acc).toFixed(1)}%</b> of ${acc.n} new statements read correctly`;
-  const big = { interrupt: () => big, style: () => big, transition: () => ({ duration: () => ({ style: () => {} }) }) };
 
   const base = { layer: 12, space: "hero", lattice: null, paperLabel: "", counts: false, glassLabel: "" };
-  const V0 = { ...base, pts: pts(false), frame: f0, sc: sc0, probe: null, paper: false, choreo: "cut" };
-  const V1 = { ...base, pts: pts(true), frame: f0, sc: sc0, probe: null, paper: false, choreo: "move" };
-  const V2 = { ...base, pts: pts(true), frame: f1, sc: sc1, probe, paper: false, choreo: "move" };
-  const V3 = { ...base, pts: pts(true), frame: f1, sc: sc1, probe, choreo: "read", _order: order };
+  const V1 = { ...base, pts: pts(), frame: f0, sc: sc0, probe: null, paper: false, choreo: "move" };
+  const V2 = { ...base, pts: pts(), frame: f1, sc: sc1, probe, paper: false, choreo: "turn" };
+  const V3 = { ...base, pts: pts(), frame: f1, sc: sc1, probe, choreo: "read", _order: order };
 
   // a reader who scrolls on mid-play hurries it: the remaining moves land as cuts, so the hero stops animating off screen
   // and the finished picture waits for them (the replay control plays it again)
@@ -58,22 +52,16 @@ export function startHero(svgEl, DATA, { reduced = false, narrow = false } = {})
     running = true; hurry = false;
     paper.interrupt().style("opacity", 0);
     fig.cur = null; fig.pts.forEach((s) => { s.el?.remove(); s.dotEl?.remove(); s.ringEl?.remove(); }); fig.pts.clear();
-    await show(V0);
-    say(`${idx.length.toLocaleString("en-US")} statements about cities, as 1,536 numbers each, seen in a view chosen so that true and false overlap`);
-    await sleep(1300);
-    await show(V1);
-    say("filled: true · hollow: false · this view ignores the probe's direction, and they overlap");
+    // no captions (the learner, 2026-10-04): the picture carries it, one move at a time, phased like the home card
+    await show({ ...V1, choreo: "cut" });
+    await sleep(1600);
+    await show(V2);
     await sleep(900);
-    await show({ ...V2, choreo: "move" });
-    say("the view turns until the probe's direction lies flat");
-    await sleep(400);
-    paper.transition().duration(reduced || hurry ? 0 : 500).style("opacity", 0.96);
-    say("each statement's position along the probe's direction falls onto the paper");
+    paper.transition().duration(reduced || hurry ? 0 : 600).style("opacity", 0.96);
     await show(V3);
-    say(final);
     running = false;
   }
-  if (reduced) { fig.show({ ...V3, choreo: "cut" }); say(final); }
+  if (reduced) fig.show({ ...V3, choreo: "cut" });
   else {
     // start when the hero is on screen; pause-free (it plays once), with a replay control
     const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { io.disconnect(); play(); } }, { threshold: 0.3 });

@@ -30,7 +30,7 @@ export function card(g, ctx, { x, y, w, h, title, body, tag, glyph }) {
 // ---------------------------------------------------------------------------------------------------------------------
 // Prologue: readers in production. A schematic stream of exchanges runs through a model; a probe reads it (drawn at one
 // layer; production probes may read several); a few are flagged and drop onto paper, to further checks. It ends as a snapshot of the running stream.
-// Below: what three labs report.
+// Below, once the flagged ones have landed: what three labs report.
 export function prologueView() {
   return {
     id: "prologue",
@@ -63,13 +63,17 @@ export function prologueView() {
       probe.append("text").attr("class", "glass-label small gold").attr("x", px - 22).attr("y", G.y0 + 102).attr("text-anchor", "end").text("one or more layers");
       ctx.fadeIn(band, 0, 500);
       ctx.fadeIn(probe, 300, 500);
-      // the stream: exchanges enter on the left at a steady rate and move right at a steady speed
-      const n = 30, flagged = new Set([6, 14]);
-      const x0 = 26, xEnd = 700, v = (xEnd - x0) / 2600;                   // px per ms
-      const gapT = 150, tFirst = 800, tLast = tFirst + (n - 1) * gapT;
+      // the stream: exchanges enter on the left at a steady rate and move right at a steady speed, sparse and slow enough
+      // to follow one through the probe (the learner, 2026-10-04: the first version was too fast to tell what it showed).
+      // One thing moves at a time: the stream freezes (the snapshot), the flagged ones finish their trip, then the cards.
+      const n = 10, flagged = new Set([2, 4]), first = 2;
+      const x0 = 26, xEnd = 700, v = (xEnd - x0) / 3600;                   // px per ms
+      const gapT = 500, tFirst = 1300, tLast = tFirst + (n - 1) * gapT;
       const T = tLast + 120;                                                // the snapshot: the last one just entered
+      const tLand = (i) => tFirst + i * gapT + (mx1 + 30 - x0) / v + 700;  // a flagged one reaches the paper
+      const tCards = tLand(4) + 400;
       const paperY = G.y1 + (phone ? 36 : 40);
-      const land = (i) => [640 + (i === 6 ? -16 : 16), paperY];
+      const land = (i) => [640 + (i === first ? -16 : 16), paperY];
       const dots = g.append("g").attr("class", "q-stream");
       const reads = g.append("g").attr("class", "q-reads");
       const yOf = (i) => rowY + (((i * 37) % 9) - 4) * 3.4;
@@ -115,18 +119,18 @@ export function prologueView() {
       }
       // where the flagged ones land: heavier checks, on paper
       const esc = g.append("g").attr("class", "q-esc");
-      esc.append("path").attr("class", "q-drop").attr("d", `M${mx1 + 30},${G.y1 - 4} C${mx1 + 30},${paperY - 6} ${600},${paperY - 2} ${land(6)[0] - 14},${paperY}`);
+      esc.append("path").attr("class", "q-drop").attr("d", `M${mx1 + 30},${G.y1 - 4} C${mx1 + 30},${paperY - 6} ${600},${paperY - 2} ${land(first)[0] - 14},${paperY}`);
       esc.append("text").attr("class", "q-note").attr("x", 600).attr("y", paperY + 6).attr("text-anchor", "end").text("flagged: on to further checks");
-      ctx.fadeIn(esc, ctx.reduced ? 0 : tFirst + 6 * gapT + 2600, 500);
+      ctx.fadeIn(esc, ctx.reduced ? 0 : tLand(first) - 300, 500);
       // three labs, as they report it
       const cy0 = paperY + (phone ? 24 : 30);
       const labs = [
         { title: "Anthropic", lines: phone ? ["Claude Opus 5.5 (cyber): a probe screens all", "traffic, then two further classifiers"]
-          : ["Claude Opus 5.5, cyber:", "a probe screens all traffic,", "then a lightweight classifier,", "then an LLM classifier"], glyph: "probe" },
+          : ["Claude Opus 5.5, cyber:", "a probe screens all", "traffic, then a", "lightweight classifier,", "then an LLM classifier"], glyph: "probe" },
         { title: "Google DeepMind", lines: phone ? ["Gemini: misuse-mitigation probes in", "user-facing instances"]
-          : ["Gemini: misuse-mitigation", "probes deployed in", "user-facing instances"], glyph: "probe" },
+          : ["Gemini:", "misuse-mitigation", "probes deployed in", "user-facing instances"], glyph: "probe" },
         { title: "OpenAI", lines: phone ? ["GPT-5.6 Sol and Terra: activation classifiers", "pause streaming for a separate check"]
-          : ["GPT-5.6 Sol and Terra:", "activation classifiers pause", "streaming for a separate", "check (design undisclosed)"], glyph: "box" },
+          : ["GPT-5.6 Sol and Terra:", "activation classifiers", "pause streaming for a", "separate check", "(design undisclosed)"], glyph: "box" },
       ];
       const glyph = (c, kind, x, y) => (kind === "probe" ? probeGlyph(c, x, y, 0.8, "q-lvl")
         : c.append("rect").attr("class", "q-box").attr("x", x - 11).attr("y", y - 11).attr("width", 22).attr("height", 22).attr("rx", 4));
@@ -144,11 +148,10 @@ export function prologueView() {
           glyph(c, lb.glyph, x + 26, cy0 + 26);
           c.append("text").attr("class", "q-card-title").attr("x", x + 50).attr("y", cy0 + 32).text(lb.title);
           ctx.lines(c.append("text").attr("class", "q-card-body").attr("x", x + 16).attr("y", cy0 + 62), lb.lines, x + 16);
-          c.append("text").attr("class", "q-card-tag").attr("x", x + 16).attr("y", cy0 + h - 14).text("as the lab reports it");
         }
-        ctx.fadeIn(c, 300 + i * 250, 450);
+        ctx.fadeIn(c, tCards + i * 350, 450);
       });
-      return ctx.reduced ? 0 : T + 200;
+      return ctx.reduced ? 0 : tCards + 2 * 350 + 450;
     },
   };
 }
