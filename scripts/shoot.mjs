@@ -47,7 +47,7 @@ const mobile = Boolean(opts.mobile);
 const width = Number(flag("width", mobile ? 390 : 1280));
 const height = Number(flag("height", mobile ? 844 : 800));
 const MIME = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css",
-  ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg",
+  ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp",
   ".wav": "audio/wav", ".mp3": "audio/mpeg", ".mp4": "video/mp4", ".woff2": "font/woff2" };
 
 let server, url = target;

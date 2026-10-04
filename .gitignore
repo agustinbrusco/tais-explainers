@@ -19,3 +19,6 @@ references/**/papers/
 
 .DS_Store
 *.swp
+
+# Watercolor home variant: paint.py's whole-canvas preview (regenerated on every render)
+home/acuarela/preview.png
