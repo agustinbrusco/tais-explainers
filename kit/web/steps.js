@@ -117,12 +117,14 @@ export function mountSteps({ render, root = document }) {
   );
   sections.forEach((s, j) => {
     io.observe(s);
-    // clicking a section selects it, but not when the click was meant for a control inside it; clicking the one already
-    // shown only centres it (a click while reading must not replay its animation; goto(current) still replays, for shoot.mjs)
+    // clicking a section selects it, but not when the click was meant for a control inside it, nor when it selected text.
+    // A click on the section already shown does nothing: the reader may be partway down it, or selecting a passage, and
+    // must neither be scrolled back to its title nor see its animation replay (goto(current) still replays, for shoot.mjs)
     s.addEventListener("click", (e) => {
       if (e.target.closest("button, input, select, textarea, a, label, summary, details")) return;
-      if (j === current && !before) scrollToStep(j, true);
-      else goto(j, { scroll: true });
+      if (String(getSelection?.() ?? "").length) return;
+      if (j === current && !before) return;
+      goto(j, { scroll: true });
     });
   });
 

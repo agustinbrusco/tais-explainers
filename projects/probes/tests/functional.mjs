@@ -88,6 +88,20 @@ const go = async (i) => { await page.evaluate((j) => window.explainer.goto(j, { 
     if (r.top < 0 || !r.inBand) bad.push(`${i + 1}: heading top ${Math.round(r.top)}, in band ${r.inBand}`);
   }
   check(!bad.length, "every step lands with its title (and chapter heading) on screen, inside the reading band", bad.join("; "));
+  // 1d. Partway down a long step, a click on its text, or a drag to select some, leaves the page where it is
+  await go(1); await page.evaluate(() => scrollBy({ top: 420, behavior: "instant" })); await page.waitForTimeout(1100);
+  const here = () => page.evaluate(() => `${window.explainer.current} @ ${Math.round(scrollY)}`);
+  const before1d = await here();
+  const pt = await page.evaluate(() => {
+    const p = [...document.querySelectorAll("[data-step]")[1].querySelectorAll("p")].find((el) => { const r = el.getBoundingClientRect(); return r.top > innerHeight * 0.3 && r.bottom < innerHeight * 0.9; });
+    const r = p.getBoundingClientRect(); return { x: r.left + 40, y: r.top + 10, x2: r.left + 260 };
+  });
+  await page.mouse.click(pt.x, pt.y); await page.waitForTimeout(900);
+  const afterClick = await here();
+  await page.mouse.move(pt.x, pt.y); await page.mouse.down(); await page.mouse.move(pt.x2, pt.y, { steps: 6 }); await page.mouse.up();
+  await page.waitForTimeout(900);
+  check(before1d.startsWith("1 @") && afterClick === before1d && await here() === before1d,
+    "a click, or a text selection, partway down the current step doesn't scroll", `${before1d} → ${afterClick} → ${await here()}`);
 }
 const ro = async () => (await page.textContent("#readouts")).replace(/\s+/g, " ").trim();
 const S = Object.fromEntries((await page.evaluate(() => window.probesSteps())).map((k, i) => [k, i]));
