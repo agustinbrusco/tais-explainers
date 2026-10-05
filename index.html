@@ -4,14 +4,67 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAIS Explainers</title>
+  <!-- The watercolor frame around the page is painted by home/acuarela/paint.py for this page's height: after a change
+       that makes the page taller or shorter (a new card), re-measure and re-paint it (see paint.py). -->
   <meta name="description" content="Visual explainers on technical AI safety, made mostly by Claude as an experiment. Not personally fact-checked unless marked.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
   <link rel="stylesheet" href="kit/web/tokens.css">
   <link rel="stylesheet" href="kit/web/base.css">
+  <!-- wc.js will paint the river along its course: don't show it whole while the page loads -->
+  <script>if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("wc-js");</script>
   <style>
-    main { max-width: 54rem; margin: 0 auto; padding: 4.5rem 1.5rem 5rem; }
+    main { position: relative; max-width: 54rem; margin: 0 auto; padding: var(--wc-top-pad) 1.5rem 1.6rem; }
+
+    /* ---- Watercolor frame: a network around the page, its density as sierras on a ruler at the bottom ----
+       Every layer is a transmittance image (white = bare paper) multiplied onto the page, so the pigment sits on our
+       paper and overlapping layers darken like glazes. Design coordinates: a 1920-wide canvas whose middle 864 px is
+       the text column; the middle layer stretches a little to whatever height the content takes. */
+    :root { --wc-a: 420px; --wc-b: 330px; --wc-top-pad: 340px; --wc-w: 1920px; --wc-foot: 290px; }
+    body { position: relative; }
+    .wc { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .wc > div { position: absolute; left: 50%; width: var(--wc-w); margin-left: calc(var(--wc-w) / -2);
+      background-position: center; background-size: 100% 100%; background-repeat: no-repeat; mix-blend-mode: multiply; }
+    .wc-top, .wc-river-top { top: 0; height: var(--wc-a); }
+    .wc-mid, .wc-river-mid { top: var(--wc-a); bottom: var(--wc-b); }
+    .wc-bottom { bottom: 0; height: var(--wc-b); }
+    .wc-top { background-image: image-set(url("home/acuarela/top.webp") 1x, url("home/acuarela/top@2x.webp") 2x); }
+    .wc-river-top { background-image: image-set(url("home/acuarela/river-top.webp") 1x, url("home/acuarela/river-top@2x.webp") 2x); }
+    .wc > .wc-river-top { background-size: 80% 65.7143%; background-position: left bottom; }   /* cropped to x 0-1536, y 144-420 */
+    .wc-bottom { background-image: image-set(url("home/acuarela/bottom.webp") 1x, url("home/acuarela/bottom@2x.webp") 2x); }
+    @media (min-width: 1180px) {
+      /* the middle layer is bare paper across the column: only its two margins are images (544 of 1920 px each) */
+      .wc-mid { background-image: image-set(url("home/acuarela/mid-l.webp") 1x, url("home/acuarela/mid-l@2x.webp") 2x),
+          image-set(url("home/acuarela/mid-r.webp") 1x, url("home/acuarela/mid-r@2x.webp") 2x);
+      }
+      .wc > .wc-mid { background-size: 28.3333% 100%; background-position: left top, right top; }
+      /* the river's own layers are cropped to where it runs (x 1424-1920, y 0-1104 of 1392) */
+      .wc-river-mid { background-image: image-set(url("home/acuarela/river-mid.webp") 1x, url("home/acuarela/river-mid@2x.webp") 2x); }
+      .wc > .wc-river-mid { background-size: 25.8333% 79.3103%; background-position: right top; }
+    }
+    /* Alive (wc.js): the river is painted along its course as you read, through an SVG mask that follows its center
+       line, and the crowns in the margins bloom as they come into view. With reduced motion all is there from the start;
+       without JS the river is still there, but the margins keep only their ink. */
+    .wc-js .wc-river-top, .wc-js .wc-river-mid { background-image: none; }
+    .wc svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    @property --wc-r { syntax: "<percentage>"; inherits: false; initial-value: 160%; }
+    @property --wc-o { syntax: "<number>"; inherits: false; initial-value: 1; }
+    /* A crown opens through a mask; its fade is the mask's alpha (the same pixels as opacity, without making the crown
+       a composited layer, which would pull every overlapping layer of the frame onto the GPU with it). Until it opens it
+       isn't painted, and once open it drops the mask: its image is bare paper wherever the mask at rest is below 1. */
+    .wc-bloom { position: absolute; background-size: 100% 100%; mix-blend-mode: multiply; }
+    .wc-bloom.wait, .wc-bloom.open {
+      -webkit-mask: radial-gradient(closest-side, rgb(0 0 0 / var(--wc-o)) calc(var(--wc-r) - 45%), transparent var(--wc-r));
+      mask: radial-gradient(closest-side, rgb(0 0 0 / var(--wc-o)) calc(var(--wc-r) - 45%), transparent var(--wc-r)); }
+    .wc-bloom.open { transition: --wc-o 1.6s ease-out, --wc-r 3.2s cubic-bezier(.2, .6, .3, 1); }
+    .wc-bloom.wait { --wc-o: 0; --wc-r: 25%; visibility: hidden; }
+    @media (max-width: 1179px) {
+      /* no margins to paint in: the top and the sierras shrink, the middle goes */
+      :root { --wc-w: 1240px; --wc-a: 271px; --wc-b: 213px; --wc-top-pad: 230px; --wc-foot: 190px; }
+      .wc-bottom { bottom: 22px; }          /* the ruler stays above the footer line */
+      .wc-mid, .wc-river-mid { display: none; }
+    }
     h1 { font: 400 clamp(2.4rem, 6vw, 3.4rem)/1.05 var(--font-display); letter-spacing: -0.022em; margin: 0 0 1.4rem; }
     p { margin: 0 0 1.1rem; }
     .intro, .heads-up, .legend, .about p { max-width: 42rem; }
@@ -55,12 +108,16 @@
     .legend { font: 400 .88rem/1.7 var(--font-sans); color: var(--ink2); margin: 0 0 3rem; }
     .legend .pill { margin-right: .3rem; }
     .about p { color: var(--ink2); }
-    footer { margin-top: 3rem; font: 400 .78rem/1.6 var(--font-mono); color: var(--ink3); display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; }
+    footer { margin-top: var(--wc-foot); font: 400 .78rem/1.6 var(--font-mono); color: var(--ink3); display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; }
     footer b { color: var(--ink); font-weight: 500; }
-    @media (max-width: 560px) { main { padding: 3rem 1rem 4rem; } }
+    @media (max-width: 560px) { main { padding: var(--wc-top-pad) 1rem 1.6rem; } }
   </style>
 </head>
 <body>
+  <div class="wc" aria-hidden="true">
+    <div class="wc-top"></div><div class="wc-mid"></div><div class="wc-river-top"></div><div class="wc-river-mid"></div>
+    <div class="wc-bottom"></div>
+  </div>
   <main>
     <h1>Technical AI safety explainers, made with Claude</h1>
 
@@ -81,7 +138,8 @@
     </div>
 
     <!-- Shelves of pieces. Add a card when a piece ships: its pill stays "not checked by me" until Agustin has
-         checked the piece's claims against its sources, and its window lives in home/<slug>.js (see home/cards.js). -->
+         checked the piece's claims against its sources, and its window lives in home/<slug>.js (see home/cards.js). A card
+         changes the page's height: re-paint the watercolor frame afterwards (home/acuarela/paint.py). -->
     <section class="shelf">
       <h2>Technical AI safety</h2>
       <ul class="pieces">
@@ -134,5 +192,6 @@
     <footer><span><b>Made with Claude</b></span><span>Agustin Brusco</span></footer>
   </main>
   <script type="module" src="home/cards.js"></script>
+  <script type="module" src="home/acuarela/wc.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-"""Paints the watercolor frame of acuarela.html (a variant of the home page).
+"""Paints the watercolor frame of the home page (index.html).
 
 A network grows around the text column like a frame: crowns across the top, more down both margins, and trees on the
 ground at the bottom. Below, the x coordinates of all of its nodes are projected onto a ruler and painted as sierras
@@ -32,13 +32,16 @@ from acuarela.hybrid import VIRID, HOOK, SAPG, MOSS, LIGHTG, BARK, BARKW, TEALIN
 HERE = os.path.dirname(os.path.abspath(__file__))
 COLORS = dict(virid=VIRID, hook=HOOK, sapg=SAPG, moss=MOSS, cyan=CYAN, turq=TURQ)
 
-# Page geometry in CSS px at desktop widths (measured on acuarela.html; the column has a fixed width from 1180 px up).
+# Page geometry in CSS px at desktop widths, measured on index.html (the column has a fixed width from 1180 px up, so
+# the height is the same at any desktop width). H is document.documentElement.scrollHeight in a window ≥ 1180 px wide.
+# When the page's height changes (a new card), set H and re-paint: the bands below follow it, but the margins'
+# communities (COMMUNITIES) are placed by hand, so space them over the new height too.
 W, H = 1920, 2142
 COL = (528, 1392)          # the text column
-YA, YB = 420, 1812         # cuts between the top, middle and bottom layers (--wc-a, H - --wc-b)
+YA, YB = 420, H - 330      # cuts between the top, middle and bottom layers (--wc-a, H - --wc-b)
 TEXT_TOP = 330             # the title starts at 340
-Y0 = 2080                  # the ruler, just above the footer line
-YMAX = 1770                # no crown nodes below this
+Y0 = H - 62                # the ruler, just above the footer line
+YMAX = H - 372             # no crown nodes below this
 
 # Communities: (cx, cy, sx, sy, rotation, nodes, color, x of the trunk's root | None)
 COMMUNITIES = [
@@ -513,15 +516,40 @@ def save_layers(c, graph, blooms, river):
     edge = np.clip(np.minimum(xs, W - xs) / 40, 0, 1)[None, :, None]
     T_river = 1 - (1 - T_river) * edge
 
-    def save(name, T, y0, y1):
-        im = Image.fromarray((T[y0 * S:y1 * S] * 255 + 0.5).astype(np.uint8))
+    def save(name, T, y0, y1, box=None, check=True):
+        """box = (x0, y0, x1, y1) in design px of the band, multiples of 16: only that part is written, and everything
+        outside it must be bare paper (multiplying by white changes nothing, so the page looks the same). check=False
+        when another crop of the same band holds the rest (then the caller checks what's between them)."""
+        band = T[y0 * S:y1 * S]
+        if box:
+            bx0, by0, bx1, by1 = (v * S for v in box)
+            if check:
+                out = np.ones(band.shape[:2], bool)
+                out[by0:by1, bx0:bx1] = False
+                assert band[out].min() >= 254.5 / 255, f"{name}: paint outside its crop {box}"
+            band = band[by0:by1, bx0:bx1]
+        im = Image.fromarray((band * 255 + 0.5).astype(np.uint8))
         im.save(f"{HERE}/{name}@2x.webp", quality=80, method=6)
         im.resize((im.width // S, im.height // S), Image.LANCZOS).save(f"{HERE}/{name}.webp", quality=84, method=6)
+
+    def ink_box(T, y0, y1, pad=8):
+        """The smallest box, on a 16-px grid, holding all the paint of a band (design px, relative to the band)."""
+        ys, xs = np.nonzero(T[y0 * S:y1 * S].min(axis=2) < 254.5 / 255)   # anything that would not encode as 255
+        lo = lambda v: max(0, (int(v / S) - pad) // 16 * 16)
+        hi = lambda v, top: min(top, -(-(int(v / S) + 1 + pad) // 16) * 16)
+        return (lo(xs.min()), lo(ys.min()), hi(xs.max(), W), hi(ys.max(), y1 - y0))
+
     save("top", T_net, 0, YA)
-    save("mid", T_net, YA, YB)
+    # the margins only: the column between them is bare paper (its ragged edge reaches 8 px into it, hence the extra 16)
+    ml, mr = COL[0] + 16, COL[1] - 16
+    assert T_net[YA * S:YB * S, ml * S:mr * S].min() >= 254.5 / 255, "mid: paint in the column"
+    save("mid-l", T_net, YA, YB, (0, 0, ml, YB - YA), check=False)
+    save("mid-r", T_net, YA, YB, (mr, 0, W, YB - YA), check=False)
     save("bottom", T_net, YB, H)
-    save("river-top", T_river, 0, YA)
-    save("river-mid", T_river, YA, YB)
+    crops = {"river-top": ink_box(T_river, 0, YA), "river-mid": ink_box(T_river, YA, YB)}
+    save("river-top", T_river, 0, YA, crops["river-top"])
+    save("river-mid", T_river, YA, YB, crops["river-mid"])
+    print("river crops (update index.html's .wc-river-top / .wc-river-mid background-size and -position):", crops)
     T_all = T_net * T_river
     for f in os.listdir(HERE):                                   # blooms of an earlier render
         if f.startswith("bloom-"):
@@ -535,7 +563,7 @@ def save_layers(c, graph, blooms, river):
         manifest.append(dict(name=name, x=x0 // S, y=y0 // S, w=T.shape[1] // S, h=T.shape[0] // S))
         T_all[y0:y0 + T.shape[0], x0:x0 + T.shape[1]] *= T
     with open(f"{HERE}/wc.json", "w") as fh:
-        json.dump(dict(W=W, YA=YA, YB=YB, blooms=manifest,
+        json.dump(dict(W=W, YA=YA, YB=YB, blooms=manifest, crops=crops,
                        river=[[round(float(x), 1), round(float(y), 1)] for x, y in river[::3]]), fh)
     page = np.array([0xF1, 0xED, 0xE4], np.float32) / 255
     prev = Image.fromarray((page * T_all * 255).astype(np.uint8))

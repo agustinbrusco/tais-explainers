@@ -1,4 +1,4 @@
-// Brings the watercolor frame of acuarela.html to life (layers and wc.json come from paint.py).
+// Brings the watercolor frame of the home page (index.html) to life (layers and wc.json come from paint.py).
 //
 // The river is painted along its own course: an SVG mask strokes its center line up to a length that flows toward a
 // target, with a soft tip. The target is how far down the page you are, a little ahead of the viewport, so on load it
@@ -39,7 +39,14 @@ function blooms({ W, YA, YB, blooms }) {
   let queue = [], timer = 0;
   const next = () => {
     const el = queue.shift();
-    if (el) el.classList.remove("wait");
+    if (el) {
+      el.classList.replace("wait", "open");
+      el.addEventListener("transitionend", function done(e) {
+        if (e.propertyName !== "--wc-r") return;
+        el.classList.remove("open");                // at rest the mask changes nothing: drop it
+        el.removeEventListener("transitionend", done);
+      });
+    }
     timer = queue.length ? setTimeout(next, 450) : 0;
   };
   const io = new IntersectionObserver((entries) => {
@@ -54,7 +61,7 @@ function blooms({ W, YA, YB, blooms }) {
   els.forEach((el) => io.observe(el));
 }
 
-function river({ W, YA, YB, river: pts }) {
+function river({ W, YA, YB, river: pts, crops }) {
   const top = wc.querySelector(".wc-river-top"), mid = wc.querySelector(".wc-river-mid");
   const d = "M" + pts.map(([x, y]) => `${x} ${y}`).join("L");
   const cum = [0];
@@ -62,32 +69,50 @@ function river({ W, YA, YB, river: pts }) {
   const total = cum[cum.length - 1];
   const TIP = [12, 24, 36, 48];                     // the soft tip: four fainter strokes past the front
 
-  // one mask (in design coordinates), used by both layers' SVGs
+  // one mask per layer (in design coordinates), its region fitted to the stretch of river that can touch the layer, so
+  // a frame repaints only the layer the front is in, and only around the river (an image's repaint is bounded by its
+  // mask region). Outside a layer's stretch the strokes can't reach its image, so the pixels are the same as one mask.
   const hi = devicePixelRatio > 1.25 ? "@2x" : "";
-  const make = (host, name, y, h, withMask) => {
+  const PAD = 30;                                   // > half the stroke width (23)
+  const make = (host, name, y, h) => {
+    const [x0, y0, x1, y1] = crops?.[name] ?? [0, 0, W, h];   // the layer's image is cropped to its paint (paint.py)
+    const idx = pts.map((p, i) => [p, i]).filter(([[, py]]) => py >= y - PAD && py <= y + h + PAD).map(([, i]) => i);
+    const lo = cum[idx[0]], hi_ = cum[idx[idx.length - 1]];
+    const xs = idx.map((i) => pts[i][0]), ys = idx.map((i) => pts[i][1]);
+    const rx = Math.floor(Math.min(...xs) - PAD), ry = Math.floor(Math.max(y, Math.min(...ys) - PAD));
+    const rw = Math.ceil(Math.max(...xs) + PAD) - rx, rh = Math.ceil(Math.min(y + h, Math.max(...ys) + PAD)) - ry;
+    const id = `wc-river-${name}`;
     const svg = document.createElementNS(NS, "svg");
     svg.setAttribute("viewBox", `0 ${y} ${W} ${h}`);
     svg.setAttribute("preserveAspectRatio", "none");
-    if (withMask) {
-      svg.innerHTML = `<defs><mask id="wc-river" maskUnits="userSpaceOnUse" x="-400" y="-100" width="${W + 800}" height="${YB + 200}">
+    svg.innerHTML = `<defs><mask id="${id}" maskUnits="userSpaceOnUse" x="${rx}" y="${ry}" width="${rw}" height="${rh}">
         <path d="${d}" fill="none" stroke="#fff" stroke-width="46"/>
         ${TIP.map(() => `<path d="${d}" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="46"/>`).join("")}
       </mask></defs>`;
-    }
     const img = document.createElementNS(NS, "image");
-    img.setAttribute("href", url(name + hi));
-    for (const [k, v] of Object.entries({ x: 0, y, width: W, height: h, preserveAspectRatio: "none", mask: "url(#wc-river)" }))
+    const src = url(name + hi);                     // fetched once its layer is shown (phones never show the middle)
+    const show = () => { if (!img.hasAttribute("href") && getComputedStyle(host).display !== "none") img.setAttribute("href", src); };
+    for (const [k, v] of Object.entries({ x: x0, y: y + y0, width: x1 - x0, height: y1 - y0, preserveAspectRatio: "none", mask: `url(#${id})` }))
       img.setAttribute(k, v);
     svg.append(img);
     host.append(svg);
-    return svg;
+    const [main, ...tips] = svg.querySelectorAll("mask path");
+    // the front only matters to this layer within [lo - 60, hi + 60] (60 > the longest tip plus the stroke's half width)
+    show();
+    addEventListener("resize", show);
+    return { img, main, tips, lo: lo - 60, hi: hi_ + 60, last: null };
   };
-  const svgTop = make(top, "river-top", 0, YA, true);
-  make(mid, "river-mid", YA, YB - YA, false);
-  const [main, ...tips] = svgTop.querySelectorAll("mask path");
+  const masks = [make(top, "river-top", 0, YA), make(mid, "river-mid", YA, YB - YA)];
   const paint = (s) => {
-    main.setAttribute("stroke-dasharray", `${s.toFixed(1)} ${total + 100}`);
-    tips.forEach((p, k) => p.setAttribute("stroke-dasharray", `0 ${s.toFixed(1)} ${TIP[k]} ${total + 100}`));
+    for (const m of masks) {
+      const sk = Math.min(m.hi, Math.max(m.lo, s)).toFixed(1);
+      if (sk === m.last) continue;                  // nothing of this layer changes: leave its mask (and pixels) alone
+      m.last = sk;
+      if (s >= m.hi) { m.img.removeAttribute("mask"); continue; }   // past this layer: the river's pigment lies within the
+                                                                    // stroke, so the mask no longer changes anything
+      m.main.setAttribute("stroke-dasharray", `${sk} ${total + 100}`);
+      m.tips.forEach((p, k) => p.setAttribute("stroke-dasharray", `0 ${sk} ${TIP[k]} ${total + 100}`));
+    }
   };
   let s = cum[pts.findIndex(([x]) => x > -30)];     // it starts where it comes into the page
   paint(s);
